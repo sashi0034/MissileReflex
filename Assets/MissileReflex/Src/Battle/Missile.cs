@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
 
@@ -33,6 +34,8 @@ namespace MissileReflex.Src.Battle
 
         private MissileSourceData _data = MissileSourceData.Empty;
         private MissilePhysic _physic;
+
+        public Vector3 Pos => transform.position;
 
         public Missile()
         {
@@ -84,6 +87,24 @@ namespace MissileReflex.Src.Battle
         private void OnCollisionEnter(Collision collision)
         {
             _physic.OnCollisionEnter(collision);
+        }
+
+        public void PredictHitTank()
+        {
+            // 進路方向にrayを飛ばす
+            if (Physics.Raycast(transform.position, rigidBody.velocity, out var rayHit,
+                    ConstParam.Instance.MissilePredictRange) == false) return;
+                
+            var other = rayHit.collider;
+            if (IsColliderTankFighter(other, out var tank) == false) return;
+            
+            // 当たりそうなので通知
+            tank.Prediction.PredictMissileHit(this);
+        }
+
+        public static bool IsColliderTankFighter(Collider other, out TankFighter tank)
+        {
+            return other.gameObject.transform.parent.TryGetComponent<TankFighter>(out tank);
         }
     }
 }

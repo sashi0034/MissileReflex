@@ -12,6 +12,10 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private Player player;
         public Player Player => player;
 
+        [SerializeField] private TankManager tankManager;
+        public TankManager TankManager => tankManager;
+        
+
         public void Start()
         {
             Init();            
@@ -19,7 +23,9 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
+            missileManager.Init();
             player.Init();
+            tankManager.Init();
         }
     }
 }

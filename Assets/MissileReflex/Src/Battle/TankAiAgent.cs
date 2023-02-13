@@ -19,15 +19,17 @@ namespace MissileReflex.Src.Battle
         public float ShotRange => shotRange;
         public float ShotRangeSqrMag => shotRange * shotRange;
 
-        [SerializeField] private float retrieveDuration = 0.3f;
-        public float RetrieveDuration => retrieveDuration;
+        // [SerializeField] private float retrieveDuration = 0.3f;
+        // public float RetrieveDuration => retrieveDuration;
     }
     
     
     public class TankAiAgent : MonoBehaviour, ITankAgent
     {
         [SerializeField] private TankFighter selfTank;
+        private Vector3 selfTankPos => selfTank.transform.position;
         private TankFighterInput tankIn => selfTank.Input;
+        private TankFighterPrediction tankPredict => selfTank.Prediction;
 
         [SerializeField] private BattleRoot battleRoot;
         public BattleRoot BattleRoot => battleRoot;
@@ -70,6 +72,15 @@ namespace MissileReflex.Src.Battle
                 var targetTank = battleRoot.Player.Tank;
                 var selfPos = selfTank.transform.position;
 
+                var approachingMissile = tankPredict.FindPredictedMissile();
+                tankPredict.ClearPredictedMissiles();
+                if (approachingMissile != null)
+                {
+                    // ミサイルと当たりそうなので避ける
+                    await avoidApproachingMissile(approachingMissile, param.UpdateInterval);
+                    continue;
+                }
+
                 if (isNoWallBetweenTargetTank(selfPos, targetTank))
                 {
                     // 射程内に入ってるので退き撃ち
@@ -82,6 +93,14 @@ namespace MissileReflex.Src.Battle
                 }
                 
             }
+        }
+
+        private async UniTask avoidApproachingMissile(Missile approachingMissile, float evasionTime)
+        {
+            var missilePos = approachingMissile.Pos;
+            var evasionVec = findSpaciousOrthogonalVec(selfTankPos, missilePos - selfTankPos);
+            tankIn.SetMoveVec(evasionVec.normalized);
+            await UniTask.Delay(evasionTime.ToIntMilli());
         }
 
         private static bool isNoWallBetweenTargetTank(Vector3 selfPos, TankFighter targetTank)
@@ -101,6 +120,17 @@ namespace MissileReflex.Src.Battle
             // var destVec = calcDestVecToTarget(targetTank);
             var destVec = targetPos - selfPos;
             
+            var rotatedDestVec = findSpaciousOrthogonalVec(selfPos, destVec);
+
+            tankIn.SetMoveVec(rotatedDestVec.normalized);
+            tankIn.SetShotRadFromVec3(destVec);
+            tankIn.ShotRequest.UpFlag();
+            await UniTask.Delay(param.UpdateInterval.ToIntMilli());
+        }
+
+        // 自分の位置から直行ベクトルのうちスペースにゆとりのあるほうを探す
+        private static Vector3 findSpaciousOrthogonalVec(Vector3 selfPos, Vector3 destVec)
+        {
             var rotatedDestVec1 = Quaternion.Euler(0, 90, 0) * destVec;
             var rotatedDestVec2 = Quaternion.Euler(0, -90, 0) * destVec;
 
@@ -113,11 +143,7 @@ namespace MissileReflex.Src.Battle
 
             // 90度回転させたベクトルのうち、壁までの距離がより遠い方を方向として選択
             var rotatedDestVec = spaceVec1 < spaceVec2 ? rotatedDestVec2 : rotatedDestVec1;
-            
-            tankIn.SetMoveVec(rotatedDestVec.normalized);
-            tankIn.SetShotRadFromVec3(destVec);
-            tankIn.ShotRequest.UpFlag();
-            await UniTask.Delay(param.RetrieveDuration.ToIntMilli());
+            return rotatedDestVec;
         }
 
         private float calcSqrMagSelfWithTargetTank(TankFighter target)

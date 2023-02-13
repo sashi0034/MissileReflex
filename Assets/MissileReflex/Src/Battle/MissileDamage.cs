@@ -16,7 +16,7 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         public void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.transform.parent.TryGetComponent<TankFighter>(out var tank) == false) return;
+            if (Missile.IsColliderTankFighter(other, out var tank) == false) return;
 
             if (_hasEnteredMissileOwner == false)
             {

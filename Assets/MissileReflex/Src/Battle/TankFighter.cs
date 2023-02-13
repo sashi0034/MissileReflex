@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using MissileReflex.Src.Params;
@@ -42,7 +43,51 @@ namespace MissileReflex.Src.Battle
         {
             _shotRad = Mathf.Atan2(vec.z, vec.x);
         }
+    }
 
+    public class TankFighterPrediction
+    {
+        private readonly List<Missile> _missileHits = new List<Missile>();
+        // public IReadOnlyList<Missile> MissileHits => _missileHits;
+
+        public void Init()
+        {
+            _missileHits.Clear();
+        }
+        
+        public void ClearPredictedMissiles()
+        {
+            _missileHits.Clear();
+        }
+
+        // TODO: AIじゃなくて使わないときのためのフラグを作る
+        public void PredictMissileHit(Missile missile)
+        {
+            _missileHits.Add(missile);
+        }
+
+        public Missile? FindPredictedMissile()
+        {
+            foreach (var missile in _missileHits)
+            {
+                if (missile != null) return missile;
+            }
+
+            return null;
+        } 
+        
+        // public bool FindPredictedMissile(out Missile? hit)
+        // {
+        //     foreach (var missile in _missileHits)
+        //     {
+        //         if (missile == null) continue;
+        //         hit = missile;
+        //         return true;
+        //     }
+        //
+        //     hit = null;
+        //     return false;
+        // } 
     }
 
     public interface ITankAgent
@@ -93,6 +138,9 @@ namespace MissileReflex.Src.Battle
         private readonly TankFighterInput _input = new TankFighterInput();
         public TankFighterInput Input => _input;
 
+        private readonly TankFighterPrediction _prediction = new TankFighterPrediction();
+        public TankFighterPrediction Prediction => _prediction;
+
         private readonly TankFighterHp _hp = new TankFighterHp();
         public TankFighterHp Hp => _hp;
 
@@ -100,6 +148,8 @@ namespace MissileReflex.Src.Battle
         private float _shotCoolingTime = 0;
 
         private ETankFighterState _state = ETankFighterState.Alive;
+
+        private BattleRoot battleRoot => _parentAgent.BattleRoot;
         
         [EventFunction]
         private void Update()
@@ -123,11 +173,15 @@ namespace MissileReflex.Src.Battle
             // Debug.Log("change state to dead");
             
             _state = ETankFighterState.Dead;
+            
             await transform.DORotate(new Vector3(0, 0, 180), 0.3f).SetEase(Ease.OutBack);
             await UniTask.Delay(0.3f.ToIntMilli());
+            
+            // 爆発
             var effect = Instantiate(effectExplosion, transform);
             Debug.Assert(effect != null);
 
+            // ちょっと大きくなって小さくなる
             DOTween.Sequence(transform)
                 .Append(viewObject.transform.DOScale(1.3f, 0.3f).SetEase(Ease.OutBack))
                 .Append(viewObject.transform.DOScale(0f, 0.3f).SetEase(Ease.InSine));
@@ -146,11 +200,14 @@ namespace MissileReflex.Src.Battle
         {
             _parentAgent = agent;
             _input.Init();
+            _prediction.Init();
             _hp.Init(1);
             _shotCoolingTime = 0;
             _state = ETankFighterState.Alive;
 
             if (material != null) ChangeMaterial(material);
+            
+            battleRoot.TankManager.RegisterTank(this);
         }
 
         public bool IsAlive()
