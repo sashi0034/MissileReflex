@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
@@ -85,6 +86,8 @@ namespace MissileReflex.Src.Battle
 
         [SerializeField] private GameObject viewObject;
 
+        [SerializeField] private ParticleSystem effectExplosion;
+
         private ITankAgent? _parentAgent;
 
         private readonly TankFighterInput _input = new TankFighterInput();
@@ -106,14 +109,35 @@ namespace MissileReflex.Src.Battle
             if (_hp.Value <= 0)
             {
                 // 死んだ
-                _state = ETankFighterState.Dead;
-                transform.DORotate(new Vector3(0, 0, 180), 0.5f).SetEase(Ease.OutBack);
+                performDead();
                 return;
             }
             
             checkInputMove();
             
             updateInputShoot(Time.deltaTime);
+        }
+
+        private async UniTask performDead()
+        {
+            // Debug.Log("change state to dead");
+            
+            _state = ETankFighterState.Dead;
+            await transform.DORotate(new Vector3(0, 0, 180), 0.3f).SetEase(Ease.OutBack);
+            await UniTask.Delay(0.3f.ToIntMilli());
+            var effect = Instantiate(effectExplosion, transform);
+            Debug.Assert(effect != null);
+
+            DOTween.Sequence(transform)
+                .Append(viewObject.transform.DOScale(1.3f, 0.3f).SetEase(Ease.OutBack))
+                .Append(viewObject.transform.DOScale(0f, 0.3f).SetEase(Ease.InSine));
+            
+            await UniTask.WaitUntil(() => effect == null || effect.isStopped);
+            Util.DestroyGameObject(effect.gameObject);
+            
+            // Debug.Log("finished explosion effect");
+            
+            gameObject.SetActive(false);
         }
 
         public void Init(
