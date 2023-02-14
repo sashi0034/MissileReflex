@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
@@ -14,6 +15,9 @@ namespace MissileReflex.Src.Battle
 
         [SerializeField] private TankManager tankManager;
         public TankManager TankManager => tankManager;
+
+        private CancellationTokenSource _cancelBattle = new CancellationTokenSource();
+        public CancellationToken CancelBattle => _cancelBattle.Token;
         
 
         public void Start()

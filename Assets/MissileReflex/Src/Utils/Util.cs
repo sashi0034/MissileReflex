@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -75,6 +77,13 @@ namespace MissileReflex.Src.Utils
             Debug.Log(target.ToString());
             return target;
         }
+        
+        public static async UniTask DelayDestroyEffect(ParticleSystem effect, CancellationToken cancel)
+        {
+            await UniTask.WaitUntil(() => effect.isStopped, cancellationToken: cancel);
+            Util.DestroyGameObject(effect.gameObject);
+        }
+
     }
     
     [AttributeUsage(AttributeTargets.Method)]

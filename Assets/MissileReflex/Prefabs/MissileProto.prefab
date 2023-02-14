@@ -5034,6 +5034,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c05d9bf3ca4e4f05be19234bec820bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  owner: {fileID: 2172758356093325020}
+  missileExplosion: {fileID: 8194992990867289333, guid: 0b85710846d7ad24e876b4748d5727f6,
+    type: 3}
   damageAmount: 1
 --- !u!1001 &826744301568067575
 PrefabInstance:

@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using MissileReflex.Src.Params;
@@ -89,7 +90,7 @@ namespace MissileReflex.Src.Battle
             if (_hp.Value <= 0)
             {
                 // 死んだ
-                performDeadAndRespawn().RunTaskHandlingError();
+                performDeadAndRespawn(battleRoot.CancelBattle).RunTaskHandlingError();
                 return;
             }
             
@@ -98,26 +99,27 @@ namespace MissileReflex.Src.Battle
             updateInputShoot(Time.deltaTime);
         }
 
-        private async UniTask performDeadAndRespawn()
+        private async UniTask performDeadAndRespawn(CancellationToken cancel)
         {
-            await performDead();
+            await performDead(cancel);
 
             // 復活
             resetRespawn();
             
             // 復活する演出
             selfView.transform.localScale = Vector3.zero;
-            await selfView.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBack);
+            await selfView.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBack).SetLink(gameObject);
         }
 
-        private async UniTask performDead()
+        private async UniTask performDead(CancellationToken cancel)
         {
             // Debug.Log("change state to dead");
             
             _state = ETankFighterState.Dead;
             
-            await selfView.transform.DORotate(new Vector3(0, 0, 180), 0.3f).SetEase(Ease.OutBack);
-            await UniTask.Delay(0.3f.ToIntMilli());
+            await selfView.transform.DORotate(new Vector3(0, 0, 180), 0.3f)
+                .SetEase(Ease.OutBack).SetLink(gameObject);
+            await UniTask.Delay(0.3f.ToIntMilli(), cancellationToken: cancel);
             
             // コライダー無効にして
             selfCollider.gameObject.SetActive(false);
@@ -129,9 +131,10 @@ namespace MissileReflex.Src.Battle
             // ちょっと大きくなって小さくなる
             DOTween.Sequence(transform)
                 .Append(selfView.transform.DOScale(1.3f, 0.3f).SetEase(Ease.OutBack))
-                .Append(selfView.transform.DOScale(0f, 0.3f).SetEase(Ease.InSine));
+                .Append(selfView.transform.DOScale(0f, 0.3f).SetEase(Ease.InSine))
+                .SetLink(gameObject);
             
-            await UniTask.WaitUntil(() => effect == null || effect.isStopped);
+            await UniTask.WaitUntil(() => effect == null || effect.isStopped, cancellationToken: cancel);
             Util.DestroyGameObject(effect.gameObject);
             
             // Debug.Log("finished explosion effect");
@@ -213,6 +216,7 @@ namespace MissileReflex.Src.Battle
             
             Debug.Assert(_parentAgent != null);
             _parentAgent.BattleRoot.MissileManager.ShootMissile(new MissileInitArg(
+                battleRoot,
                 new MissileSourceData(missileSpeed),
                 initialPos,
                 initialVel));

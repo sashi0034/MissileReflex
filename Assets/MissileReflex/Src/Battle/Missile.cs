@@ -14,6 +14,7 @@ namespace MissileReflex.Src.Battle
     };
 
     public record MissileInitArg(
+        BattleRoot BattleRoot,
         MissileSourceData SourceData,
         Vector3 InitialPos,
         Vector3 InitialVel);
@@ -30,6 +31,10 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private GameObject view;
         [SerializeField] private int lifeTimeReflectedCount = 3;
 
+        private BattleRoot _battleRoot;
+        public BattleRoot BattleRoot => _battleRoot;
+        public MissileManager Manager => _battleRoot.MissileManager;
+
         private Vector3 viewInitialRotation;
         private float viewRotationAnimX = 0;
 
@@ -45,6 +50,7 @@ namespace MissileReflex.Src.Battle
 
         public void Init(MissileInitArg arg)
         {
+            _battleRoot = arg.BattleRoot;
             _data = arg.SourceData;
             transform.position = arg.InitialPos;
             rigidBody.velocity = arg.InitialVel;
@@ -63,8 +69,10 @@ namespace MissileReflex.Src.Battle
             }
             
             _physic.Update();
+            // たくさん反射したのでおしまい
             if (_physic.ReflectedCount >= lifeTimeReflectedCount)
             {
+                missileDamage.BirthEffectExplosion(transform.position);
                 Util.DestroyGameObject(this.gameObject);
                 return;
             }
