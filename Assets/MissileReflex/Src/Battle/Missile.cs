@@ -22,6 +22,7 @@ namespace MissileReflex.Src.Battle
     public class Missile : MonoBehaviour
     {
         [SerializeField] private MissileDamage missileDamage;
+        public MissileDamage Damage => missileDamage;
         
         [SerializeField] private Rigidbody rigidBody;
         public Rigidbody Rigidbody => rigidBody;
@@ -54,8 +55,8 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         private void Update()
         {
-            // 衝突してダメージ与えた
-            if (missileDamage.HitTankCount > 0)
+            // 衝突した
+            if (missileDamage.HitTankCount > 0 || missileDamage.HitMissileCount > 0)
             {
                 Util.DestroyGameObject(gameObject);
                 return;

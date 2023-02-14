@@ -8,6 +8,9 @@ namespace MissileReflex.Src.Params
     [CreateAssetMenu(fileName = nameof(ConstParam), menuName = "ScriptableObjects/Create" + nameof(ConstParam))]
     public class ConstParam : SingletonScriptableObject<ConstParam>
     {
+        [SerializeField] private float missilePredictInterval = 0.1f;
+        public float MissilePredictInterval => missilePredictInterval;
+        
         [SerializeField] private float missilePredictRange = 8f;
         public float MissilePredictRange => missilePredictRange;
 

@@ -4,10 +4,15 @@ namespace MissileReflex.Src.Utils
 {
     public class IntervalProcess
     {
-        private readonly float interval;
+        private readonly float interval = 0;
         private readonly Action process;
 
         private float _timeCount = 0;
+
+        public IntervalProcess()
+        {
+            process = () => { };
+        }
 
         public IntervalProcess(Action process, float interval)
         {

@@ -18,13 +18,7 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private float missileOffsetY = 0.5f;
 
         private readonly List<Missile> _missileList = new List<Missile>();
-        private readonly IntervalProcess _intervalProcess;
-
-        public MissileManager()
-        {
-            // TODO: 時間調整
-            _intervalProcess = new IntervalProcess(predictMissileHit, 0.1f);
-        }
+        private IntervalProcess _intervalProcess = new();
 
         public void Init()
         {
@@ -33,7 +27,7 @@ namespace MissileReflex.Src.Battle
                 Util.DestroyGameObject(missile.gameObject);
             }
             _missileList.Clear();
-            _intervalProcess.Clear();
+            _intervalProcess = new IntervalProcess(predictMissileHit, ConstParam.Instance.MissilePredictInterval);
         }
 
         public void ShootMissile(MissileInitArg arg)

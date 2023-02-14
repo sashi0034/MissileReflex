@@ -48,7 +48,7 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
-            selfTank.Init(this, enemyMaterial);
+            selfTank.Init(this, enemyMaterial, null);
             processAiRoutine().Forget();
 
             navAi.speed = 0;
@@ -68,6 +68,7 @@ namespace MissileReflex.Src.Battle
             while (gameObject != null)
             {
                 await UniTask.Delay(param.UpdateInterval.ToIntMilli());
+                if (selfTank.IsAlive() == false) continue;
 
                 var targetTank = battleRoot.Player.Tank;
                 var selfPos = selfTank.transform.position;

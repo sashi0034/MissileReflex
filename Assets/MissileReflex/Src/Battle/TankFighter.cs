@@ -6,117 +6,12 @@ using DG.Tweening;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using Sirenix.OdinInspector;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MissileReflex.Src.Battle
 {
-    public class TankFighterInput
-    {
-        private Vector3 _moveVec = Vector3.zero;
-        public Vector3 MoveVec => _moveVec;
-
-        private float _shotRad = 0;
-        public float ShotRad => _shotRad;
-        
-        private readonly BoolFlag _shotRequest = new BoolFlag();
-        public BoolFlag ShotRequest => _shotRequest;
-
-        public void Init()
-        {
-            _moveVec = Vector3.zero;
-            _shotRad = 0;
-            _shotRequest.Clear();
-        }
-
-        public void SetMoveVec(Vector3 move)
-        {
-            Debug.Assert(Vector3.SqrMagnitude(move) <= 1 + ConstParam.DeltaMilliF);
-            _moveVec = move;
-        }
-
-        public void SetShotRad(float rad)
-        {
-            _shotRad = rad;
-        }
-        
-        public void SetShotRadFromVec3(Vector3 vec)
-        {
-            _shotRad = Mathf.Atan2(vec.z, vec.x);
-        }
-    }
-
-    public class TankFighterPrediction
-    {
-        private readonly List<Missile> _missileHits = new List<Missile>();
-        // public IReadOnlyList<Missile> MissileHits => _missileHits;
-
-        public void Init()
-        {
-            _missileHits.Clear();
-        }
-        
-        public void ClearPredictedMissiles()
-        {
-            _missileHits.Clear();
-        }
-
-        // TODO: AIじゃなくて使わないときのためのフラグを作る
-        public void PredictMissileHit(Missile missile)
-        {
-            _missileHits.Add(missile);
-        }
-
-        public Missile? FindPredictedMissile()
-        {
-            foreach (var missile in _missileHits)
-            {
-                if (missile != null) return missile;
-            }
-
-            return null;
-        } 
-        
-        // public bool FindPredictedMissile(out Missile? hit)
-        // {
-        //     foreach (var missile in _missileHits)
-        //     {
-        //         if (missile == null) continue;
-        //         hit = missile;
-        //         return true;
-        //     }
-        //
-        //     hit = null;
-        //     return false;
-        // } 
-    }
-
-    public interface ITankAgent
-    {
-        public BattleRoot BattleRoot { get; }
-    }
-
-    public class TankFighterHp
-    {
-        private float _value = 0;
-        public float Value => _value;
-
-        public void Init(float value)
-        {
-            this._value = value;
-        }
-
-        public void CauseDamage(float value)
-        {
-            _value = Mathf.Max(0, _value - value);
-        }
-    }
-
-    public enum ETankFighterState
-    {
-        Alive,
-        Dead
-    }
-    
     // TankFighterはAgentから動かす
     public class TankFighter : MonoBehaviour
     {
@@ -129,7 +24,8 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private TankFighterCannon tankFighterCannon;
         [SerializeField] private TankFighterLeg tankFighterLeg;
 
-        [SerializeField] private GameObject viewObject;
+        [SerializeField] private Collider selfCollider;
+        [SerializeField] private GameObject selfView;
 
         [SerializeField] private ParticleSystem effectExplosion;
 
@@ -149,54 +45,15 @@ namespace MissileReflex.Src.Battle
 
         private ETankFighterState _state = ETankFighterState.Alive;
 
+        private Vector3 _initialPos;
+
         private BattleRoot battleRoot => _parentAgent.BattleRoot;
         
-        [EventFunction]
-        private void Update()
-        {
-            if (_state == ETankFighterState.Dead) return;
-
-            if (_hp.Value <= 0)
-            {
-                // 死んだ
-                performDead();
-                return;
-            }
-            
-            checkInputMove();
-            
-            updateInputShoot(Time.deltaTime);
-        }
-
-        private async UniTask performDead()
-        {
-            // Debug.Log("change state to dead");
-            
-            _state = ETankFighterState.Dead;
-            
-            await transform.DORotate(new Vector3(0, 0, 180), 0.3f).SetEase(Ease.OutBack);
-            await UniTask.Delay(0.3f.ToIntMilli());
-            
-            // 爆発
-            var effect = Instantiate(effectExplosion, transform);
-            Debug.Assert(effect != null);
-
-            // ちょっと大きくなって小さくなる
-            DOTween.Sequence(transform)
-                .Append(viewObject.transform.DOScale(1.3f, 0.3f).SetEase(Ease.OutBack))
-                .Append(viewObject.transform.DOScale(0f, 0.3f).SetEase(Ease.InSine));
-            
-            await UniTask.WaitUntil(() => effect == null || effect.isStopped);
-            Util.DestroyGameObject(effect.gameObject);
-            
-            // Debug.Log("finished explosion effect");
-            
-            gameObject.SetActive(false);
-        }
-
+        
         public void Init(
             ITankAgent agent,
-            Material? material)
+            Material? material,
+            Vector3? initialPos)
         {
             _parentAgent = agent;
             _input.Init();
@@ -208,7 +65,84 @@ namespace MissileReflex.Src.Battle
             if (material != null) ChangeMaterial(material);
             
             battleRoot.TankManager.RegisterTank(this);
+
+            if (initialPos != null) transform.position = initialPos.Value;
+            _initialPos = transform.position;
         }
+        private void resetRespawn()
+        {
+            _input.Init();
+            _prediction.Init();
+            _hp.RecoverFully();
+            _shotCoolingTime = 0;
+            _state = ETankFighterState.Alive;
+
+            transform.position = _initialPos;
+            gameObject.SetActive(true);
+        }
+        
+        [EventFunction]
+        private void Update()
+        {
+            if (_state == ETankFighterState.Dead) return;
+
+            if (_hp.Value <= 0)
+            {
+                // 死んだ
+                performDeadAndRespawn().RunTaskHandlingError();
+                return;
+            }
+            
+            checkInputMove();
+            
+            updateInputShoot(Time.deltaTime);
+        }
+
+        private async UniTask performDeadAndRespawn()
+        {
+            await performDead();
+
+            // 復活
+            resetRespawn();
+            
+            // 復活する演出
+            selfView.transform.localScale = Vector3.zero;
+            await selfView.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBack);
+        }
+
+        private async UniTask performDead()
+        {
+            // Debug.Log("change state to dead");
+            
+            _state = ETankFighterState.Dead;
+            
+            await selfView.transform.DORotate(new Vector3(0, 0, 180), 0.3f).SetEase(Ease.OutBack);
+            await UniTask.Delay(0.3f.ToIntMilli());
+            
+            // コライダー無効にして
+            selfCollider.gameObject.SetActive(false);
+            
+            // 爆発
+            var effect = Instantiate(effectExplosion, transform);
+            Debug.Assert(effect != null);
+
+            // ちょっと大きくなって小さくなる
+            DOTween.Sequence(transform)
+                .Append(selfView.transform.DOScale(1.3f, 0.3f).SetEase(Ease.OutBack))
+                .Append(selfView.transform.DOScale(0f, 0.3f).SetEase(Ease.InSine));
+            
+            await UniTask.WaitUntil(() => effect == null || effect.isStopped);
+            Util.DestroyGameObject(effect.gameObject);
+            
+            // Debug.Log("finished explosion effect");
+            
+            gameObject.SetActive(false);
+            selfCollider.gameObject.SetActive(true);
+            selfView.transform.rotation = quaternion.Euler(Vector3.zero);
+            selfView.transform.localScale = Vector3.one;
+        }
+
+
 
         public bool IsAlive()
         {
@@ -251,7 +185,7 @@ namespace MissileReflex.Src.Battle
             const float trickDefaultAngle = 30;
             const float trickDeltaAngle = 15;
             
-            viewObject.transform.localRotation =
+            selfView.transform.localRotation =
                 Quaternion.Euler(Vector3.right * (trickDefaultAngle - Mathf.Max(trickDeltaAngle * Mathf.Sin(tankFighterLeg.GetLegRotRadY()), 0)));
         }
         
