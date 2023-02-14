@@ -118,8 +118,22 @@ namespace MissileReflex.Src.Battle
             resetRespawn();
             
             // 復活する演出
+            _state = ETankFighterState.Immortal;
             selfView.transform.localScale = Vector3.zero;
-            await selfView.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBack).SetLink(gameObject);
+            // await selfView.transform.DOScale(1f, 2.0f).SetEase(Ease.OutBack).SetLink(gameObject);
+            // await DOTween.Sequence(selfView)
+            //     .Append(selfView.transform.DOScale(1.5f, 0.5f).SetEase(Ease.OutBack))
+            //     .Append(selfView.transform.DOScale(1.0f, 0.5f).SetEase(Ease.InSine))
+            //     .SetLink(gameObject);
+            // TODO: オーブ系のエフェクトで無敵を表現
+            await DOTween.Sequence(selfView)
+                .Append(selfView.transform.DOScale(1.0f, 0.1f).SetEase(Ease.OutBack))
+                .Append(selfView.transform.DOScale(0f, 0.1f).SetEase(Ease.InSine))
+                .SetLoops(5)
+                .SetLink(gameObject);
+            await DOTween.Sequence(selfView)
+                .Append(selfView.transform.DOScale(1.0f, 0.3f).SetEase(Ease.OutBack));
+            _state = ETankFighterState.Alive;
         }
 
         private async UniTask performDead(CancellationToken cancel)
@@ -163,6 +177,11 @@ namespace MissileReflex.Src.Battle
         public bool IsAlive()
         {
             return _state != ETankFighterState.Dead;
+        }
+
+        public bool IsImmortalNow()
+        {
+            return _state == ETankFighterState.Immortal;
         }
 
         [Button]

@@ -95,6 +95,9 @@ namespace MissileReflex.Src.Utils
             }
         }
 
+        public static Action EmptyAction => () => { };
+        public static void DoEmpty(){ }
+
     }
     
     [AttributeUsage(AttributeTargets.Method)]

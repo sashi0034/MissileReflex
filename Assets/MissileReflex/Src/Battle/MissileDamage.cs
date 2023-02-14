@@ -39,6 +39,9 @@ namespace MissileReflex.Src.Battle
                 return false;
             }
 
+            // 無敵中ならキャンセル
+            if (tank.IsImmortalNow()) return false;
+                
             tank.Hp.CauseDamage(damageAmount, owner.OwnerFighter);
             _hitTankCount++;
             return true;

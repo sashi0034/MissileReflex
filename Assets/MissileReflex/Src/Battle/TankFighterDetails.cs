@@ -160,6 +160,7 @@ namespace MissileReflex.Src.Battle
 
     public enum ETankFighterState
     {
+        Immortal,
         Alive,
         Dead
     }
