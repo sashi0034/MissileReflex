@@ -84,7 +84,7 @@ namespace MissileReflex.Src.Battle
                 if (isNoWallBetweenTargetTank(selfPos, targetTank))
                 {
                     // 射程内に入ってるので退き撃ち
-                    await shotWithRetreat(targetTank);
+                    shotWithRetreat(targetTank);
                 }
                 else
                 {
@@ -106,14 +106,16 @@ namespace MissileReflex.Src.Battle
         private static bool isNoWallBetweenTargetTank(Vector3 selfPos, TankFighter targetTank)
         {
             var targetPos = targetTank.transform.position;
+            var targetVed = targetPos - selfPos;
             
-            if (Physics.Raycast(selfPos, targetPos - selfPos, out var rayHit, param.ShotRange) == false) 
+            if (Physics.BoxCast(selfPos, ConstParam.Instance.MissileColBoxHalfExt, targetVed, 
+                    out var rayHit, Quaternion.Euler(targetVed), param.ShotRange) == false) 
                 return false;
             
             return rayHit.transform == targetTank.transform;
         }
 
-        private async UniTask shotWithRetreat(TankFighter targetTank)
+        private void shotWithRetreat(TankFighter targetTank)
         {
             var selfPos = selfTank.transform.position;
             var targetPos = targetTank.transform.position;
@@ -125,7 +127,7 @@ namespace MissileReflex.Src.Battle
             tankIn.SetMoveVec(rotatedDestVec.normalized);
             tankIn.SetShotRadFromVec3(destVec);
             tankIn.ShotRequest.UpFlag();
-            await UniTask.Delay(param.UpdateInterval.ToIntMilli());
+            // await UniTask.Delay(param.UpdateInterval.ToIntMilli());
         }
 
         // 自分の位置から直行ベクトルのうちスペースにゆとりのあるほうを探す

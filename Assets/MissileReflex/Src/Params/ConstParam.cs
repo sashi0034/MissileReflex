@@ -10,7 +10,9 @@ namespace MissileReflex.Src.Params
     {
         [SerializeField] private float missilePredictRange = 8f;
         public float MissilePredictRange => missilePredictRange;
-        
+
+        [SerializeField] private Vector3 missileColBoxHalfExt = Vector3.one / 4;
+        public Vector3 MissileColBoxHalfExt => missileColBoxHalfExt;
         
         [SerializeField] private TankAiAgentParam tankAiAgentParam;
         public TankAiAgentParam TankAiAgentParam => tankAiAgentParam;

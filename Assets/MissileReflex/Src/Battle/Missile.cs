@@ -92,8 +92,10 @@ namespace MissileReflex.Src.Battle
         public void PredictHitTank()
         {
             // 進路方向にrayを飛ばす
-            if (Physics.Raycast(transform.position, rigidBody.velocity, out var rayHit,
-                    ConstParam.Instance.MissilePredictRange) == false) return;
+            if (Physics.BoxCast(transform.position, ConstParam.Instance.MissileColBoxHalfExt, rigidBody.velocity, 
+                    out var rayHit, Quaternion.Euler(rigidBody.velocity), ConstParam.Instance.MissilePredictRange) == false) return;
+            // if (Physics.Raycast(transform.position, rigidBody.velocity, out var rayHit,
+            //         ConstParam.Instance.MissilePredictRange) == false) return;
                 
             var other = rayHit.collider;
             if (IsColliderTankFighter(other, out var tank) == false) return;

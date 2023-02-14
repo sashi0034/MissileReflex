@@ -22,7 +22,8 @@ namespace MissileReflex.Src.Battle
 
         public MissileManager()
         {
-            _intervalProcess = new IntervalProcess(predictMissileHit, 0.05f);
+            // TODO: 時間調整
+            _intervalProcess = new IntervalProcess(predictMissileHit, 0.1f);
         }
 
         public void Init()
