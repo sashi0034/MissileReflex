@@ -100,7 +100,14 @@ namespace MissileReflex.Src.Battle
         {
             var missilePos = approachingMissile.Pos;
             var evasionVec = findSpaciousOrthogonalVec(selfTankPos, missilePos - selfTankPos);
+            
+            // 回避
             tankIn.SetMoveVec(evasionVec.normalized);
+            
+            // ミサイルの迎撃を試みる
+            tankIn.SetShotRadFromVec3(missilePos - selfTankPos);
+            tankIn.ShotRequest.UpFlag();
+            
             await UniTask.Delay(evasionTime.ToIntMilli());
         }
 

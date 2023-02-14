@@ -69,6 +69,7 @@ namespace MissileReflex.Src.Battle
             }
             
             _physic.Update();
+            
             // たくさん反射したのでおしまい
             if (_physic.ReflectedCount >= lifeTimeReflectedCount)
             {
