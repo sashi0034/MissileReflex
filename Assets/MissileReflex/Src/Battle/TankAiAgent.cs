@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
@@ -39,9 +40,7 @@ namespace MissileReflex.Src.Battle
         private TankManager tankManager => battleRoot.TankManager;
 
         [SerializeField] private Material enemyMaterial;
-
-        [SerializeField] private NavMeshAgent navAi;
-
+        
         private static TankAiAgentParam param => ConstParam.Instance.TankAiAgentParam;
 
         [SerializeField] private int selfTeam;
@@ -56,17 +55,10 @@ namespace MissileReflex.Src.Battle
         {
             selfTank.Init(this, null, new TankFighterTeam(selfTeam));
             processAiRoutine().Forget();
-
-            navAi.speed = 0;
-            navAi.angularSpeed = 0;
-            navAi.acceleration = 0;
-            navAi.updatePosition = false;
-            navAi.updateRotation = false;
         }
 
         [EventFunction]
-        private void Update()
-        { }
+        private void Update() {}
 
         private async UniTask processAiRoutine()
         {
@@ -205,10 +197,20 @@ namespace MissileReflex.Src.Battle
 
         private Vector3 calcDestVecToTarget(TankFighter target)
         {
-            navAi.nextPosition = selfTank.transform.position;
-            navAi.SetDestination(target.transform.position);
+            var path = new NavMeshPath();
+            NavMesh.CalculatePath(selfTankPos, battleRoot.Player.Tank.transform.position, NavMesh.AllAreas, path);
+
+            const float delta = 0.1f;
+            var destPos = (selfTankPos - path.corners[0]).sqrMagnitude < delta ? path.corners[0] : path.corners[1];
             
-            var destPos = navAi.steeringTarget;
+            // Util.ExecutePerFrame(100, () =>
+            // {
+            //     for (var index = 0; index < path.corners.Length - 1; index++)
+            //     {
+            //         Debug.DrawLine(path.corners[index], path.corners[index + 1], Color.blue);
+            //     }
+            // }).Forget();
+            
             var currPos = selfTank.transform.position;
             var destVec = destPos - currPos;
             return destVec;

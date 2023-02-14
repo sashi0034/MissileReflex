@@ -85,6 +85,15 @@ namespace MissileReflex.Src.Utils
             await UniTask.WaitUntil(() => effect.isStopped, cancellationToken: cancel);
             Util.DestroyGameObject(effect.gameObject);
         }
+        
+        public static async UniTask ExecutePerFrame(int numFrame, Action action)
+        {
+            for (int i = 0; i < numFrame; ++i)
+            {
+                action();
+                await UniTask.DelayFrame(1);
+            }
+        }
 
     }
     
