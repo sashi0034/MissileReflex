@@ -17,7 +17,8 @@ namespace MissileReflex.Src.Battle
         BattleRoot BattleRoot,
         MissileSourceData SourceData,
         Vector3 InitialPos,
-        Vector3 InitialVel);
+        Vector3 InitialVel,
+        TankFighter Attacker);
     
     [DisallowMultipleComponent]
     public class Missile : MonoBehaviour
@@ -41,6 +42,10 @@ namespace MissileReflex.Src.Battle
         private MissileSourceData _data = MissileSourceData.Empty;
         private MissilePhysic _physic;
 
+        private TankFighter _ownerFighter;
+        public TankFighter OwnerFighter => _ownerFighter;
+        
+
         public Vector3 Pos => transform.position;
 
         public Missile()
@@ -52,6 +57,7 @@ namespace MissileReflex.Src.Battle
         {
             _battleRoot = arg.BattleRoot;
             _data = arg.SourceData;
+            _ownerFighter = arg.Attacker;
             transform.position = arg.InitialPos;
             rigidBody.velocity = arg.InitialVel;
 

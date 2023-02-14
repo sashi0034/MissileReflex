@@ -199,18 +199,17 @@ namespace MissileReflex.Src.Battle
         {
             var path = new NavMeshPath();
             NavMesh.CalculatePath(selfTankPos, battleRoot.Player.Tank.transform.position, NavMesh.AllAreas, path);
-
-            const float delta = 0.1f;
-            var destPos = (selfTankPos - path.corners[0]).sqrMagnitude < delta ? path.corners[0] : path.corners[1];
-            
             // Util.ExecutePerFrame(100, () =>
             // {
-            //     for (var index = 0; index < path.corners.Length - 1; index++)
-            //     {
-            //         Debug.DrawLine(path.corners[index], path.corners[index + 1], Color.blue);
-            //     }
+            //     for (var index = 0; index < path.corners.Length - 1; index++) Debug.DrawLine(path.corners[index], path.corners[index + 1], Color.blue);
             // }).Forget();
-            
+
+            const float delta = 0.1f;
+            if (path.corners.Length == 0) return Vector3.zero;
+            var destPos = path.corners.Length == 1 || (selfTankPos - path.corners[0]).sqrMagnitude < delta 
+                ? path.corners[0] 
+                : path.corners[1];
+
             var currPos = selfTank.transform.position;
             var destVec = destPos - currPos;
             return destVec;

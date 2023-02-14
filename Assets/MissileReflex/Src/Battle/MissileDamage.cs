@@ -39,7 +39,7 @@ namespace MissileReflex.Src.Battle
                 return false;
             }
 
-            tank.Hp.CauseDamage(damageAmount);
+            tank.Hp.CauseDamage(damageAmount, owner.OwnerFighter);
             _hitTankCount++;
             return true;
         }

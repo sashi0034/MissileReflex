@@ -4621,7 +4621,7 @@ MonoBehaviour:
     legMesh: {fileID: 4745825822156598375}
   selfCollider: {fileID: 4900318780597126798}
   selfView: {fileID: 4900318780454898570}
-  effectExplosion: {fileID: 2433282508523890284, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312,
+  effectTankExplosion: {fileID: 8477914248062940932, guid: 6b35413029188f24d900e1552b2bbf00,
     type: 3}
   maxShotCoolingTime: 1
 --- !u!54 &4900318780997718827

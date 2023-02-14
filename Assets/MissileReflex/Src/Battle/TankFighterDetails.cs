@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
@@ -95,21 +97,27 @@ namespace MissileReflex.Src.Battle
         private float _maxValue = 0;
         private float _value = 0;
         public float Value => _value;
+        private TankFighter? _lastAttacker;
+        public TankFighter? LastAttacker => _lastAttacker;
 
         public void Init(float maxValue)
         {
             _maxValue = maxValue;
             _value = maxValue;
+            _lastAttacker = null;
         }
 
         public void RecoverFully()
         {
             _value = _maxValue;
+            _lastAttacker = null;
         }
 
-        public void CauseDamage(float value)
+        public void CauseDamage(float value, TankFighter attacker)
         {
+            if (value <= 0) return;
             _value = Mathf.Max(0, _value - value);
+            _lastAttacker = attacker;
         }
     }
 

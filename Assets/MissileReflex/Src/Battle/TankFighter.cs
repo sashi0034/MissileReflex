@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using MissileReflex.Src.Battle.Effects;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using Sirenix.OdinInspector;
@@ -28,9 +29,10 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private Collider selfCollider;
         [SerializeField] private GameObject selfView;
 
-        [SerializeField] private ParticleSystem effectExplosion;
+        [SerializeField] private TankExplosion effectTankExplosion;
 
-        private ITankAgent? _parentAgent;
+        private ITankAgent? _ownerAgent;
+        public ITankAgent? Agent => _ownerAgent;
 
         private readonly TankFighterInput _input = new TankFighterInput();
         public TankFighterInput Input => _input;
@@ -54,7 +56,7 @@ namespace MissileReflex.Src.Battle
         private TankFighterTeam _team;
         public TankFighterTeam Team => _team;
 
-        private BattleRoot battleRoot => _parentAgent.BattleRoot;
+        private BattleRoot battleRoot => _ownerAgent.BattleRoot;
         
         
         public void Init(
@@ -62,7 +64,7 @@ namespace MissileReflex.Src.Battle
             Vector3? initialPos,
             TankFighterTeam team)
         {
-            _parentAgent = agent;
+            _ownerAgent = agent;
             _input.Init();
             _prediction.Init();
             _hp.Init(1);
@@ -134,7 +136,9 @@ namespace MissileReflex.Src.Battle
             selfCollider.gameObject.SetActive(false);
             
             // 爆発
-            var effect = Instantiate(effectExplosion, transform);
+            var effect = Instantiate(effectTankExplosion, transform);
+            effect.Effect.cameraShake.enabled = _ownerAgent is Player || _hp.LastAttacker is { Agent: Player };
+            
             Debug.Assert(effect != null);
 
             // ちょっと大きくなって小さくなる
@@ -142,8 +146,8 @@ namespace MissileReflex.Src.Battle
                 .Append(selfView.transform.DOScale(1.3f, 0.3f).SetEase(Ease.OutBack))
                 .Append(selfView.transform.DOScale(0f, 0.3f).SetEase(Ease.InSine))
                 .SetLink(gameObject);
-            
-            await UniTask.WaitUntil(() => effect == null || effect.isStopped, cancellationToken: cancel);
+
+            await UniTask.WaitUntil(() => effect == null || effect.ParticleSystem.isStopped, cancellationToken: cancel);
             Util.DestroyGameObject(effect.gameObject);
             
             // Debug.Log("finished explosion effect");
@@ -223,12 +227,13 @@ namespace MissileReflex.Src.Battle
 
             const float missileSpeed = 10f;
             
-            Debug.Assert(_parentAgent != null);
-            _parentAgent.BattleRoot.MissileManager.ShootMissile(new MissileInitArg(
+            Debug.Assert(_ownerAgent != null);
+            _ownerAgent.BattleRoot.MissileManager.ShootMissile(new MissileInitArg(
                 battleRoot,
                 new MissileSourceData(missileSpeed),
                 initialPos,
-                initialVel));
+                initialVel,
+                this));
         }
     }
 }
