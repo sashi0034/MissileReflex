@@ -48,13 +48,19 @@ namespace MissileReflex.Src.Battle
 
         private Vector3 _initialPos;
 
+        private TankFighterId _id;
+        public TankFighterId Id => _id;
+        
+        private TankFighterTeam _team;
+        public TankFighterTeam Team => _team;
+
         private BattleRoot battleRoot => _parentAgent.BattleRoot;
         
         
         public void Init(
             ITankAgent agent,
-            Material? material,
-            Vector3? initialPos)
+            Vector3? initialPos,
+            TankFighterTeam team)
         {
             _parentAgent = agent;
             _input.Init();
@@ -63,12 +69,15 @@ namespace MissileReflex.Src.Battle
             _shotCoolingTime = 0;
             _state = ETankFighterState.Alive;
 
-            if (material != null) ChangeMaterial(material);
+            // if (material != null) ChangeMaterial(material);
+            ChangeMaterial(battleRoot.TankManager.GetTankMatOf(team));
             
-            battleRoot.TankManager.RegisterTank(this);
+            _id = battleRoot.TankManager.RegisterTank(this);
 
             if (initialPos != null) transform.position = initialPos.Value;
             _initialPos = transform.position;
+
+            _team = team;
         }
         private void resetRespawn()
         {

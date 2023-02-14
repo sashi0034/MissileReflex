@@ -113,6 +113,43 @@ namespace MissileReflex.Src.Battle
         }
     }
 
+    public readonly struct TankFighterTeam
+    {
+        private readonly int _teamId;
+        public int TeamId => _teamId;
+
+        public TankFighterTeam(int teamId)
+        {
+            _teamId = teamId;
+        }
+
+        public bool IsSame(TankFighterTeam other)
+        {
+            return _teamId == other._teamId;
+        }
+    }
+
+    public readonly struct TankFighterId
+    {
+        private readonly int _value;
+        public int Value => _value;
+
+        public TankFighterId(int value)
+        {
+            _value = value;
+        }
+
+        public bool IsSame(TankFighterId other)
+        {
+            return _value == other._value;
+        }
+
+        public override string ToString()
+        {
+            return "id: " + _value;
+        }
+    }
+
     public enum ETankFighterState
     {
         Alive,

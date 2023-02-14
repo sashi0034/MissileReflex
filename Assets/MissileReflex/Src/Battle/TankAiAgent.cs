@@ -1,6 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
@@ -33,12 +36,15 @@ namespace MissileReflex.Src.Battle
 
         [SerializeField] private BattleRoot battleRoot;
         public BattleRoot BattleRoot => battleRoot;
+        private TankManager tankManager => battleRoot.TankManager;
 
         [SerializeField] private Material enemyMaterial;
 
         [SerializeField] private NavMeshAgent navAi;
 
         private static TankAiAgentParam param => ConstParam.Instance.TankAiAgentParam;
+
+        [SerializeField] private int selfTeam;
 
         [EventFunction]
         private void Start()
@@ -48,7 +54,7 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
-            selfTank.Init(this, enemyMaterial, null);
+            selfTank.Init(this, null, new TankFighterTeam(selfTeam));
             processAiRoutine().Forget();
 
             navAi.speed = 0;
@@ -60,40 +66,69 @@ namespace MissileReflex.Src.Battle
 
         [EventFunction]
         private void Update()
-        {
-        }
+        { }
 
         private async UniTask processAiRoutine()
         {
             while (gameObject != null)
             {
                 await UniTask.Delay(param.UpdateInterval.ToIntMilli());
-                if (selfTank.IsAlive() == false) continue;
 
-                var targetTank = battleRoot.Player.Tank;
-                var selfPos = selfTank.transform.position;
-
-                var approachingMissile = tankPredict.FindPredictedMissile();
-                tankPredict.ClearPredictedMissiles();
-                if (approachingMissile != null)
-                {
-                    // ミサイルと当たりそうなので避ける
-                    await avoidApproachingMissile(approachingMissile, param.UpdateInterval);
-                    continue;
-                }
-
-                if (isNoWallBetweenTargetTank(selfPos, targetTank))
-                {
-                    // 射程内に入ってるので退き撃ち
-                    shotWithRetreat(targetTank);
-                }
-                else
-                {
-                    // 射程内に入ってないので目標に近づく
-                    approachrTargetTank(targetTank);
-                }
-                
+                await processAiRoutineFrame();
             }
+        }
+
+        private async UniTask processAiRoutineFrame()
+        {
+            if (selfTank.IsAlive() == false) return;
+
+            var selfPos = selfTank.transform.position;
+
+            var approachingMissile = tankPredict.FindPredictedMissile();
+            tankPredict.ClearPredictedMissiles();
+            if (approachingMissile != null)
+            {
+                // ミサイルと当たりそうなので避ける
+                await avoidApproachingMissile(approachingMissile, param.UpdateInterval);
+                return;
+            }
+
+            // ターゲットを探す
+            var targetTank = findTargetTankNearSelf();
+            if (targetTank == null) return;
+
+            if (isNoWallBetweenTargetTank(selfPos, targetTank))
+            {
+                // 射程内に入ってるので退き撃ち
+                shotWithRetreat(targetTank);
+            }
+            else
+            {
+                // 射程内に入ってないので目標に近づく
+                approachrTargetTank(targetTank);
+            }
+        }
+
+        private TankFighter? findTargetTankNearSelf()
+        {
+            TankFighter? target = null;
+            float targetSqrMag = 0;
+            for (int i = 0; i < tankManager.List.Count; i++)
+            {
+                var checking = tankManager.List[i];
+                if (checking.IsAlive() == false) continue;
+                if (selfTank.Team.IsSame(checking.Team)) continue;
+
+                float checkingSqrMag = tankManager.GetTankSqrMagAdjMatAt(selfTank.Id, i);
+                if (target != null && checkingSqrMag > targetSqrMag) continue;
+                
+                // 近いターゲットを更新
+                target = checking;
+                targetSqrMag = checkingSqrMag;
+            }
+            
+            // Debug.Log( selfTank.Id + " target = " + (target==null ? "null" : target.Id));
+            return target;
         }
 
         private async UniTask avoidApproachingMissile(Missile approachingMissile, float evasionTime)
@@ -172,7 +207,7 @@ namespace MissileReflex.Src.Battle
         {
             navAi.nextPosition = selfTank.transform.position;
             navAi.SetDestination(target.transform.position);
-
+            
             var destPos = navAi.steeringTarget;
             var currPos = selfTank.transform.position;
             var destVec = destPos - currPos;

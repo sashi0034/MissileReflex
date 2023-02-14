@@ -20,7 +20,7 @@ namespace MissileReflex.Src.Battle
         public CancellationToken CancelBattle => _cancelBattle.Token;
         
 
-        public void Start()
+        public void Awake()
         {
             Init();            
         }
@@ -28,8 +28,9 @@ namespace MissileReflex.Src.Battle
         public void Init()
         {
             missileManager.Init();
-            player.Init();
             tankManager.Init();
+            
+            player.Init();
         }
     }
 }

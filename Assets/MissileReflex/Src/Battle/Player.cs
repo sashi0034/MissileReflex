@@ -21,7 +21,7 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
-            _selfTank.Init(this, null, null);
+            _selfTank.Init(this, null, new TankFighterTeam(0));
         }
 
         [EventFunction]
