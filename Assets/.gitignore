@@ -1,0 +1,12 @@
+/*
+!.gitignore
+!/MissileReflex
+!/Resources
+
+# ignre Photon except settings
+!/Photon
+/Photon/*
+!/Photon/Fusion
+/Photon/Fusion/*
+!/Photon/Fusion/Resources
+/Photon/Fusion/Resources/PhotonAppSettings.*
