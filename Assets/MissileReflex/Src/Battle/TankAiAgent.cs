@@ -39,8 +39,6 @@ namespace MissileReflex.Src.Battle
         public BattleRoot BattleRoot => battleRoot;
         private TankManager tankManager => battleRoot.TankManager;
 
-        [SerializeField] private Material enemyMaterial;
-        
         private static TankAiAgentParam param => ConstParam.Instance.TankAiAgentParam;
 
         [SerializeField] private int selfTeam;
@@ -53,7 +51,7 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
-            selfTank.Init(this, null, new TankFighterTeam(selfTeam));
+            selfTank.Init(this, battleRoot, null, new TankFighterTeam(selfTeam));
             processAiRoutine().Forget();
         }
 
@@ -198,7 +196,7 @@ namespace MissileReflex.Src.Battle
         private Vector3 calcDestVecToTarget(TankFighter target)
         {
             var path = new NavMeshPath();
-            NavMesh.CalculatePath(selfTankPos, battleRoot.Player.Tank.transform.position, NavMesh.AllAreas, path);
+            NavMesh.CalculatePath(selfTankPos, target.transform.position, NavMesh.AllAreas, path);
             // Util.ExecutePerFrame(100, () =>
             // {
             //     for (var index = 0; index < path.corners.Length - 1; index++) Debug.DrawLine(path.corners[index], path.corners[index + 1], Color.blue);

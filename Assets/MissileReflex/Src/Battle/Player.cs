@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using Fusion;
 using MissileReflex.Src.Battle;
 using MissileReflex.Src.Utils;
 using UnityEngine;
@@ -10,8 +11,8 @@ namespace MissileReflex.Src.Battle
     [DisallowMultipleComponent]
     public class Player : MonoBehaviour, ITankAgent
     {
-        [SerializeField] private BattleRoot battleRoot;
-        public BattleRoot BattleRoot => battleRoot;
+        private BattleRoot _battleRoot;
+        public BattleRoot BattleRoot => _battleRoot;
 
         [SerializeField] private TankFighter _selfTank;
         public TankFighter Tank => _selfTank;
@@ -19,9 +20,15 @@ namespace MissileReflex.Src.Battle
         private Camera mainCamera => Camera.main;
 
 
-        public void Init()
+        // このままだとInitはHostしか呼ばれていない...
+        // 何とかする必要がある
+        public void Init(BattleRoot battleRoot, PlayerRef networkPlayer)
         {
-            _selfTank.Init(this, null, new TankFighterTeam(0));
+            _battleRoot = battleRoot;
+            _selfTank.Init(this,  battleRoot, null, new TankFighterTeam(0));
+            
+            // ローカルプレイヤーでないなら操作できなくする
+            if (_selfTank.Runner.LocalPlayer != networkPlayer) Util.DestroyComponent(this); 
         }
 
         [EventFunction]

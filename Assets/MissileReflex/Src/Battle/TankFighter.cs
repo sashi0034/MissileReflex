@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Fusion;
 using MissileReflex.Src.Battle.Effects;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
@@ -15,7 +16,7 @@ using UnityEngine.Serialization;
 namespace MissileReflex.Src.Battle
 {
     // TankFighterはAgentから動かす
-    public class TankFighter : MonoBehaviour
+    public class TankFighter : NetworkBehaviour
     {
         [SerializeField] private Rigidbody tankRigidbody;
         
@@ -31,8 +32,9 @@ namespace MissileReflex.Src.Battle
 
         [SerializeField] private TankExplosion effectTankExplosion;
 
-        private ITankAgent? _ownerAgent;
-        public ITankAgent? Agent => _ownerAgent;
+        private ITankAgent? _selfAgent;
+        public ITankAgent? Agent => _selfAgent;
+        private BattleRoot _battleRoot;
 
         private readonly TankFighterInput _input = new TankFighterInput();
         public TankFighterInput Input => _input;
@@ -56,15 +58,16 @@ namespace MissileReflex.Src.Battle
         private TankFighterTeam _team;
         public TankFighterTeam Team => _team;
 
-        private BattleRoot battleRoot => _ownerAgent.BattleRoot;
         
         
         public void Init(
             ITankAgent agent,
+            BattleRoot battleRoot,
             Vector3? initialPos,
             TankFighterTeam team)
         {
-            _ownerAgent = agent;
+            _selfAgent = agent;
+            _battleRoot = battleRoot;
             _input.Init();
             _prediction.Init();
             _hp.Init(1);
@@ -72,9 +75,9 @@ namespace MissileReflex.Src.Battle
             _state = ETankFighterState.Alive;
 
             // if (material != null) ChangeMaterial(material);
-            ChangeMaterial(battleRoot.TankManager.GetTankMatOf(team));
+            ChangeMaterial(_battleRoot.TankManager.GetTankMatOf(team));
             
-            _id = battleRoot.TankManager.RegisterTank(this);
+            _id = _battleRoot.TankManager.RegisterTank(this);
 
             if (initialPos != null) transform.position = initialPos.Value;
             _initialPos = transform.position;
@@ -94,20 +97,20 @@ namespace MissileReflex.Src.Battle
         }
         
         [EventFunction]
-        private void Update()
+        public override void FixedUpdateNetwork()
         {
             if (_state == ETankFighterState.Dead) return;
 
             if (_hp.Value <= 0)
             {
                 // 死んだ
-                performDeadAndRespawn(battleRoot.CancelBattle).RunTaskHandlingError();
+                performDeadAndRespawn(_battleRoot.CancelBattle).RunTaskHandlingError();
                 return;
             }
             
-            checkInputMove();
+            checkInputMove(Runner.DeltaTime);
             
-            updateInputShoot(Time.deltaTime);
+            updateInputShoot(Runner.DeltaTime);
         }
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)
@@ -151,7 +154,7 @@ namespace MissileReflex.Src.Battle
             
             // 爆発
             var effect = Instantiate(effectTankExplosion, transform);
-            effect.Effect.cameraShake.enabled = _ownerAgent is Player || _hp.LastAttacker is { Agent: Player };
+            effect.Effect.cameraShake.enabled = _selfAgent is Player || _hp.LastAttacker is { Agent: Player };
             
             Debug.Assert(effect != null);
 
@@ -191,7 +194,7 @@ namespace MissileReflex.Src.Battle
             tankFighterCannon.ChangeMaterial(material);
         }
         
-        private void checkInputMove()
+        private void checkInputMove(float deltaTime)
         {
             var inputVec = _input.MoveVec;
 
@@ -202,12 +205,12 @@ namespace MissileReflex.Src.Battle
             
             if (hasInput)
             {
-                tankFighterLeg.LerpLegRotation(Time.deltaTime, inputVec);
+                tankFighterLeg.LerpLegRotation(deltaTime, inputVec);
                 trickViewRotation();
             }
             
             // 加速
-            tankRigidbody.velocity += inputVec * accelSize * Time.deltaTime;
+            tankRigidbody.velocity += inputVec * accelSize * deltaTime;
             if (tankRigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
                 tankRigidbody.velocity = tankRigidbody.velocity.normalized * maxSpeed;
 
@@ -246,9 +249,9 @@ namespace MissileReflex.Src.Battle
 
             const float missileSpeed = 10f;
             
-            Debug.Assert(_ownerAgent != null);
-            _ownerAgent.BattleRoot.MissileManager.ShootMissile(new MissileInitArg(
-                battleRoot,
+            Debug.Assert(_selfAgent != null);
+            _battleRoot.MissileManager.ShootMissile(new MissileInitArg(
+                _battleRoot,
                 new MissileSourceData(missileSpeed),
                 initialPos,
                 initialVel,

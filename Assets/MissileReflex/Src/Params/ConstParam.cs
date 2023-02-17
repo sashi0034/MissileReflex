@@ -23,17 +23,11 @@ namespace MissileReflex.Src.Params
         
         [SerializeField] private TankAiAgentParam tankAiAgentParam;
         public TankAiAgentParam TankAiAgentParam => tankAiAgentParam;
+
+        [SerializeField] private float playerDefaultY = 0.5f;
+        public float PlayerDefaultY => playerDefaultY;
         
         
         public const float DeltaMilliF = 1e-3f;
-        
-#if UNITY_EDITOR
-        // git管理できるようにするため作成
-        // [Button]
-        // public void BackupMirrorFile()
-        // {
-        //     BackupMirrorFile(nameof(ConstParam));
-        // }
-#endif
     }
 }

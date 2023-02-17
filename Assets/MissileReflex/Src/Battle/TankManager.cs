@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Fusion;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
@@ -9,7 +10,10 @@ namespace MissileReflex.Src.Battle
 {
     public class TankManager : MonoBehaviour
     {
+        [SerializeField] private BattleRoot battleRoot;
         [SerializeField] private Material[] tankMaterialList;
+
+        [SerializeField] private NetworkPrefabRef playerPrefab;
         
         private readonly List<TankFighter> _tankFighterList = new List<TankFighter>();
         public IReadOnlyList<TankFighter> List => _tankFighterList;
@@ -51,12 +55,7 @@ namespace MissileReflex.Src.Battle
         private void calcTankSqrMagAdjMat()
         {
             int numTank = _tankFighterList.Count;
-            // if (_tankSqrMagAdjMat.GetLength(0) < numTank)
-            // {
-            //     // 初期化
-            //     _tankSqrMagAdjMat = new float[numTank, numTank];
-            // }
-
+            
             // タンク間平方距離の隣接行列を更新
             for (int row = 0; row < numTank; ++row)
             {
@@ -72,6 +71,19 @@ namespace MissileReflex.Src.Battle
                     _tankSqrMagAdjMat[column, row] = sqrMag;
                 }
             }
+        }
+
+        public void SpawnPlayer(NetworkRunner runner, PlayerRef player)
+        {
+            var pos = new Vector3(
+                player.RawEncoded % runner.Config.Simulation.DefaultPlayers * 3, 
+                ConstParam.Instance.PlayerDefaultY, 
+                0);
+            runner.Spawn(playerPrefab, pos, Quaternion.identity, player, onBeforeSpawned: (networkRunner, obj) =>
+            {
+                obj.GetComponent<Player>().Init(battleRoot, player);
+            });
+            
         }
 
         public float GetTankSqrMagAdjMatAt(TankFighterId id, int column)

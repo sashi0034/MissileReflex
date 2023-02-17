@@ -87,10 +87,7 @@ namespace MissileReflex.Src.Battle
         // } 
     }
 
-    public interface ITankAgent
-    {
-        public BattleRoot BattleRoot { get; }
-    }
+    public interface ITankAgent {}
 
     public class TankFighterHp
     {
