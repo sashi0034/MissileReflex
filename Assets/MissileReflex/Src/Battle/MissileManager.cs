@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Fusion;
 using MissileReflex.Src.Battle;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
@@ -12,8 +13,7 @@ namespace MissileReflex.Src.Battle
     {
         [SerializeField] private BattleRoot battleRoot;
         
-        [SerializeField] private Missile missilePrefab;
-        public Missile MissilePrefab => missilePrefab;
+        [SerializeField] private NetworkPrefabRef missilePrefab;
 
         [SerializeField] private float missileOffsetY = 0.5f;
 
@@ -30,13 +30,16 @@ namespace MissileReflex.Src.Battle
             _intervalProcess = new IntervalProcess(predictMissileHit, ConstParam.Instance.MissilePredictInterval);
         }
 
-        public void ShootMissile(MissileInitArg arg)
+        public void ShootMissile(MissileInitArg arg, NetworkRunner runner)
         {
-            var missile = Instantiate(missilePrefab, this.transform);
-            _missileList.Add(missile);
+            runner.Spawn(missilePrefab, onBeforeSpawned: (networkRunner, obj) =>
+            {
+                var missile = obj.GetComponent<Missile>();
+                _missileList.Add(missile);
 
-            var fixedArg = arg with { InitialPos = arg.InitialPos.FixY(missileOffsetY) };
-            missile.Init(fixedArg);
+                var fixedArg = arg with { InitialPos = arg.InitialPos.FixY(missileOffsetY) };
+                missile.Init(fixedArg);
+            });
         }
 
         [EventFunction]

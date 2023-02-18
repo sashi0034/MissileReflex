@@ -67,6 +67,7 @@ namespace MissileReflex.Src.Battle
 
         public override void Spawned()
         {
+            transform.parent = battleRoot.TankManager.transform;
             ChangeMaterial(battleRoot.TankManager.GetTankMatOf(_team));
             _id = battleRoot.TankManager.RegisterTank(this);
             _prediction.Init();
@@ -270,11 +271,11 @@ namespace MissileReflex.Src.Battle
             const float missileSpeed = 10f;
             
             battleRoot.MissileManager.ShootMissile(new MissileInitArg(
-                battleRoot,
                 new MissileSourceData(missileSpeed),
                 initialPos,
                 initialVel,
-                this));
+                this), 
+                Runner);
         }
     }
 }

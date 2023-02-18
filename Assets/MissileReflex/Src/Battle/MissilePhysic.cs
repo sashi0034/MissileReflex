@@ -17,8 +17,6 @@ namespace MissileReflex.Src.Battle
         private Vector3 _velocityOld;
         private Vector3 _positionOld;
         
-        private int _reflectedCount = 0;
-        public int ReflectedCount => _reflectedCount;
 
         private List<Vector3> _reflectedVelListInFrame = new List<Vector3>();
 
@@ -40,7 +38,7 @@ namespace MissileReflex.Src.Battle
             if (_reflectedVelListInFrame.Count == 0) return;
             
             _reflectedVelListInFrame.Clear();
-            _reflectedCount++;
+            owner.IncReflectedCount();
         }
         
         public void OnCollisionEnter(Collision collision)

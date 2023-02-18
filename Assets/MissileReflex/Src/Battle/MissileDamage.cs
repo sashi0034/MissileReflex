@@ -1,16 +1,14 @@
-﻿using System;
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using DG.Tweening;
+﻿#nullable enable
+
+using Fusion;
 using MissileReflex.Src.Utils;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
 {
-    public class MissileDamage : MonoBehaviour
+    public class MissileDamage : NetworkBehaviour
     {
         [SerializeField] private Missile owner;
-        [SerializeField] private ParticleSystem missileExplosion;
         [SerializeField] private sbyte damageAmount = 1;
         
         private int _hitTankCount = 0;
@@ -24,6 +22,7 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         public void OnTriggerEnter(Collider other)
         {
+            if (owner.HasDespawned) return;
             if (checkHitWithTank(other)) return;
             if (checkHitWithMissile(other)) return;
         }
@@ -55,19 +54,10 @@ namespace MissileReflex.Src.Battle
             if (otherMissile.Damage._hitMissileCount == 0)
             {
                 // 爆発エフェクト発生
-                BirthEffectExplosion((owner.transform.position + otherMissile.transform.position) / 2);
+                owner.BirthEffectExplosion((owner.transform.position + otherMissile.transform.position) / 2);
             }
             
             return true;
         }
-
-        public void BirthEffectExplosion(Vector3 pos)
-        {
-            var effect = Instantiate(missileExplosion, owner.Manager.transform);
-            effect.transform.position = pos;
-            Util.DelayDestroyEffect(effect, owner.BattleRoot.CancelBattle).Forget();
-        }
-        
-        
     }
 }

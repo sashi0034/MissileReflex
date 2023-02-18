@@ -1,27 +1,35 @@
 ﻿#nullable enable
 
+using Cysharp.Threading.Tasks;
+using Fusion;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
 {
-    public record MissileSourceData(
-        float Speed)
+    public struct MissileSourceData : INetworkStruct
     {
+        private float speed;
+        public float Speed => speed;
+
+        public MissileSourceData(float speed)
+        {
+            this.speed = speed;
+        }
+
         public static readonly MissileSourceData Empty = 
             new MissileSourceData(0);
     };
 
     public record MissileInitArg(
-        BattleRoot BattleRoot,
         MissileSourceData SourceData,
         Vector3 InitialPos,
         Vector3 InitialVel,
         TankFighter Attacker);
     
     [DisallowMultipleComponent]
-    public class Missile : MonoBehaviour
+    public class Missile : NetworkBehaviour
     {
         [SerializeField] private MissileDamage missileDamage;
         public MissileDamage Damage => missileDamage;
@@ -32,19 +40,29 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private GameObject view;
         [SerializeField] private int lifeTimeReflectedCount = 3;
 
-        private BattleRoot _battleRoot;
-        public BattleRoot BattleRoot => _battleRoot;
+        [SerializeField] private ParticleSystem missileExplosion;
+
+        private NetworkObject _selfNetwork;
+        
+        private BattleRoot _battleRoot => BattleRoot.Instance;
         public MissileManager Manager => _battleRoot.MissileManager;
 
-        private Vector3 viewInitialRotation;
-        private float viewRotationAnimX = 0;
+        private bool _hasDespawned = false;
+        public bool HasDespawned => _hasDespawned;
 
-        private MissileSourceData _data = MissileSourceData.Empty;
+        private Vector3 _viewInitialRotation;
+        private float _viewRotationAnimX = 0;
         private MissilePhysic _physic;
 
-        private TankFighter _ownerFighter;
+        [Networked]
+        private MissileSourceData _data { get; set; } = MissileSourceData.Empty;
+
+        [Networked] 
+        private TankFighter _ownerFighter { get; set; }
         public TankFighter OwnerFighter => _ownerFighter;
-        
+
+        [Networked] 
+        private int _reflectedCount { get; set; } = 0;
 
         public Vector3 Pos => transform.position;
 
@@ -53,50 +71,76 @@ namespace MissileReflex.Src.Battle
             _physic = new MissilePhysic(this);
         }
 
+        public override void Spawned()
+        {
+            _selfNetwork = GetComponent<NetworkObject>();
+            
+            _viewInitialRotation = view.transform.localRotation.eulerAngles;
+        }
+
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            _hasDespawned = true;
+            
+            // 最大回数まで反射したときもエフェクトを出す
+            if (isReflectedUpTo())BirthEffectExplosion(transform.position);
+        }
+
         public void Init(MissileInitArg arg)
         {
-            _battleRoot = arg.BattleRoot;
             _data = arg.SourceData;
             _ownerFighter = arg.Attacker;
             transform.position = arg.InitialPos;
             rigidBody.velocity = arg.InitialVel;
-
-            viewInitialRotation = view.transform.localRotation.eulerAngles;
         }
 
         [EventFunction]
-        private void Update()
+        public override void FixedUpdateNetwork()
         {
             // 衝突した
             if (missileDamage.HitTankCount > 0 || missileDamage.HitMissileCount > 0)
             {
-                Util.DestroyGameObject(gameObject);
+                Runner.Despawn(_selfNetwork);
                 return;
             }
             
             _physic.Update();
             
             // たくさん反射したのでおしまい
-            if (_physic.ReflectedCount >= lifeTimeReflectedCount)
+            if (isReflectedUpTo())
             {
-                missileDamage.BirthEffectExplosion(transform.position);
-                Util.DestroyGameObject(this.gameObject);
+                Runner.Despawn(_selfNetwork);
                 return;
             }
 
-            updateViewAnim(Time.deltaTime);
+            updateViewAnim(Runner.DeltaTime);
+
+            // 速度調整
+            rigidBody.velocity = rigidBody.velocity.normalized * _data.Speed;
         }
 
+        private bool isReflectedUpTo()
+        {
+            return _reflectedCount >= lifeTimeReflectedCount;
+        }
+
+        public void IncReflectedCount()
+        {
+            _reflectedCount++;
+        }
+        
+        public void BirthEffectExplosion(Vector3 pos, RpcInfo info = default)
+        {
+            var effect = Instantiate(missileExplosion, Manager.transform);
+            effect.transform.position = pos;
+            Util.DelayDestroyEffect(effect, _battleRoot.CancelBattle).Forget();
+            Debug.Log(info.Source);
+        }
+        
         private void updateViewAnim(float deltaTime)
         {
-            viewRotationAnimX += deltaTime * 360;
-            view.transform.localRotation = Quaternion.Euler(viewInitialRotation + Vector3.right * viewRotationAnimX);
-        }
-
-        [EventFunction]
-        private void FixedUpdate()
-        {
-            rigidBody.velocity = rigidBody.velocity.normalized * _data.Speed;
+            _viewRotationAnimX += deltaTime * 360;
+            view.transform.localRotation = Quaternion.Euler(_viewInitialRotation + Vector3.right * _viewRotationAnimX);
         }
 
         [EventFunction]
