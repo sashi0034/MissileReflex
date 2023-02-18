@@ -76,6 +76,8 @@ namespace MissileReflex.Src.Battle
             _selfNetwork = GetComponent<NetworkObject>();
             
             _viewInitialRotation = view.transform.localRotation.eulerAngles;
+
+            transform.parent = Manager.transform;
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -83,7 +85,7 @@ namespace MissileReflex.Src.Battle
             _hasDespawned = true;
             
             // 最大回数まで反射したときもエフェクトを出す
-            if (isReflectedUpTo())BirthEffectExplosion(transform.position);
+            if (isReflectedUpTo()) BirthEffectExplosion(transform.position);
         }
 
         public void Init(MissileInitArg arg)
