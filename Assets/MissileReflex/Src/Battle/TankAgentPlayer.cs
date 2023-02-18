@@ -35,7 +35,7 @@ namespace MissileReflex.Src.Battle
 
             // カメラ位置調整
             if (Object.HasInputAuthority) 
-                mainCamera.transform.position = _selfTank.transform.position.FixY(mainCamera.transform.position.y);
+                mainCamera.transform.localPosition = _selfTank.transform.position.FixY(mainCamera.transform.localPosition.y);
         }
 
         private void updateInputMove(PlayerInputData input)
