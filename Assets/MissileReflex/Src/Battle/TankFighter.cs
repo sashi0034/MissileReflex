@@ -31,10 +31,11 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private GameObject selfView;
 
         [SerializeField] private TankExplosion effectTankExplosion;
+        
+        [Networked]
+        private PlayerRef _ownerPlayer { get; set; } = PlayerRef.None;
 
-        private ITankAgent? _selfAgent;
-        public ITankAgent? Agent => _selfAgent;
-        private BattleRoot _battleRoot;
+        private BattleRoot battleRoot => BattleRoot.Instance;
 
         private readonly TankFighterInput _input = new TankFighterInput();
         public TankFighterInput Input => _input;
@@ -61,13 +62,10 @@ namespace MissileReflex.Src.Battle
         
         
         public void Init(
-            ITankAgent agent,
-            BattleRoot battleRoot,
+            TankFighterTeam team,
             Vector3? initialPos,
-            TankFighterTeam team)
+            PlayerRef? ownerPlayer)
         {
-            _selfAgent = agent;
-            _battleRoot = battleRoot;
             _input.Init();
             _prediction.Init();
             _hp.Init(1);
@@ -75,10 +73,11 @@ namespace MissileReflex.Src.Battle
             _state = ETankFighterState.Alive;
 
             // if (material != null) ChangeMaterial(material);
-            ChangeMaterial(_battleRoot.TankManager.GetTankMatOf(team));
+            ChangeMaterial(battleRoot.TankManager.GetTankMatOf(team));
             
-            _id = _battleRoot.TankManager.RegisterTank(this);
+            _id = battleRoot.TankManager.RegisterTank(this);
 
+            if (ownerPlayer != null) _ownerPlayer = ownerPlayer.Value;
             if (initialPos != null) transform.position = initialPos.Value;
             _initialPos = transform.position;
 
@@ -95,6 +94,11 @@ namespace MissileReflex.Src.Battle
             transform.position = _initialPos;
             gameObject.SetActive(true);
         }
+
+        public bool IsOwnerLocalPlayer()
+        {
+            return Runner.LocalPlayer == _ownerPlayer;
+        }
         
         [EventFunction]
         public override void FixedUpdateNetwork()
@@ -104,7 +108,7 @@ namespace MissileReflex.Src.Battle
             if (_hp.Value <= 0)
             {
                 // 死んだ
-                performDeadAndRespawn(_battleRoot.CancelBattle).RunTaskHandlingError();
+                performDeadAndRespawn(battleRoot.CancelBattle).RunTaskHandlingError();
                 return;
             }
             
@@ -154,7 +158,7 @@ namespace MissileReflex.Src.Battle
             
             // 爆発
             var effect = Instantiate(effectTankExplosion, transform);
-            effect.Effect.cameraShake.enabled = _selfAgent is Player || _hp.LastAttacker is { Agent: Player };
+            effect.Effect.cameraShake.enabled = _ownerPlayer == Runner.LocalPlayer || _hp.LastAttacker == Runner.LocalPlayer;
             
             Debug.Assert(effect != null);
 
@@ -249,9 +253,8 @@ namespace MissileReflex.Src.Battle
 
             const float missileSpeed = 10f;
             
-            Debug.Assert(_selfAgent != null);
-            _battleRoot.MissileManager.ShootMissile(new MissileInitArg(
-                _battleRoot,
+            battleRoot.MissileManager.ShootMissile(new MissileInitArg(
+                battleRoot,
                 new MissileSourceData(missileSpeed),
                 initialPos,
                 initialVel,

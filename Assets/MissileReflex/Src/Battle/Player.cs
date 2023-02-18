@@ -11,29 +11,29 @@ namespace MissileReflex.Src.Battle
     [DisallowMultipleComponent]
     public class Player : MonoBehaviour, ITankAgent
     {
-        private BattleRoot _battleRoot;
-        public BattleRoot BattleRoot => _battleRoot;
+        private BattleRoot battleRoot => BattleRoot.Instance;
 
         [SerializeField] private TankFighter _selfTank;
         public TankFighter Tank => _selfTank;
         
         private Camera mainCamera => Camera.main;
 
-
-        // このままだとInitはHostしか呼ばれていない...
-        // 何とかする必要がある
-        public void Init(BattleRoot battleRoot, PlayerRef networkPlayer)
+        
+        public void Init(Vector3? initialPos, PlayerRef networkPlayer)
         {
-            _battleRoot = battleRoot;
-            _selfTank.Init(this,  battleRoot, null, new TankFighterTeam(0));
-            
-            // ローカルプレイヤーでないなら操作できなくする
-            if (_selfTank.Runner.LocalPlayer != networkPlayer) Util.DestroyComponent(this); 
+            _selfTank.Init(new TankFighterTeam(0), initialPos, networkPlayer);
         }
 
         [EventFunction]
         private void Update()
         {
+            // ローカルプレイヤーでないなら操作不可
+            if (_selfTank.IsOwnerLocalPlayer() == false)
+            {
+                Util.DestroyComponent(this);
+                return;
+            } 
+
             updateInputMove();
             
             updateInputShoot();

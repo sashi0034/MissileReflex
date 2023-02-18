@@ -81,7 +81,7 @@ namespace MissileReflex.Src.Battle
                 0);
             runner.Spawn(playerPrefab, pos, Quaternion.identity, player, onBeforeSpawned: (networkRunner, obj) =>
             {
-                obj.GetComponent<Player>().Init(battleRoot, player);
+                obj.GetComponent<Player>().Init(pos, player);
             });
             
         }

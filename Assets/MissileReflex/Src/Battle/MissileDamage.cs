@@ -24,7 +24,6 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         public void OnTriggerEnter(Collider other)
         {
-            Debug.Log(other.gameObject.name);
             if (checkHitWithTank(other)) return;
             if (checkHitWithMissile(other)) return;
         }

@@ -51,7 +51,7 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
-            selfTank.Init(this, battleRoot, null, new TankFighterTeam(selfTeam));
+            selfTank.Init(new TankFighterTeam(selfTeam), null, null);
             processAiRoutine().Forget();
         }
 
