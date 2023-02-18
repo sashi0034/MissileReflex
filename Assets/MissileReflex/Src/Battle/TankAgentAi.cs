@@ -32,7 +32,7 @@ namespace MissileReflex.Src.Battle
     {
         [SerializeField] private TankFighter selfTank;
         private Vector3 selfTankPos => selfTank.transform.position;
-        private TankFighterInput tankIn => selfTank.Input;
+        private ref TankFighterInput tankIn => ref selfTank.Input;
         private TankFighterPrediction tankPredict => selfTank.Prediction;
 
         private BattleRoot battleRoot = BattleRoot.Instance;
@@ -120,7 +120,7 @@ namespace MissileReflex.Src.Battle
             
             // ミサイルの迎撃を試みる
             tankIn.SetShotRadFromVec3(missilePos - selfTankPos);
-            tankIn.ShotRequest.UpFlag();
+            tankIn.MakeShotRequest();
             
             await UniTask.Delay(evasionTime.ToIntMilli());
         }
@@ -148,7 +148,7 @@ namespace MissileReflex.Src.Battle
 
             tankIn.SetMoveVec(rotatedDestVec.normalized);
             tankIn.SetShotRadFromVec3(destVec);
-            tankIn.ShotRequest.UpFlag();
+            tankIn.MakeShotRequest();
             // await UniTask.Delay(param.UpdateInterval.ToIntMilli());
         }
 

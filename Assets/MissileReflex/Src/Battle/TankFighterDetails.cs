@@ -9,22 +9,22 @@ using UnityEngine;
 
 namespace MissileReflex.Src.Battle
 {
-    public class TankFighterInput
+    public struct TankFighterInput : INetworkStruct
     {
-        private Vector3 _moveVec = Vector3.zero;
-        public Vector3 MoveVec => _moveVec;
+        // Recognized float-based Networked Properties will implement Fusion's compression.
+        // Such as Float, Double, Vector2, Vector3, Color, Matrix etc.
+        [Networked] private Vector3 _moveVec { get; set; }
+        [Networked] private float _shotRad { get; set; }
+        private NetworkBool _shotRequest;
 
-        private float _shotRad = 0;
+        public Vector3 MoveVec => _moveVec;
         public float ShotRad => _shotRad;
-        
-        private readonly BoolFlag _shotRequest = new BoolFlag();
-        public BoolFlag ShotRequest => _shotRequest;
 
         public void Init()
         {
             _moveVec = Vector3.zero;
             _shotRad = 0;
-            _shotRequest.Clear();
+            _shotRequest = false;
         }
 
         public void SetMoveVec(Vector3 move)
@@ -41,6 +41,18 @@ namespace MissileReflex.Src.Battle
         public void SetShotRadFromVec3(Vector3 vec)
         {
             _shotRad = Mathf.Atan2(vec.z, vec.x);
+        }
+
+        public void MakeShotRequest()
+        {
+            _shotRequest = true;
+        }
+
+        public bool PeekShotRequest()
+        {
+            var result = _shotRequest;
+            _shotRequest = false;
+            return result;
         }
     }
 

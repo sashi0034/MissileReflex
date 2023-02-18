@@ -60,7 +60,7 @@ namespace MissileReflex.Src.Battle
             
             _selfTank.Input.SetShotRadFromVec3(shotDirection);
 
-            if (Input.GetMouseButtonDown(0)) _selfTank.Input.ShotRequest.UpFlag();
+            if (Input.GetMouseButtonDown(0)) _selfTank.Input.MakeShotRequest();
         }
 
 

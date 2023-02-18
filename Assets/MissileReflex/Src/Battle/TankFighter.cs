@@ -37,8 +37,9 @@ namespace MissileReflex.Src.Battle
 
         private BattleRoot battleRoot => BattleRoot.Instance;
 
-        private readonly TankFighterInput _input = new TankFighterInput();
-        public TankFighterInput Input => _input;
+        [Networked]
+        private ref TankFighterInput _input => ref MakeRef<TankFighterInput>();
+        public ref TankFighterInput Input => ref _input;
 
         private readonly TankFighterPrediction _prediction = new TankFighterPrediction();
         public TankFighterPrediction Prediction => _prediction;
@@ -249,7 +250,7 @@ namespace MissileReflex.Src.Battle
             _shotCoolingTime = Math.Max(_shotCoolingTime - deltaTime, 0);
 
             // ミサイルを打つか確認
-            if (_shotCoolingTime > 0 || _input.ShotRequest.PeekFlag() == false) return;
+            if (_shotCoolingTime > 0 || _input.PeekShotRequest() == false) return;
             
             // 発射
             _shotCoolingTime = maxShotCoolingTime;
