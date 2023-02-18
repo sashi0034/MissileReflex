@@ -140,9 +140,9 @@ namespace MissileReflex.Src.Battle
         }
     }
 
-    public readonly struct TankFighterTeam
+    public struct TankFighterTeam : INetworkStruct
     {
-        private readonly int _teamId;
+        private int _teamId;
         public int TeamId => _teamId;
 
         public TankFighterTeam(int teamId)

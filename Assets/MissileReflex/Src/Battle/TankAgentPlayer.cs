@@ -3,13 +3,14 @@
 using System;
 using Fusion;
 using MissileReflex.Src.Battle;
+using MissileReflex.Src.Connection;
 using MissileReflex.Src.Utils;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
 {
     [DisallowMultipleComponent]
-    public class TankAgentPlayer : MonoBehaviour, ITankAgent
+    public class TankAgentPlayer : NetworkBehaviour, ITankAgent
     {
         private BattleRoot battleRoot => BattleRoot.Instance;
 
@@ -24,43 +25,36 @@ namespace MissileReflex.Src.Battle
             _selfTank.Init(new TankFighterTeam(0), initialPos, networkPlayer);
         }
 
-        [EventFunction]
-        private void Update()
+        public override void FixedUpdateNetwork()
         {
-            // ローカルプレイヤーでないなら操作不可
-            if (_selfTank.IsOwnerLocalPlayer() == false)
-            {
-                Util.DestroyComponent(this);
-                return;
-            } 
-
-            updateInputMove();
+            GetInput(out PlayerInputData input);
             
-            updateInputShoot();
+            updateInputMove(input);
+            
+            updateInputShoot(input);
 
             // カメラ位置調整
-            mainCamera.transform.position = _selfTank.transform.position.FixY(mainCamera.transform.position.y);
+            if (Object.HasInputAuthority) 
+                mainCamera.transform.position = _selfTank.transform.position.FixY(mainCamera.transform.position.y);
         }
 
-        private void updateInputMove()
+        private void updateInputMove(PlayerInputData input)
         {
-            var inputVec = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
+            var inputVec = new Vector3(input.Direction.x, 0, input.Direction.y).normalized;
 
             _selfTank.Input.SetMoveVec(inputVec);
         }
 
-        private void updateInputShoot()
+        private void updateInputShoot(PlayerInputData input)
         {
             var playerPos = _selfTank.transform.position;
-            var distancePlayerCamera = Vector3.Distance(playerPos, mainCamera.transform.position); 
-            var mousePos = Input.mousePosition.FixZ(distancePlayerCamera);
-            var worldMousePos = mainCamera.ScreenToWorldPoint(mousePos);
+            var mouseWorldPos = input.MouseWorldPos;
 
-            var shotDirection = worldMousePos - playerPos;
+            var shotDirection = mouseWorldPos - playerPos;
             
             _selfTank.Input.SetShotRadFromVec3(shotDirection);
 
-            if (Input.GetMouseButtonDown(0)) _selfTank.Input.MakeShotRequest();
+            if (input.Button.IsPushMouseLeft) _selfTank.Input.MakeShotRequest();
         }
 
 

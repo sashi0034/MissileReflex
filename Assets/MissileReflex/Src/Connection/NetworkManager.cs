@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Fusion;
 using Fusion.Sockets;
 using MissileReflex.Src.Battle;
+using MissileReflex.Src.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,7 +13,9 @@ namespace MissileReflex.Src.Connection
     public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         [SerializeField] private BattleRoot battleRoot;
-        
+
+        private readonly BoolFlag _pushedMouseRight = new();
+        private readonly BoolFlag _pushedMouseLeft = new();
 
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
@@ -117,9 +120,36 @@ namespace MissileReflex.Src.Connection
         }
 
         private void Update()
-        { }
+        {
+            if (Input.GetMouseButtonDown(0)) _pushedMouseLeft.UpFlag();
+            if (Input.GetMouseButtonDown(1)) _pushedMouseRight.UpFlag();
+        }
 
-        public void OnInput(NetworkRunner runner, NetworkInput input)
-        {}
+        public void OnInput(NetworkRunner _, NetworkInput input)
+        {
+            var direction = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+            
+            // ローカルプレイヤーを基準にマウスのワールド座標を求める
+            var mouseWorldPos = calcMouseWorldPosFromPlayer();
+
+            var button = new PlayerInputButton((byte)
+                (_pushedMouseLeft.PeekFlag() ? PlayerInputButton.BitMouseLeft : 0 |
+                (_pushedMouseRight.PeekFlag() ? PlayerInputButton.BitMouseRight : 0)
+            ));
+
+            input.Set(new PlayerInputData(direction, mouseWorldPos, button));
+        }
+
+        private Vector3 calcMouseWorldPosFromPlayer()
+        {
+            var player = battleRoot.TankManager.FindLocalPlayerTank();
+            if (player == null) return Vector3.zero;
+            var playerPos = player.transform.position;
+            var mainCamera = Camera.main;
+            if (mainCamera == null) return Vector3.zero;
+            var distancePlayerCamera = Vector3.Distance(playerPos, mainCamera.transform.position); 
+            var mousePos = Input.mousePosition.FixZ(distancePlayerCamera);
+            return mainCamera.ScreenToWorldPoint(mousePos);
+        }
     }
 }

@@ -61,26 +61,25 @@ namespace MissileReflex.Src.Battle
         private TankFighterId _id;
         public TankFighterId Id => _id;
         
-        private TankFighterTeam _team;
+        [Networked(OnChanged = nameof(onChangedTeam))]
+        private TankFighterTeam _team { get; set; }
         public TankFighterTeam Team => _team;
 
-        
-        
+        public override void Spawned()
+        {
+            ChangeMaterial(battleRoot.TankManager.GetTankMatOf(_team));
+            _id = battleRoot.TankManager.RegisterTank(this);
+            _prediction.Init();
+        }
+
         public void Init(
             TankFighterTeam team,
             Vector3? initialPos,
             PlayerRef? ownerPlayer)
         {
             _input.Init();
-            _prediction.Init();
             _hp = new TankFighterHp(1);
-            _shotCoolingTime = 0;
             _state = ETankFighterState.Alive;
-
-            // if (material != null) ChangeMaterial(material);
-            ChangeMaterial(battleRoot.TankManager.GetTankMatOf(team));
-            
-            _id = battleRoot.TankManager.RegisterTank(this);
 
             if (ownerPlayer != null) _ownerPlayer = ownerPlayer.Value;
             if (initialPos != null) transform.position = initialPos.Value;
@@ -199,6 +198,13 @@ namespace MissileReflex.Src.Battle
         public bool IsImmortalNow()
         {
             return _state == ETankFighterState.Immortal;
+        }
+
+        [EventFunction]
+        private static void onChangedTeam(Changed<TankFighter> changed)
+        {
+            var self = changed.Behaviour;
+            self.ChangeMaterial(self.battleRoot.TankManager.GetTankMatOf(self._team));
         }
 
         [Button]

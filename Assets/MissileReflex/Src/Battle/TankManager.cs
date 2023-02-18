@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
 using Fusion;
@@ -19,6 +20,8 @@ namespace MissileReflex.Src.Battle
         private readonly List<TankFighter> _tankFighterList = new List<TankFighter>();
         public IReadOnlyList<TankFighter> List => _tankFighterList;
 
+        private TankFighter? _localPlayerTank;
+
         private float[,] _tankSqrMagAdjMat = new float[,]{};
 
         private IntervalProcess _processCalcTankSqrMagAdjMat = new();
@@ -29,6 +32,7 @@ namespace MissileReflex.Src.Battle
             _tankSqrMagAdjMat = new float[,]{};
             _processCalcTankSqrMagAdjMat =
                 new IntervalProcess(calcTankSqrMagAdjMat, ConstParam.Instance.TankAdjMatUpdateInterval);
+            _localPlayerTank = null;
         }
 
         [EventFunction]
@@ -103,6 +107,20 @@ namespace MissileReflex.Src.Battle
         public float GetTankSqrMagAdjMatAt(TankFighterId id, int column)
         {
             return _tankSqrMagAdjMat[id.Value, column];
+        }
+
+        public TankFighter? FindLocalPlayerTank()
+        {
+            if (_localPlayerTank != null) return _localPlayerTank;
+            
+            foreach (var tank in _tankFighterList)
+            {
+                if (tank.IsOwnerLocalPlayer() == false) continue;
+                _localPlayerTank = tank;
+                return tank;
+            }
+
+            return null;
         }
     }
 }
