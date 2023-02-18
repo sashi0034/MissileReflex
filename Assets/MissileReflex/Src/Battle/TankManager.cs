@@ -14,6 +14,7 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private Material[] tankMaterialList;
 
         [SerializeField] private NetworkPrefabRef playerPrefab;
+        [SerializeField] private NetworkPrefabRef aiPrefab;
         
         private readonly List<TankFighter> _tankFighterList = new List<TankFighter>();
         public IReadOnlyList<TankFighter> List => _tankFighterList;
@@ -81,9 +82,22 @@ namespace MissileReflex.Src.Battle
                 0);
             runner.Spawn(playerPrefab, pos, Quaternion.identity, player, onBeforeSpawned: (networkRunner, obj) =>
             {
-                obj.GetComponent<Player>().Init(pos, player);
+                obj.GetComponent<TankAgentPlayer>().Init(pos, player);
             });
-            
+        }
+        
+        public void SpawnAi(NetworkRunner runner)
+        {
+            // TODO: 位置とチームをちゃんと設定
+            var pos = new Vector3(
+                0, 
+                ConstParam.Instance.PlayerDefaultY, 
+                -5);
+            var team = 1;
+            runner.Spawn(aiPrefab, pos, Quaternion.identity, onBeforeSpawned: (networkRunner, obj) =>
+            {
+                obj.GetComponent<TankAgentAi>().Init(team);
+            });
         }
 
         public float GetTankSqrMagAdjMatAt(TankFighterId id, int column)

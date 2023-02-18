@@ -9,7 +9,7 @@ using UnityEngine;
 namespace MissileReflex.Src.Battle
 {
     [DisallowMultipleComponent]
-    public class Player : MonoBehaviour, ITankAgent
+    public class TankAgentPlayer : MonoBehaviour, ITankAgent
     {
         private BattleRoot battleRoot => BattleRoot.Instance;
 

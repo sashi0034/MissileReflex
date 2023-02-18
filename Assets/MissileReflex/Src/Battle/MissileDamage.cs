@@ -11,7 +11,7 @@ namespace MissileReflex.Src.Battle
     {
         [SerializeField] private Missile owner;
         [SerializeField] private ParticleSystem missileExplosion;
-        [SerializeField] private float damageAmount = 1f;
+        [SerializeField] private sbyte damageAmount = 1;
         
         private int _hitTankCount = 0;
         public int HitTankCount => _hitTankCount;

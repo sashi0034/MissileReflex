@@ -1,0 +1,168 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &4173567947091925567
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4004285516994594272, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: Flags
+      value: 2305
+      objectReference: {fileID: 0}
+    - target: {fileID: 4004285516994594272, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: NetworkGuid.RawGuidValue.Array.data[0]
+      value: -3111076085716389936
+      objectReference: {fileID: 0}
+    - target: {fileID: 4004285516994594272, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: NetworkGuid.RawGuidValue.Array.data[1]
+      value: 5988139362775482970
+      objectReference: {fileID: 0}
+    - target: {fileID: 4777918284038277780, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_Name
+      value: TankAgentAi Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.94
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -6.73
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4900318780997718838, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_Name
+      value: TankFighter
+      objectReference: {fileID: 0}
+    - target: {fileID: 6364737822466616171, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6364737822466616171, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6364737822466616171, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6364737822466616171, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6364737822466616171, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6364737822466616171, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6694691362429255926, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: Flags
+      value: 2561
+      objectReference: {fileID: 0}
+    - target: {fileID: 6694691362429255926, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: NetworkGuid.RawGuidValue.Array.data[0]
+      value: 8956390995632518660
+      objectReference: {fileID: 0}
+    - target: {fileID: 6694691362429255926, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: NetworkGuid.RawGuidValue.Array.data[1]
+      value: -6879284380545173609
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5, type: 3}
+--- !u!114 &7372698774502346694 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6897944072711132665, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+    type: 3}
+  m_PrefabInstance: {fileID: 4173567947091925567}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8909789886390522027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1ace10fc5774353b7a3b84022840c82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &8909789886390522027 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4777918284038277780, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+    type: 3}
+  m_PrefabInstance: {fileID: 4173567947091925567}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2099327544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8909789886390522027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b58f487cc255434aa1f3f56c0b5ae1d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selfTank: {fileID: 7372698774502346694}
+  selfTeam: 1

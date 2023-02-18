@@ -1,8 +1,10 @@
 ﻿#nullable enable
 
 using System.Collections.Generic;
+using Fusion;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
@@ -89,32 +91,40 @@ namespace MissileReflex.Src.Battle
 
     public interface ITankAgent {}
 
-    public class TankFighterHp
+    public struct TankFighterHp : INetworkStruct
     {
-        private float _maxValue = 0;
-        private float _value = 0;
-        public float Value => _value;
-        private TankFighter? _lastAttacker;
-        public TankFighter? LastAttacker => _lastAttacker;
+        private sbyte _maxValue;
+        private sbyte _value;
+        private NetworkBehaviourId _lastAttacker;
 
-        public void Init(float maxValue)
+        public sbyte Value => _value;
+        public NetworkBehaviourId LastAttacker => _lastAttacker;
+
+        public TankFighterHp(sbyte max)
         {
-            _maxValue = maxValue;
-            _value = maxValue;
-            _lastAttacker = null;
+            _maxValue = max;
+            _value = max;
+            _lastAttacker = default;
         }
-
+        
         public void RecoverFully()
         {
             _value = _maxValue;
-            _lastAttacker = null;
+            _lastAttacker = default;
         }
 
-        public void CauseDamage(float value, TankFighter attacker)
+        public void CauseDamage(sbyte value, TankFighter attacker)
         {
             if (value <= 0) return;
-            _value = Mathf.Max(0, _value - value);
+            _value = (sbyte)(Mathf.Max(0, _value - value));
             _lastAttacker = attacker;
+        }
+
+        public TankFighter? FindLastAttacker(NetworkRunner runner)
+        {
+            if (_lastAttacker == default) return null;
+            if (runner.TryFindBehaviour(_lastAttacker, out var networkBehaviour) == false) return null;
+            return networkBehaviour.TryGetComponent<TankFighter>(out var tank) == false ? null : tank;
         }
     }
 

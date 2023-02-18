@@ -28,35 +28,24 @@ namespace MissileReflex.Src.Battle
     }
     
     
-    public class TankAiAgent : MonoBehaviour, ITankAgent
+    public class TankAgentAi : MonoBehaviour, ITankAgent
     {
         [SerializeField] private TankFighter selfTank;
         private Vector3 selfTankPos => selfTank.transform.position;
         private TankFighterInput tankIn => selfTank.Input;
         private TankFighterPrediction tankPredict => selfTank.Prediction;
 
-        [SerializeField] private BattleRoot battleRoot;
-        public BattleRoot BattleRoot => battleRoot;
+        private BattleRoot battleRoot = BattleRoot.Instance;
         private TankManager tankManager => battleRoot.TankManager;
 
         private static TankAiAgentParam param => ConstParam.Instance.TankAiAgentParam;
+        
 
-        [SerializeField] private int selfTeam;
-
-        [EventFunction]
-        private void Start()
-        {
-            Init();
-        }
-
-        public void Init()
+        public void Init(int selfTeam)
         {
             selfTank.Init(new TankFighterTeam(selfTeam), null, null);
             processAiRoutine().Forget();
         }
-
-        [EventFunction]
-        private void Update() {}
 
         private async UniTask processAiRoutine()
         {

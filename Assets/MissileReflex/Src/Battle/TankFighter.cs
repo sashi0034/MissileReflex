@@ -43,15 +43,19 @@ namespace MissileReflex.Src.Battle
         private readonly TankFighterPrediction _prediction = new TankFighterPrediction();
         public TankFighterPrediction Prediction => _prediction;
 
-        private readonly TankFighterHp _hp = new TankFighterHp();
-        public TankFighterHp Hp => _hp;
+        [Networked] 
+        private ref TankFighterHp _hp => ref MakeRef<TankFighterHp>();
+        
+        public ref TankFighterHp Hp => ref _hp;
 
         [SerializeField] private float maxShotCoolingTime;
         private float _shotCoolingTime = 0;
 
-        private ETankFighterState _state = ETankFighterState.Alive;
+        [Networked] 
+        private ETankFighterState _state { get; set; } = ETankFighterState.Alive;
 
-        private Vector3 _initialPos;
+        [Networked]
+        private Vector3 _initialPos { get; set; }
 
         private TankFighterId _id;
         public TankFighterId Id => _id;
@@ -68,7 +72,7 @@ namespace MissileReflex.Src.Battle
         {
             _input.Init();
             _prediction.Init();
-            _hp.Init(1);
+            _hp = new TankFighterHp(1);
             _shotCoolingTime = 0;
             _state = ETankFighterState.Alive;
 
@@ -158,7 +162,12 @@ namespace MissileReflex.Src.Battle
             
             // 爆発
             var effect = Instantiate(effectTankExplosion, transform);
-            effect.Effect.cameraShake.enabled = _ownerPlayer == Runner.LocalPlayer || _hp.LastAttacker == Runner.LocalPlayer;
+            var lastAttacker = _hp.FindLastAttacker(Runner);
+            effect.Effect.cameraShake.enabled = 
+                // 自身がやられたときか
+                _ownerPlayer == Runner.LocalPlayer ||
+                // 自身が攻撃したときにカメラシェイク
+                (lastAttacker!= null && lastAttacker._ownerPlayer == Runner.LocalPlayer);
             
             Debug.Assert(effect != null);
 

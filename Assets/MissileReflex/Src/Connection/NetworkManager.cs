@@ -102,6 +102,8 @@ namespace MissileReflex.Src.Connection
                 Scene = SceneManager.GetActiveScene().buildIndex,
                 SceneManager = gameObject.AddComponent<NetworkSceneManagerBase>()
             });
+            
+            battleRoot.TankManager.SpawnAi(_runner);
         }
 
         private void OnGUI()
