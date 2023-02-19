@@ -41,9 +41,9 @@ namespace MissileReflex.Src.Battle
         private static TankAiAgentParam param => ConstParam.Instance.TankAiAgentParam;
         
 
-        public void Init(int selfTeam)
+        public void Init(TankSpawnInfo spawnInfo)
         {
-            selfTank.Init(new TankFighterTeam(selfTeam), null, null);
+            selfTank.Init(spawnInfo.Team, spawnInfo.InitialPos, null);
             processAiRoutine().Forget();
         }
 

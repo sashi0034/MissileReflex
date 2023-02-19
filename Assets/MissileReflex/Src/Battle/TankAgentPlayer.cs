@@ -20,9 +20,9 @@ namespace MissileReflex.Src.Battle
         private Camera mainCamera => Camera.main;
 
         
-        public void Init(Vector3? initialPos, PlayerRef networkPlayer)
+        public void Init(TankSpawnInfo spawnInfo, PlayerRef networkPlayer)
         {
-            _selfTank.Init(new TankFighterTeam(0), initialPos, networkPlayer);
+            _selfTank.Init(spawnInfo.Team, spawnInfo.InitialPos, networkPlayer);
         }
 
         public override void FixedUpdateNetwork()

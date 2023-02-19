@@ -29,5 +29,7 @@ namespace MissileReflex.Src.Params
         
         
         public const float DeltaMilliF = 1e-3f;
+
+        public const int NumTankTeam = 4;
     }
 }

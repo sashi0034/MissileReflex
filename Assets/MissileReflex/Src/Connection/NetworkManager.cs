@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Fusion;
 using Fusion.Sockets;
 using MissileReflex.Src.Battle;
+using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,7 +22,7 @@ namespace MissileReflex.Src.Connection
         {
             if (runner.IsServer)
             {
-                battleRoot.TankManager.SpawnPlayer(runner, player);
+                battleRoot.TankManager.SpawnPlayer(runner, player, battleRoot.TankManager.GetNextSpawnInfo());
                 Debug.Log("connected player: " + player.PlayerId);
             }
             else
@@ -105,8 +106,9 @@ namespace MissileReflex.Src.Connection
                 Scene = SceneManager.GetActiveScene().buildIndex,
                 SceneManager = gameObject.AddComponent<NetworkSceneManagerBase>()
             });
-            
-            battleRoot.TankManager.SpawnAi(_runner);
+
+            for (int i = 0; i < 2 * ConstParam.NumTankTeam; ++i)
+                battleRoot.TankManager.SpawnAi(_runner, battleRoot.TankManager.GetNextSpawnInfo());
         }
 
         private void OnGUI()

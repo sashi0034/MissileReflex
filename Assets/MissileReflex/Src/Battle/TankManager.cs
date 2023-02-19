@@ -9,6 +9,11 @@ using UnityEngine;
 
 namespace MissileReflex.Src.Battle
 {
+    public record TankSpawnInfo(
+        TankFighterTeam Team, 
+        Vector3 InitialPos)
+    {};
+
     public class TankManager : MonoBehaviour
     {
         [SerializeField] private BattleRoot battleRoot;
@@ -16,6 +21,8 @@ namespace MissileReflex.Src.Battle
 
         [SerializeField] private NetworkPrefabRef playerPrefab;
         [SerializeField] private NetworkPrefabRef aiPrefab;
+
+        [SerializeField] private TankInitialPositionData posData;
         
         private readonly List<TankFighter> _tankFighterList = new List<TankFighter>();
         public IReadOnlyList<TankFighter> List => _tankFighterList;
@@ -78,30 +85,32 @@ namespace MissileReflex.Src.Battle
             }
         }
 
-        public void SpawnPlayer(NetworkRunner runner, PlayerRef player)
+        public void SpawnPlayer(NetworkRunner runner, PlayerRef player, TankSpawnInfo spawnInfo)
         {
-            var pos = new Vector3(
-                player.RawEncoded % runner.Config.Simulation.DefaultPlayers * 3, 
-                ConstParam.Instance.PlayerDefaultY, 
-                0);
-            runner.Spawn(playerPrefab, pos, Quaternion.identity, player, onBeforeSpawned: (networkRunner, obj) =>
+            runner.Spawn(playerPrefab, spawnInfo.InitialPos, Quaternion.identity, player, onBeforeSpawned: (networkRunner, obj) =>
             {
-                obj.GetComponent<TankAgentPlayer>().Init(pos, player);
+                obj.GetComponent<TankAgentPlayer>().Init(spawnInfo, player);
             });
         }
         
-        public void SpawnAi(NetworkRunner runner)
+        public void SpawnAi(NetworkRunner runner, TankSpawnInfo spawnInfo)
         {
-            // TODO: 位置とチームをちゃんと設定
-            var pos = new Vector3(
-                0, 
-                ConstParam.Instance.PlayerDefaultY, 
-                -5);
-            var team = 1;
-            runner.Spawn(aiPrefab, pos, Quaternion.identity, onBeforeSpawned: (networkRunner, obj) =>
+            runner.Spawn(aiPrefab, spawnInfo.InitialPos, Quaternion.identity, onBeforeSpawned: (networkRunner, obj) =>
             {
-                obj.GetComponent<TankAgentAi>().Init(team);
+                obj.GetComponent<TankAgentAi>().Init(spawnInfo);
             });
+        }
+
+        public TankSpawnInfo GetNextSpawnInfo()
+        {
+            int numTank = _tankFighterList.Count;
+
+            var team = new TankFighterTeam(numTank % ConstParam.NumTankTeam);
+            int teamMemberIndex = numTank / ConstParam.NumTankTeam;
+
+            return new TankSpawnInfo(
+                team, 
+                posData.TeamElements[team.TeamId].PosObj[teamMemberIndex].position.FixY(ConstParam.Instance.PlayerDefaultY));
         }
 
         public float GetTankSqrMagAdjMatAt(TankFighterId id, int column)
