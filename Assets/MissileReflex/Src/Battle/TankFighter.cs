@@ -66,7 +66,7 @@ namespace MissileReflex.Src.Battle
         private TankFighterTeam _team { get; set; }
         public TankFighterTeam Team => _team;
         
-        private UniTask _interruptTask = UniTask.CompletedTask;
+        private UniTask _interruptedTask = UniTask.CompletedTask;
 
         public override void Spawned()
         {
@@ -99,7 +99,7 @@ namespace MissileReflex.Src.Battle
             _shotCoolingTime = 0;
             _state = ETankFighterState.Alive;
 
-            transform.position = _initialPos;
+            // transform.position = _initialPos;
             trickViewRotation();
             selfCollider.gameObject.SetActive(true);
         }
@@ -112,20 +112,27 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         public override void FixedUpdateNetwork()
         {
-            if (_interruptTask.Status == UniTaskStatus.Pending) return;
+            if (_interruptedTask.Status == UniTaskStatus.Pending) return;
             
             if (_state == ETankFighterState.Dead) return;
 
             if (_hp.Value <= 0)
             {
                 // 死んだ
-                _interruptTask = performDeadAndRespawn(battleRoot.CancelBattle);
+                rpcallStartDie();
                 return;
             }
             
             checkInputMove(Runner.DeltaTime);
             
             updateInputShoot(Runner.DeltaTime);
+        }
+
+        [Rpc]
+        private void rpcallStartDie()
+        {
+            if (_state == ETankFighterState.Dead) return;
+            _interruptedTask = performDeadAndRespawn(battleRoot.CancelBattle);
         }
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)
@@ -193,6 +200,9 @@ namespace MissileReflex.Src.Battle
                 .Append(selfView.transform.DOScale(1.3f, 0.3f).SetEase(Ease.OutBack))
                 .Append(selfView.transform.DOScale(0f, 0.3f).SetEase(Ease.InSine))
                 .SetLink(gameObject);
+
+            // リスポーン地点に移動
+            transform.position = _initialPos;
 
             // 死亡ペナルティ時間
             await UniTask.Delay(ConstParam.Instance.TankDeathPenaltyTime.ToIntMilli(), cancellationToken: cancel);
