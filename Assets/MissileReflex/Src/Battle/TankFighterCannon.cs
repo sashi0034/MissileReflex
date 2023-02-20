@@ -1,4 +1,5 @@
 ﻿using System;
+using MissileReflex.Src.Utils;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
@@ -9,6 +10,8 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private GameObject cannonView;
         [SerializeField] private Animator cannonAnimator;
         [SerializeField] private SkinnedMeshRenderer cannonMesh;
+
+        private static readonly AnimHash hashShot = new AnimHash("shot");
         
         public void ChangeMaterial(Material mat)
         {
@@ -24,6 +27,11 @@ namespace MissileReflex.Src.Battle
                     Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg,
                     deltaTime * 20),
                 0);
+        }
+
+        public void AnimShot()
+        {
+            cannonAnimator.SetTrigger(hashShot.Code);
         }
     }
 }

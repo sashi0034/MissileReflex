@@ -279,6 +279,8 @@ namespace MissileReflex.Src.Battle
 
             const float missileSpeed = 10f;
             
+            tankFighterCannon.AnimShot();
+            
             battleRoot.MissileManager.ShootMissile(new MissileInitArg(
                 new MissileSourceData(missileSpeed),
                 initialPos,
