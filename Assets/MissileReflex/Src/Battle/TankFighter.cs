@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Fusion;
@@ -64,6 +65,8 @@ namespace MissileReflex.Src.Battle
         [Networked(OnChanged = nameof(onChangedTeam))]
         private TankFighterTeam _team { get; set; }
         public TankFighterTeam Team => _team;
+        
+        private UniTask _interruptTask = UniTask.CompletedTask;
 
         public override void Spawned()
         {
@@ -97,7 +100,8 @@ namespace MissileReflex.Src.Battle
             _state = ETankFighterState.Alive;
 
             transform.position = _initialPos;
-            gameObject.SetActive(true);
+            trickViewRotation();
+            selfCollider.gameObject.SetActive(true);
         }
 
         public bool IsOwnerLocalPlayer()
@@ -108,12 +112,14 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         public override void FixedUpdateNetwork()
         {
+            if (_interruptTask.Status == UniTaskStatus.Pending) return;
+            
             if (_state == ETankFighterState.Dead) return;
 
             if (_hp.Value <= 0)
             {
                 // 死んだ
-                performDeadAndRespawn(battleRoot.CancelBattle).RunTaskHandlingError();
+                _interruptTask = performDeadAndRespawn(battleRoot.CancelBattle);
                 return;
             }
             
@@ -130,14 +136,20 @@ namespace MissileReflex.Src.Battle
             resetRespawn();
             
             // 復活する演出
+            performRespawnAfterDead().Forget();
+        }
+
+        private async UniTask performRespawnAfterDead()
+        {
             _state = ETankFighterState.Immortal;
+
             selfView.transform.localScale = Vector3.zero;
             // await selfView.transform.DOScale(1f, 2.0f).SetEase(Ease.OutBack).SetLink(gameObject);
             // await DOTween.Sequence(selfView)
             //     .Append(selfView.transform.DOScale(1.5f, 0.5f).SetEase(Ease.OutBack))
             //     .Append(selfView.transform.DOScale(1.0f, 0.5f).SetEase(Ease.InSine))
             //     .SetLink(gameObject);
-            // TODO: オーブ系のエフェクトで無敵を表現
+            // TODO: オーブ系のエフェクトで無敵を表現?
             await DOTween.Sequence(selfView)
                 .Append(selfView.transform.DOScale(1.0f, 0.1f).SetEase(Ease.OutBack))
                 .Append(selfView.transform.DOScale(0f, 0.1f).SetEase(Ease.InSine))
@@ -159,34 +171,31 @@ namespace MissileReflex.Src.Battle
             await UniTask.Delay(0.3f.ToIntMilli(), cancellationToken: cancel);
             
             // コライダー無効にして
+            tankRigidbody.velocity = Vector3.zero;
             selfCollider.gameObject.SetActive(false);
             
             // 爆発
-            var effect = Instantiate(effectTankExplosion, transform);
+            var effect = Instantiate(effectTankExplosion, transform.parent);
+            effect.transform.position = transform.position;
+            
             var lastAttacker = _hp.FindLastAttacker(Runner);
             effect.Effect.cameraShake.enabled = 
                 // 自身がやられたときか
                 _ownerPlayer == Runner.LocalPlayer ||
                 // 自身が攻撃したときにカメラシェイク
                 (lastAttacker!= null && lastAttacker._ownerPlayer == Runner.LocalPlayer);
+            Util.DelayDestroyEffect(effect.ParticleSystem, cancel).Forget();
             
             Debug.Assert(effect != null);
 
             // ちょっと大きくなって小さくなる
-            DOTween.Sequence(transform)
+            await DOTween.Sequence(transform)
                 .Append(selfView.transform.DOScale(1.3f, 0.3f).SetEase(Ease.OutBack))
                 .Append(selfView.transform.DOScale(0f, 0.3f).SetEase(Ease.InSine))
                 .SetLink(gameObject);
 
-            await UniTask.WaitUntil(() => effect == null || effect.ParticleSystem.isStopped, cancellationToken: cancel);
-            Util.DestroyGameObject(effect.gameObject);
-            
-            // Debug.Log("finished explosion effect");
-            
-            gameObject.SetActive(false);
-            selfCollider.gameObject.SetActive(true);
-            selfView.transform.rotation = quaternion.Euler(Vector3.zero);
-            selfView.transform.localScale = Vector3.one;
+            // 死亡ペナルティ時間
+            await UniTask.Delay(ConstParam.Instance.TankDeathPenaltyTime.ToIntMilli(), cancellationToken: cancel);
         }
 
 

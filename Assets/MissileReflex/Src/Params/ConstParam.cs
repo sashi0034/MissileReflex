@@ -19,6 +19,9 @@ namespace MissileReflex.Src.Params
 
         [SerializeField] private float tankAdjMatUpdateInterval = 0.1f;
         public float TankAdjMatUpdateInterval => tankAdjMatUpdateInterval;
+
+        [SerializeField] private float tankDeathPenaltyTime = 1.5f;
+        public float TankDeathPenaltyTime => tankDeathPenaltyTime;
         
         
         [SerializeField] private TankAiAgentParam tankAiAgentParam;

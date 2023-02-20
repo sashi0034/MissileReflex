@@ -136,7 +136,6 @@ namespace MissileReflex.Src.Battle
             var effect = Instantiate(missileExplosion, Manager.transform);
             effect.transform.position = pos;
             Util.DelayDestroyEffect(effect, _battleRoot.CancelBattle).Forget();
-            Debug.Log(info.Source);
         }
         
         private void updateViewAnim(float deltaTime)
