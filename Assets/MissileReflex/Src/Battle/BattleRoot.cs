@@ -21,15 +21,11 @@ namespace MissileReflex.Src.Battle
 
         private CancellationTokenSource _cancelBattle = new CancellationTokenSource();
         public CancellationToken CancelBattle => _cancelBattle.Token;
-
-        public BattleRoot()
+        
+        public void Awake()
         {
             Debug.Assert(_instance == null);
             _instance = this;
-        }
-
-        public void Awake()
-        {
             Init();
         }
 
