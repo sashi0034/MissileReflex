@@ -12,7 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eb43443f5fc4a58b38f8448e19d2e77, type: 3}
   m_Name: ConstParam
   m_EditorClassIdentifier: 
+  missilePredictInterval: 0.1
+  missilePredictRange: 8
+  missileColBoxHalfExt: {x: 0.25, y: 0.25, z: 0.25}
+  tankAdjMatUpdateInterval: 0.1
+  tankDeathPenaltyTime: 1.5
   tankAiAgentParam:
     updateInterval: 0.1
     shotRange: 10
-    retrieveDuration: 0.3
+  playerDefaultY: 0.5
+  teamColorMaterial:
+  - {fileID: 2100000, guid: 37b439bc2bee00643a4bd05f09860df7, type: 2}
+  - {fileID: 2100000, guid: f4ff01462b8e1be498f3206a4a4c0a57, type: 2}
+  - {fileID: 2100000, guid: 0ce487d67e79f2c42a81121392a7d207, type: 2}
+  - {fileID: 2100000, guid: 492beeb7db6bad247bbb693da0c3e508, type: 2}

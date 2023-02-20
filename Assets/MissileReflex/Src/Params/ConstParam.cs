@@ -29,8 +29,10 @@ namespace MissileReflex.Src.Params
 
         [SerializeField] private float playerDefaultY = 0.5f;
         public float PlayerDefaultY => playerDefaultY;
-        
-        
+
+        [SerializeField] private Material[] teamColorMaterial;
+        public Material[] TeamColorMaterial => teamColorMaterial;
+
         public const float DeltaMilliF = 1e-3f;
 
         public const int NumTankTeam = 4;

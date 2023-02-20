@@ -519,7 +519,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   battleRoot: {fileID: 3573201640426918183}
   missilePrefab:
-    RawGuidValue: 0c0b6b07ba414c14c980fc1770d8eb44
+  - RawGuidValue: 47e606a5f0bcf204bb232dab06b19bee
+  - RawGuidValue: 0c7d00b83fe5072439c892ecbcb566b6
+  - RawGuidValue: cb9b70e7a25ecdc4b91604abdbaeeac6
+  - RawGuidValue: b5f687bcebae4c547ab8c1bb6a3ec873
   missileOffsetY: 0.8
 --- !u!1 &3573201640852897261
 GameObject:

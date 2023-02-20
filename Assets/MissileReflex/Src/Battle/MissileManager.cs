@@ -13,7 +13,7 @@ namespace MissileReflex.Src.Battle
     {
         [SerializeField] private BattleRoot battleRoot;
         
-        [SerializeField] private NetworkPrefabRef missilePrefab;
+        [SerializeField] private NetworkPrefabRef[] missilePrefab;
 
         [SerializeField] private float missileOffsetY = 0.5f;
 
@@ -32,7 +32,8 @@ namespace MissileReflex.Src.Battle
 
         public void ShootMissile(MissileInitArg arg, NetworkRunner runner)
         {
-            runner.Spawn(missilePrefab, onBeforeSpawned: (networkRunner, obj) =>
+            var team = arg.Attacker.Team;
+            runner.Spawn(missilePrefab[team.TeamId], onBeforeSpawned: (networkRunner, obj) =>
             {
                 var missile = obj.GetComponent<Missile>();
                 _missileList.Add(missile);
