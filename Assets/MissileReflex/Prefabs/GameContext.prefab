@@ -726,7 +726,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66f78c9c4ae048a9ab0dd30970ebe16a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  labelTankNameManager: {fileID: 0}
+  labelTankNameManager: {fileID: 7081542636323902827}
 --- !u!1 &7226026537477657072
 GameObject:
   m_ObjectHideFlags: 0

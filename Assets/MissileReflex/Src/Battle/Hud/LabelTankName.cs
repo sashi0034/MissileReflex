@@ -17,6 +17,7 @@ namespace MissileReflex.Src.Battle.Hud
         public void RegisterTank(TankFighter tank)
         {
             _followingTank = tank;
+            textMesh.text = tank.TankName;
         }
 
         public void Update()

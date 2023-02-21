@@ -43,7 +43,7 @@ namespace MissileReflex.Src.Battle
 
         public void Init(TankSpawnInfo spawnInfo)
         {
-            selfTank.Init(spawnInfo.Team, spawnInfo.InitialPos, null);
+            selfTank.Init(spawnInfo, null);
             processAiRoutine().Forget();
         }
 

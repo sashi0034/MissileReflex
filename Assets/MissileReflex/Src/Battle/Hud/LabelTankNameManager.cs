@@ -6,9 +6,11 @@ namespace MissileReflex.Src.Battle.Hud
     {
         [SerializeField] private LabelTankName labelTankName;
 
-        public LabelTankName Birth()
+        public LabelTankName BirthWith(TankFighter tank)
         {
-            return Instantiate(labelTankName, transform);
+            var result = Instantiate(labelTankName, transform);
+            result.RegisterTank(tank);
+            return result;
         }
     }
 }

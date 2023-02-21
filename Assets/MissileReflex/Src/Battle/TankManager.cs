@@ -12,7 +12,8 @@ namespace MissileReflex.Src.Battle
 {
     public record TankSpawnInfo(
         TankFighterTeam Team, 
-        Vector3 InitialPos)
+        Vector3 InitialPos,
+        string TankName)
     {};
 
     public class TankManager : MonoBehaviour
@@ -102,7 +103,7 @@ namespace MissileReflex.Src.Battle
             });
         }
 
-        public TankSpawnInfo GetNextSpawnInfo()
+        public TankSpawnInfo GetNextSpawnInfo(string name)
         {
             int numTank = _tankFighterList.Count;
 
@@ -111,7 +112,8 @@ namespace MissileReflex.Src.Battle
 
             return new TankSpawnInfo(
                 team, 
-                posData.TeamElements[team.TeamId].PosObj[teamMemberIndex].position.FixY(ConstParam.Instance.PlayerDefaultY));
+                posData.TeamElements[team.TeamId].PosObj[teamMemberIndex].position.FixY(ConstParam.Instance.PlayerDefaultY),
+                name);
         }
 
         public float GetTankSqrMagAdjMatAt(TankFighterId id, int column)

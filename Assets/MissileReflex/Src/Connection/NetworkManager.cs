@@ -28,7 +28,8 @@ namespace MissileReflex.Src.Connection
         {
             if (runner.IsServer)
             {
-                battleContext.TankManager.SpawnPlayer(runner, player, battleContext.TankManager.GetNextSpawnInfo());
+                battleContext.TankManager.SpawnPlayer(runner, player, battleContext.TankManager.GetNextSpawnInfo(
+                    $"Player [{player.PlayerId}]"));
                 Debug.Log("connected player: " + player.PlayerId);
             }
             else
@@ -119,7 +120,7 @@ namespace MissileReflex.Src.Connection
             await UniTask.WhenAll(taskSceneLoad, taskStartGame.AsUniTask());
 
             for (int i = 0; i < 2 * ConstParam.NumTankTeam; ++i)
-                battleContext.TankManager.SpawnAi(_runner, battleContext.TankManager.GetNextSpawnInfo());
+                battleContext.TankManager.SpawnAi(_runner, battleContext.TankManager.GetNextSpawnInfo($"AI [{i + 1}]"));
         }
 
         private void OnGUI()

@@ -22,7 +22,7 @@ namespace MissileReflex.Src.Battle
         
         public void Init(TankSpawnInfo spawnInfo, PlayerRef networkPlayer)
         {
-            _selfTank.Init(spawnInfo.Team, spawnInfo.InitialPos, networkPlayer);
+            _selfTank.Init(spawnInfo, networkPlayer);
         }
 
         public override void FixedUpdateNetwork()

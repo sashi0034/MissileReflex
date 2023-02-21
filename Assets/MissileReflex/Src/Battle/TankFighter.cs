@@ -65,6 +65,9 @@ namespace MissileReflex.Src.Battle
         [Networked(OnChanged = nameof(onChangedTeam))]
         private TankFighterTeam _team { get; set; }
         public TankFighterTeam Team => _team;
+
+        [Networked] private string _tankName { get; set; }
+        public string TankName => _tankName;
         
         private UniTask _interruptedTask = UniTask.CompletedTask;
 
@@ -74,11 +77,11 @@ namespace MissileReflex.Src.Battle
             ChangeMaterial(battleContext.TankManager.GetTankMatOf(_team));
             _id = battleContext.TankManager.RegisterTank(this);
             _prediction.Init();
+            battleContext.Hud.LabelTankNameManager.BirthWith(this);
         }
 
         public void Init(
-            TankFighterTeam team,
-            Vector3? initialPos,
+            TankSpawnInfo spawnInfo,
             PlayerRef? ownerPlayer)
         {
             _input.Init();
@@ -86,10 +89,13 @@ namespace MissileReflex.Src.Battle
             _state = ETankFighterState.Alive;
 
             if (ownerPlayer != null) _ownerPlayer = ownerPlayer.Value;
-            if (initialPos != null) transform.position = initialPos.Value;
-            _initialPos = transform.position;
+            
+            transform.position = spawnInfo.InitialPos;
+            _initialPos = spawnInfo.InitialPos;
 
-            _team = team;
+            _team = spawnInfo.Team;
+
+            _tankName = spawnInfo.TankName;
         }
         private void resetRespawn()
         {
