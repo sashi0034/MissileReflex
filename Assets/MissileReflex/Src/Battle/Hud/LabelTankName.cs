@@ -10,6 +10,7 @@ namespace MissileReflex.Src.Battle.Hud
     public class LabelTankName : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI textMesh;
+        [SerializeField] private RectTransform selfRect;
         public TextMeshProUGUI TextMesh => textMesh;
 
         private TankFighter? _followingTank;
@@ -27,7 +28,9 @@ namespace MissileReflex.Src.Battle.Hud
                 Util.DestroyGameObject(gameObject);
                 return;
             }
-            
+
+            selfRect.position =
+                RectTransformUtility.WorldToScreenPoint(Camera.main, _followingTank.transform.position);
         }
     }
 }

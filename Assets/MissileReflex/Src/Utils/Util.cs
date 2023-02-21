@@ -80,6 +80,12 @@ namespace MissileReflex.Src.Utils
             return target;
         }
         
+        public static T TraceAssertNotNull<T>(this T target)
+        {
+            Debug.Assert(target != null);
+            return target;
+        }
+        
         public static async UniTask DelayDestroyEffect(ParticleSystem effect, CancellationToken cancel)
         {
             await UniTask.WaitUntil(() => effect.isStopped, cancellationToken: cancel);

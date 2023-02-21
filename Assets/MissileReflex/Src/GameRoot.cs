@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+
 using MissileReflex.Src.Battle;
 using MissileReflex.Src.Connection;
 using MissileReflex.Src.Utils;
