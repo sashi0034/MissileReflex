@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Fusion;
 using MissileReflex.Src.Params;
+using MissileReflex.Src.Utils;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
@@ -19,14 +20,36 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private TankManager tankManager;
         public TankManager TankManager => tankManager;
 
+        [SerializeField] private BattleHud hud;
+        public BattleHud Hud => hud;
+
+        [SerializeField] private GameContext gameContext;
+        public GameContext GameContext => gameContext;
+        
+        
+
         private CancellationTokenSource _cancelBattle = new CancellationTokenSource();
         public CancellationToken CancelBattle => _cancelBattle.Token;
         
-        public void Awake()
+        [EventFunction]
+        private void Awake()
         {
             Debug.Assert(_instance == null);
             _instance = this;
             Init();
+        }
+
+        [EventFunction]
+        private void Start()
+        {
+            
+#if UNITY_EDITOR
+            if (DebugParam.Instance.IsForceBattleOffline)
+            {
+                Debug.Log("start offline battle");
+                gameContext.Network.StartBattle(GameMode.Single).RunTaskHandlingError();
+            }
+#endif
         }
 
         public void Init()

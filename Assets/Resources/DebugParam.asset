@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: DebugParam
   m_EditorClassIdentifier: 
   isClearDebug: 0
+  isForceBattleOffline: 0

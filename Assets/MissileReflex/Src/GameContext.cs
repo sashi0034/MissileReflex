@@ -1,5 +1,6 @@
 ﻿using System;
 using MissileReflex.Src.Battle;
+using MissileReflex.Src.Connection;
 using MissileReflex.Src.Utils;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -12,6 +13,9 @@ namespace MissileReflex.Src
         [SerializeField] private BattleContext battleContext;
         public BattleContext BattleContext => battleContext;
 
+        [SerializeField] private NetworkManager networkManager;
+        public NetworkManager Network => networkManager;
+        
         
         [EventFunction]
         private void Start()

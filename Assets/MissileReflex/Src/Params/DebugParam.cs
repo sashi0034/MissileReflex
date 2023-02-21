@@ -12,16 +12,9 @@ namespace MissileReflex.Src.Params
         public bool IsClearDebug => isClearDebug;
 
 #if UNITY_EDITOR
-        // [SerializeField] private bool isStartBattleImmediately;
-        // public bool IsStartBattleImmediately => isStartBattleImmediately;
+        [SerializeField] private bool isForceBattleOffline;
+        public bool IsForceBattleOffline => isForceBattleOffline;
         
-        // git管理できるようにするため作成
-        // [Button]
-        // public void BackupMirrorFile()
-        // {
-        //     BackupMirrorFile(nameof(DebugParam));
-        // }
-
 #endif
     }
 }

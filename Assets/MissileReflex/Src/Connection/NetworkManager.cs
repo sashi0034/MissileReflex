@@ -6,6 +6,7 @@ using Fusion.Sockets;
 using MissileReflex.Src.Battle;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
+using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -15,6 +16,10 @@ namespace MissileReflex.Src.Connection
     public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         [SerializeField] private BattleContext battleContext;
+
+        private Subject<Unit> _onEndSceneLoadDone = new Subject<Unit>();
+        public Subject<Unit> OnEndSceneLoadDone => _onEndSceneLoadDone;
+        
 
         private readonly BoolFlag _pushedMouseRight = new();
         private readonly BoolFlag _pushedMouseLeft = new();
@@ -85,6 +90,7 @@ namespace MissileReflex.Src.Connection
 
         public void OnSceneLoadDone(NetworkRunner runner)
         {
+            _onEndSceneLoadDone.OnNext(Unit.Default);
         }
 
         public void OnSceneLoadStart(NetworkRunner runner)
@@ -93,14 +99,16 @@ namespace MissileReflex.Src.Connection
 
         private NetworkRunner _runner;
 
-        private async UniTask StartGame(GameMode mode)
+        public async UniTask StartBattle(GameMode mode)
         {
             // Create the Fusion runner and let it know that we will be providing user input
             _runner = gameObject.AddComponent<NetworkRunner>();
             _runner.ProvideInput = true;
 
+            var taskSceneLoad = _onEndSceneLoadDone.Take(1).ToUniTask();
+            
             // Start or join (depends on gamemode) a session with a specific name
-            await _runner.StartGame(new StartGameArgs
+            var taskStartGame = _runner.StartGame(new StartGameArgs
             {
                 GameMode = mode,
                 SessionName = "TestRoom",
@@ -108,17 +116,19 @@ namespace MissileReflex.Src.Connection
                 SceneManager = gameObject.AddComponent<NetworkSceneManagerBase>()
             });
 
+            await UniTask.WhenAll(taskSceneLoad, taskStartGame.AsUniTask());
+
             for (int i = 0; i < 2 * ConstParam.NumTankTeam; ++i)
                 battleContext.TankManager.SpawnAi(_runner, battleContext.TankManager.GetNextSpawnInfo());
         }
 
         private void OnGUI()
         {
-            if (_runner == null)
+            if (DebugParam.Instance.IsForceBattleOffline == false && _runner == null)
             {
-                if (GUI.Button(new Rect(0, 0, 200, 40), "Host")) StartGame(GameMode.Host);
+                if (GUI.Button(new Rect(0, 0, 200, 40), "Host")) StartBattle(GameMode.Host);
 
-                if (GUI.Button(new Rect(0, 40, 200, 40), "Join")) StartGame(GameMode.Client);
+                if (GUI.Button(new Rect(0, 40, 200, 40), "Join")) StartBattle(GameMode.Client);
             }
         }
 
