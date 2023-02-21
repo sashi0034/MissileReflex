@@ -131,7 +131,7 @@ namespace MissileReflex.Src.Battle
         [Rpc]
         private void rpcallStartDie()
         {
-            if (_state == ETankFighterState.Dead) return;
+            if (_interruptedTask.Status == UniTaskStatus.Pending) return;
             _interruptedTask = performDeadAndRespawn(battleRoot.CancelBattle);
         }
 
