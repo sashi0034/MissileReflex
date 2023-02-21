@@ -44,8 +44,8 @@ namespace MissileReflex.Src.Battle
 
         private NetworkObject _selfNetwork;
         
-        private BattleRoot _battleRoot => BattleRoot.Instance;
-        public MissileManager Manager => _battleRoot.MissileManager;
+        private BattleContext battleContext => BattleContext.Instance;
+        public MissileManager Manager => battleContext.MissileManager;
 
         private bool _hasDespawned = false;
         public bool HasDespawned => _hasDespawned;
@@ -135,7 +135,7 @@ namespace MissileReflex.Src.Battle
         {
             var effect = Instantiate(missileExplosion, Manager.transform);
             effect.transform.position = pos;
-            Util.DelayDestroyEffect(effect, _battleRoot.CancelBattle).Forget();
+            Util.DelayDestroyEffect(effect, battleContext.CancelBattle).Forget();
         }
         
         private void updateViewAnim(float deltaTime)

@@ -12,7 +12,7 @@ namespace MissileReflex.Src.Battle
     [DisallowMultipleComponent]
     public class TankAgentPlayer : NetworkBehaviour, ITankAgent
     {
-        private BattleRoot battleRoot => BattleRoot.Instance;
+        private BattleContext BattleContext => BattleContext.Instance;
 
         [SerializeField] private TankFighter _selfTank;
         public TankFighter Tank => _selfTank;

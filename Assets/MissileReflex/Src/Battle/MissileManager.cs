@@ -5,13 +5,14 @@ using MissileReflex.Src.Battle;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MissileReflex.Src.Battle
 {
     [DisallowMultipleComponent]
     public class MissileManager : MonoBehaviour
     {
-        [SerializeField] private BattleRoot battleRoot;
+        [SerializeField] private BattleContext battleContext;
         
         [SerializeField] private NetworkPrefabRef[] missilePrefab;
 

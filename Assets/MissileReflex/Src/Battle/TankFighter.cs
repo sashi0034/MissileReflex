@@ -36,7 +36,7 @@ namespace MissileReflex.Src.Battle
         [Networked]
         private PlayerRef _ownerPlayer { get; set; } = PlayerRef.None;
 
-        private BattleRoot battleRoot => BattleRoot.Instance;
+        private BattleContext battleContext => BattleContext.Instance;
 
         [Networked]
         private ref TankFighterInput _input => ref MakeRef<TankFighterInput>();
@@ -70,9 +70,9 @@ namespace MissileReflex.Src.Battle
 
         public override void Spawned()
         {
-            transform.parent = battleRoot.TankManager.transform;
-            ChangeMaterial(battleRoot.TankManager.GetTankMatOf(_team));
-            _id = battleRoot.TankManager.RegisterTank(this);
+            transform.parent = battleContext.TankManager.transform;
+            ChangeMaterial(battleContext.TankManager.GetTankMatOf(_team));
+            _id = battleContext.TankManager.RegisterTank(this);
             _prediction.Init();
         }
 
@@ -132,7 +132,7 @@ namespace MissileReflex.Src.Battle
         private void rpcallStartDie()
         {
             if (_interruptedTask.Status == UniTaskStatus.Pending) return;
-            _interruptedTask = performDeadAndRespawn(battleRoot.CancelBattle);
+            _interruptedTask = performDeadAndRespawn(battleContext.CancelBattle);
         }
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)
@@ -224,7 +224,7 @@ namespace MissileReflex.Src.Battle
         private static void onChangedTeam(Changed<TankFighter> changed)
         {
             var self = changed.Behaviour;
-            self.ChangeMaterial(self.battleRoot.TankManager.GetTankMatOf(self._team));
+            self.ChangeMaterial(self.battleContext.TankManager.GetTankMatOf(self._team));
         }
 
         [Button]
@@ -291,7 +291,7 @@ namespace MissileReflex.Src.Battle
             
             tankFighterCannon.AnimShot();
             
-            battleRoot.MissileManager.ShootMissile(new MissileInitArg(
+            battleContext.MissileManager.ShootMissile(new MissileInitArg(
                 new MissileSourceData(missileSpeed),
                 initialPos,
                 initialVel,

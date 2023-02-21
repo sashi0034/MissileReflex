@@ -8,12 +8,13 @@ using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 namespace MissileReflex.Src.Connection
 {
     public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
-        [SerializeField] private BattleRoot battleRoot;
+        [SerializeField] private BattleContext battleContext;
 
         private readonly BoolFlag _pushedMouseRight = new();
         private readonly BoolFlag _pushedMouseLeft = new();
@@ -22,7 +23,7 @@ namespace MissileReflex.Src.Connection
         {
             if (runner.IsServer)
             {
-                battleRoot.TankManager.SpawnPlayer(runner, player, battleRoot.TankManager.GetNextSpawnInfo());
+                battleContext.TankManager.SpawnPlayer(runner, player, battleContext.TankManager.GetNextSpawnInfo());
                 Debug.Log("connected player: " + player.PlayerId);
             }
             else
@@ -108,7 +109,7 @@ namespace MissileReflex.Src.Connection
             });
 
             for (int i = 0; i < 2 * ConstParam.NumTankTeam; ++i)
-                battleRoot.TankManager.SpawnAi(_runner, battleRoot.TankManager.GetNextSpawnInfo());
+                battleContext.TankManager.SpawnAi(_runner, battleContext.TankManager.GetNextSpawnInfo());
         }
 
         private void OnGUI()
@@ -144,7 +145,7 @@ namespace MissileReflex.Src.Connection
 
         private Vector3 calcMouseWorldPosFromPlayer()
         {
-            var player = battleRoot.TankManager.FindLocalPlayerTank();
+            var player = battleContext.TankManager.FindLocalPlayerTank();
             if (player == null) return Vector3.zero;
             var playerPos = player.transform.position;
             var mainCamera = Camera.main;

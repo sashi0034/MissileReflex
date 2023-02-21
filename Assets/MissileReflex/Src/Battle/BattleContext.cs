@@ -8,10 +8,10 @@ using UnityEngine;
 namespace MissileReflex.Src.Battle
 {
     [DisallowMultipleComponent]
-    public class BattleRoot : MonoBehaviour
+    public class BattleContext : MonoBehaviour
     {
-        private static BattleRoot _instance;
-        public static BattleRoot Instance => _instance;
+        private static BattleContext _instance;
+        public static BattleContext Instance => _instance;
         
         [SerializeField] private MissileManager missileManager;
         public MissileManager MissileManager => missileManager;

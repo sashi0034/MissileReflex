@@ -6,6 +6,7 @@ using Fusion;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MissileReflex.Src.Battle
 {
@@ -16,7 +17,7 @@ namespace MissileReflex.Src.Battle
 
     public class TankManager : MonoBehaviour
     {
-        [SerializeField] private BattleRoot battleRoot;
+        [SerializeField] private BattleContext battleContext;
         [SerializeField] private Material[] tankMaterialList;
 
         [SerializeField] private NetworkPrefabRef playerPrefab;
