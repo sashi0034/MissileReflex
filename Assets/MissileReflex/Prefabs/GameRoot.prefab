@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34c33ba8a1974e399e69582ea7461326, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  battleContext: {fileID: 3573201640426918183}
+  battleRoot: {fileID: 3573201640426918183}
 --- !u!1 &3573201640283662271
 GameObject:
   m_ObjectHideFlags: 0
@@ -380,7 +380,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35de8d7bbd0d4697a9b646de1d6aa817, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  battleContext: {fileID: 3573201640426918183}
+  battleRoot: {fileID: 3573201640426918183}
   tankMaterialList:
   - {fileID: 2100000, guid: 1aba32c5628e59e45ba8186dabea29f5, type: 3}
   - {fileID: 2100000, guid: 3b83f0f6cc95c0a47a86664d6552ef20, type: 3}
@@ -435,7 +435,7 @@ GameObject:
   - component: {fileID: 3573201640426918182}
   - component: {fileID: 3573201640426918183}
   m_Layer: 0
-  m_Name: BattleContext
+  m_Name: BattleRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -474,7 +474,7 @@ MonoBehaviour:
   missileManager: {fileID: 3573201640757548046}
   tankManager: {fileID: 3573201640395612419}
   hud: {fileID: 2602170366940902541}
-  gameContext: {fileID: 3573201640852897262}
+  gameRoot: {fileID: 3573201640852897262}
 --- !u!1 &3573201640757548044
 GameObject:
   m_ObjectHideFlags: 0
@@ -519,7 +519,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3f5a9623448475896babe4aa9dfd3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  battleContext: {fileID: 3573201640426918183}
+  battleRoot: {fileID: 3573201640426918183}
   missilePrefab:
   - RawGuidValue: 47e606a5f0bcf204bb232dab06b19bee
   - RawGuidValue: 0c7d00b83fe5072439c892ecbcb566b6
@@ -537,7 +537,7 @@ GameObject:
   - component: {fileID: 3573201640852897263}
   - component: {fileID: 3573201640852897262}
   m_Layer: 0
-  m_Name: GameContext
+  m_Name: GameRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -573,7 +573,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54af3a787be2441ba3adcec7f2367a8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  battleContext: {fileID: 3573201640426918183}
+  battleRoot: {fileID: 3573201640426918183}
   networkManager: {fileID: 1799110164}
 --- !u!1 &5215946898948236365
 GameObject:

@@ -9,10 +9,10 @@ using UnityEngine;
 namespace MissileReflex.Src.Battle
 {
     [DisallowMultipleComponent]
-    public class BattleContext : MonoBehaviour
+    public class BattleRoot : MonoBehaviour
     {
-        private static BattleContext _instance;
-        public static BattleContext Instance => _instance;
+        private static BattleRoot _instance;
+        public static BattleRoot Instance => _instance;
         
         [SerializeField] private MissileManager missileManager;
         public MissileManager MissileManager => missileManager;
@@ -23,8 +23,8 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private BattleHud hud;
         public BattleHud Hud => hud;
 
-        [SerializeField] private GameContext gameContext;
-        public GameContext GameContext => gameContext;
+        [SerializeField] private GameRoot gameRoot;
+        public GameRoot GameRoot => gameRoot;
         
         
 
@@ -47,7 +47,7 @@ namespace MissileReflex.Src.Battle
             if (DebugParam.Instance.IsForceBattleOffline)
             {
                 Debug.Log("start offline battle");
-                gameContext.Network.StartBattle(GameMode.Single).RunTaskHandlingError();
+                gameRoot.Network.StartBattle(GameMode.Single).RunTaskHandlingError();
             }
 #endif
         }

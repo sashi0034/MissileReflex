@@ -15,7 +15,7 @@ namespace MissileReflex.Src.Connection
 {
     public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
-        [SerializeField] private BattleContext battleContext;
+        [SerializeField] private BattleRoot battleRoot;
 
         private Subject<Unit> _onEndSceneLoadDone = new Subject<Unit>();
         public Subject<Unit> OnEndSceneLoadDone => _onEndSceneLoadDone;
@@ -28,7 +28,7 @@ namespace MissileReflex.Src.Connection
         {
             if (runner.IsServer)
             {
-                battleContext.TankManager.SpawnPlayer(runner, player, battleContext.TankManager.GetNextSpawnInfo(
+                battleRoot.TankManager.SpawnPlayer(runner, player, battleRoot.TankManager.GetNextSpawnInfo(
                     $"Player [{player.PlayerId}]"));
                 Debug.Log("connected player: " + player.PlayerId);
             }
@@ -120,7 +120,7 @@ namespace MissileReflex.Src.Connection
             await UniTask.WhenAll(taskSceneLoad, taskStartGame.AsUniTask());
 
             for (int i = 0; i < 2 * ConstParam.NumTankTeam; ++i)
-                battleContext.TankManager.SpawnAi(_runner, battleContext.TankManager.GetNextSpawnInfo($"AI [{i + 1}]"));
+                battleRoot.TankManager.SpawnAi(_runner, battleRoot.TankManager.GetNextSpawnInfo($"AI [{i + 1}]"));
         }
 
         private void OnGUI()
@@ -156,7 +156,7 @@ namespace MissileReflex.Src.Connection
 
         private Vector3 calcMouseWorldPosFromPlayer()
         {
-            var player = battleContext.TankManager.FindLocalPlayerTank();
+            var player = battleRoot.TankManager.FindLocalPlayerTank();
             if (player == null) return Vector3.zero;
             var playerPos = player.transform.position;
             var mainCamera = Camera.main;

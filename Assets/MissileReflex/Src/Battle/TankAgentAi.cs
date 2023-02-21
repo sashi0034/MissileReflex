@@ -35,8 +35,8 @@ namespace MissileReflex.Src.Battle
         private ref TankFighterInput tankIn => ref selfTank.Input;
         private TankFighterPrediction tankPredict => selfTank.Prediction;
 
-        private BattleContext battleContext => BattleContext.Instance;
-        private TankManager tankManager => battleContext.TankManager;
+        private BattleRoot BattleRoot => BattleRoot.Instance;
+        private TankManager tankManager => BattleRoot.TankManager;
 
         private static TankAiAgentParam param => ConstParam.Instance.TankAiAgentParam;
         

@@ -36,7 +36,7 @@ namespace MissileReflex.Src.Battle
         [Networked]
         private PlayerRef _ownerPlayer { get; set; } = PlayerRef.None;
 
-        private BattleContext battleContext => BattleContext.Instance;
+        private BattleRoot BattleRoot => BattleRoot.Instance;
 
         [Networked]
         private ref TankFighterInput _input => ref MakeRef<TankFighterInput>();
@@ -73,11 +73,11 @@ namespace MissileReflex.Src.Battle
 
         public override void Spawned()
         {
-            transform.parent = battleContext.TankManager.transform;
-            ChangeMaterial(battleContext.TankManager.GetTankMatOf(_team));
-            _id = battleContext.TankManager.RegisterTank(this);
+            transform.parent = BattleRoot.TankManager.transform;
+            ChangeMaterial(BattleRoot.TankManager.GetTankMatOf(_team));
+            _id = BattleRoot.TankManager.RegisterTank(this);
             _prediction.Init();
-            battleContext.Hud.LabelTankNameManager.BirthWith(this);
+            BattleRoot.Hud.LabelTankNameManager.BirthWith(this);
         }
 
         public void Init(
@@ -138,7 +138,7 @@ namespace MissileReflex.Src.Battle
         private void rpcallStartDie()
         {
             if (_interruptedTask.Status == UniTaskStatus.Pending) return;
-            _interruptedTask = performDeadAndRespawn(battleContext.CancelBattle);
+            _interruptedTask = performDeadAndRespawn(BattleRoot.CancelBattle);
         }
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)
@@ -230,7 +230,7 @@ namespace MissileReflex.Src.Battle
         private static void onChangedTeam(Changed<TankFighter> changed)
         {
             var self = changed.Behaviour;
-            self.ChangeMaterial(self.battleContext.TankManager.GetTankMatOf(self._team));
+            self.ChangeMaterial(self.BattleRoot.TankManager.GetTankMatOf(self._team));
         }
 
         [Button]
@@ -297,7 +297,7 @@ namespace MissileReflex.Src.Battle
             
             tankFighterCannon.AnimShot();
             
-            battleContext.MissileManager.ShootMissile(new MissileInitArg(
+            BattleRoot.MissileManager.ShootMissile(new MissileInitArg(
                 new MissileSourceData(missileSpeed),
                 initialPos,
                 initialVel,

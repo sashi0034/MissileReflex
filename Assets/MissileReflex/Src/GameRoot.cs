@@ -7,11 +7,11 @@ using UnityEngine.Serialization;
 
 namespace MissileReflex.Src
 {
-    public class GameContext : MonoBehaviour
+    public class GameRoot : MonoBehaviour
     {
                     
-        [SerializeField] private BattleContext battleContext;
-        public BattleContext BattleContext => battleContext;
+        [SerializeField] private BattleRoot battleRoot;
+        public BattleRoot BattleRoot => battleRoot;
 
         [SerializeField] private NetworkManager networkManager;
         public NetworkManager Network => networkManager;

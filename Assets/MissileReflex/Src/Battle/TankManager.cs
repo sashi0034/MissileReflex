@@ -18,7 +18,7 @@ namespace MissileReflex.Src.Battle
 
     public class TankManager : MonoBehaviour
     {
-        [SerializeField] private BattleContext battleContext;
+        [SerializeField] private BattleRoot battleRoot;
         [SerializeField] private Material[] tankMaterialList;
 
         [SerializeField] private NetworkPrefabRef playerPrefab;

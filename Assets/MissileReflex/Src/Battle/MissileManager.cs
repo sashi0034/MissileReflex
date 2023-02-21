@@ -12,7 +12,7 @@ namespace MissileReflex.Src.Battle
     [DisallowMultipleComponent]
     public class MissileManager : MonoBehaviour
     {
-        [SerializeField] private BattleContext battleContext;
+        [SerializeField] private BattleRoot battleRoot;
         
         [SerializeField] private NetworkPrefabRef[] missilePrefab;
 
