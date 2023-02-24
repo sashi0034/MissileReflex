@@ -125,7 +125,11 @@ namespace MissileReflex.Src.Connection
 
         private void OnGUI()
         {
-            if (DebugParam.Instance.IsForceBattleOffline == false && _runner == null)
+            if (
+#if UNITY_EDITOR
+                DebugParam.Instance.IsForceBattleOffline == false &&
+#endif
+                _runner == null)
             {
                 if (GUI.Button(new Rect(0, 0, 200, 40), "Host")) StartBattle(GameMode.Host);
 

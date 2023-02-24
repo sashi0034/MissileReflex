@@ -34,7 +34,10 @@ namespace MissileReflex.Src.Battle
         public void ShootMissile(MissileInitArg arg, NetworkRunner runner)
         {
             var team = arg.Attacker.Team;
-            runner.Spawn(missilePrefab[team.TeamId], onBeforeSpawned: (networkRunner, obj) =>
+            var attackerPlayer = arg.Attacker.OwnerNetworkPlayer;
+            runner.Spawn(
+                missilePrefab[team.TeamId], arg.Attacker.transform.position, Quaternion.identity, attackerPlayer,
+                onBeforeSpawned: (networkRunner, obj) =>
             {
                 var missile = obj.GetComponent<Missile>();
                 _missileList.Add(missile);

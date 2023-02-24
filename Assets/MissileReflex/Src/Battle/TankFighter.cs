@@ -34,7 +34,9 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private TankExplosion effectTankExplosion;
         
         [Networked]
-        private PlayerRef _ownerPlayer { get; set; } = PlayerRef.None;
+        private PlayerRef _ownerNetwotkPlayer { get; set; } = PlayerRef.None;
+
+        public PlayerRef OwnerNetworkPlayer => _ownerNetwotkPlayer;
 
         private BattleRoot battleRoot => BattleRoot.Instance;
 
@@ -98,7 +100,7 @@ namespace MissileReflex.Src.Battle
             _hp = new TankFighterHp(1);
             _state = ETankFighterState.Alive;
 
-            if (ownerPlayer != null) _ownerPlayer = ownerPlayer.Value;
+            if (ownerPlayer != null) _ownerNetwotkPlayer = ownerPlayer.Value;
             
             transform.position = spawnInfo.InitialPos;
             _initialPos = spawnInfo.InitialPos;
@@ -123,7 +125,7 @@ namespace MissileReflex.Src.Battle
 
         public bool IsOwnerLocalPlayer()
         {
-            return Runner.LocalPlayer == _ownerPlayer;
+            return Runner.LocalPlayer == _ownerNetwotkPlayer;
         }
         
         [EventFunction]
@@ -204,9 +206,9 @@ namespace MissileReflex.Src.Battle
             var lastAttacker = _hp.FindLastAttacker(Runner);
             effect.Effect.cameraShake.enabled = 
                 // 自身がやられたときか
-                _ownerPlayer == Runner.LocalPlayer ||
+                _ownerNetwotkPlayer == Runner.LocalPlayer ||
                 // 自身が攻撃したときにカメラシェイク
-                (lastAttacker!= null && lastAttacker._ownerPlayer == Runner.LocalPlayer);
+                (lastAttacker!= null && lastAttacker._ownerNetwotkPlayer == Runner.LocalPlayer);
             Util.DelayDestroyEffect(effect.ParticleSystem, cancel).Forget();
             
             // リスポーン地点の演出
