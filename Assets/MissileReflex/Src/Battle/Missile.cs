@@ -66,6 +66,9 @@ namespace MissileReflex.Src.Battle
 
         public Vector3 Pos => transform.position;
 
+        private static readonly Vector3 invalidEffectExplosionPos = Vector3.positiveInfinity;
+        [Networked] private Vector3 _requestedEffectExplosionPos { get; set; } = invalidEffectExplosionPos;
+
         public Missile()
         {
             _physic = new MissilePhysic(this);
@@ -84,8 +87,9 @@ namespace MissileReflex.Src.Battle
         {
             _hasDespawned = true;
             
-            // 最大回数まで反射したときもエフェクトを出す
-            if (isReflectedUpTo()) BirthEffectExplosion(transform.position);
+            // 爆発エフェクトを出す
+            if (_requestedEffectExplosionPos != invalidEffectExplosionPos)
+                birthEffectExplosion(_requestedEffectExplosionPos);
         }
 
         public void Init(MissileInitArg arg)
@@ -111,6 +115,7 @@ namespace MissileReflex.Src.Battle
             // たくさん反射したのでおしまい
             if (isReflectedUpTo())
             {
+                RequestEffectExplosion(transform.position);
                 Runner.Despawn(_selfNetwork);
                 return;
             }
@@ -119,6 +124,11 @@ namespace MissileReflex.Src.Battle
 
             // 速度調整
             rigidBody.velocity = rigidBody.velocity.normalized * _data.Speed;
+        }
+
+        public void RequestEffectExplosion(Vector3 pos)
+        {
+            _requestedEffectExplosionPos = pos;
         }
 
         private bool isReflectedUpTo()
@@ -131,7 +141,7 @@ namespace MissileReflex.Src.Battle
             _reflectedCount++;
         }
         
-        public void BirthEffectExplosion(Vector3 pos, RpcInfo info = default)
+        private void birthEffectExplosion(Vector3 pos, RpcInfo info = default)
         {
             var effect = Instantiate(missileExplosion, Manager.transform);
             effect.transform.position = pos;

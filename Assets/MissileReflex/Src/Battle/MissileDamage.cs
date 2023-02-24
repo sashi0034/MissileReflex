@@ -54,7 +54,7 @@ namespace MissileReflex.Src.Battle
             if (otherMissile.Damage._hitMissileCount == 0)
             {
                 // 爆発エフェクト発生
-                owner.BirthEffectExplosion((owner.transform.position + otherMissile.transform.position) / 2);
+                owner.RequestEffectExplosion((owner.transform.position + otherMissile.transform.position) / 2);
             }
             
             return true;
