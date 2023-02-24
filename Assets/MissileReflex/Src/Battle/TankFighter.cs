@@ -36,7 +36,7 @@ namespace MissileReflex.Src.Battle
         [Networked]
         private PlayerRef _ownerPlayer { get; set; } = PlayerRef.None;
 
-        private BattleRoot BattleRoot => BattleRoot.Instance;
+        private BattleRoot battleRoot => BattleRoot.Instance;
 
         [Networked]
         private ref TankFighterInput _input => ref MakeRef<TankFighterInput>();
@@ -59,12 +59,15 @@ namespace MissileReflex.Src.Battle
         [Networked]
         private Vector3 _initialPos { get; set; }
 
-        private TankFighterId _id;
-        public TankFighterId Id => _id;
+        private TankFighterId _localId;
+        public TankFighterId LocalId => _localId;
         
         [Networked(OnChanged = nameof(onChangedTeam))]
         private TankFighterTeam _team { get; set; }
         public TankFighterTeam Team => _team;
+
+        [Networked] private int _teamMemberIndex { get; set; }
+        public int TeamMemberIndex => _teamMemberIndex;
 
         [Networked] private string _tankName { get; set; }
         public string TankName => _tankName;
@@ -73,12 +76,19 @@ namespace MissileReflex.Src.Battle
 
         public override void Spawned()
         {
-            transform.parent = BattleRoot.TankManager.transform;
-            ChangeMaterial(BattleRoot.TankManager.GetTankMatOf(_team));
-            _id = BattleRoot.TankManager.RegisterTank(this);
+            transform.parent = battleRoot.TankManager.transform;
+            ChangeMaterial(battleRoot.TankManager.GetTankMatOf(_team));
+            _localId = battleRoot.TankManager.RegisterTank(this);
             _prediction.Init();
-            BattleRoot.Hud.LabelTankNameManager.BirthWith(this);
+            battleRoot.Hud.LabelTankNameManager.BirthWith(this);
+            getSpawnSymbol().Init(this);
         }
+
+        private TankSpawnSymbol getSpawnSymbol()
+        {
+            return battleRoot.TankManager.GetSpawnSymbol(this);
+        }
+
 
         public void Init(
             TankSpawnInfo spawnInfo,
@@ -94,6 +104,7 @@ namespace MissileReflex.Src.Battle
             _initialPos = spawnInfo.InitialPos;
 
             _team = spawnInfo.Team;
+            _teamMemberIndex = spawnInfo.TeamMemberIndex;
 
             _tankName = spawnInfo.TankName;
         }
@@ -138,7 +149,7 @@ namespace MissileReflex.Src.Battle
         private void rpcallStartDie()
         {
             if (_interruptedTask.Status == UniTaskStatus.Pending) return;
-            _interruptedTask = performDeadAndRespawn(BattleRoot.CancelBattle);
+            _interruptedTask = performDeadAndRespawn(battleRoot.CancelBattle);
         }
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)
@@ -149,19 +160,17 @@ namespace MissileReflex.Src.Battle
             resetRespawn();
             
             // 復活する演出
-            performRespawnAfterDead().Forget();
+            performRespawnAfterDead(cancel).Forget();
         }
 
-        private async UniTask performRespawnAfterDead()
+        private async UniTask performRespawnAfterDead(CancellationToken cancel)
         {
             _state = ETankFighterState.Immortal;
 
             selfView.transform.localScale = Vector3.zero;
-            // await selfView.transform.DOScale(1f, 2.0f).SetEase(Ease.OutBack).SetLink(gameObject);
-            // await DOTween.Sequence(selfView)
-            //     .Append(selfView.transform.DOScale(1.5f, 0.5f).SetEase(Ease.OutBack))
-            //     .Append(selfView.transform.DOScale(1.0f, 0.5f).SetEase(Ease.InSine))
-            //     .SetLink(gameObject);
+
+            getSpawnSymbol().AnimRespawn(cancel).Forget();
+            
             // TODO: オーブ系のエフェクトで無敵を表現?
             await DOTween.Sequence(selfView)
                 .Append(selfView.transform.DOScale(1.0f, 0.1f).SetEase(Ease.OutBack))
@@ -189,6 +198,7 @@ namespace MissileReflex.Src.Battle
             
             // 爆発
             var effect = Instantiate(effectTankExplosion, transform.parent);
+            Debug.Assert(effect != null);
             effect.transform.position = transform.position;
             
             var lastAttacker = _hp.FindLastAttacker(Runner);
@@ -199,7 +209,8 @@ namespace MissileReflex.Src.Battle
                 (lastAttacker!= null && lastAttacker._ownerPlayer == Runner.LocalPlayer);
             Util.DelayDestroyEffect(effect.ParticleSystem, cancel).Forget();
             
-            Debug.Assert(effect != null);
+            // リスポーン地点の演出
+            getSpawnSymbol().AnimWither();
 
             // ちょっと大きくなって小さくなる
             await DOTween.Sequence(transform)
@@ -230,7 +241,7 @@ namespace MissileReflex.Src.Battle
         private static void onChangedTeam(Changed<TankFighter> changed)
         {
             var self = changed.Behaviour;
-            self.ChangeMaterial(self.BattleRoot.TankManager.GetTankMatOf(self._team));
+            self.ChangeMaterial(self.battleRoot.TankManager.GetTankMatOf(self._team));
         }
 
         [Button]
@@ -297,7 +308,7 @@ namespace MissileReflex.Src.Battle
             
             tankFighterCannon.AnimShot();
             
-            BattleRoot.MissileManager.ShootMissile(new MissileInitArg(
+            battleRoot.MissileManager.ShootMissile(new MissileInitArg(
                 new MissileSourceData(missileSpeed),
                 initialPos,
                 initialVel,

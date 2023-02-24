@@ -2,6 +2,7 @@
 using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MissileReflex.Src.Params
 {
@@ -30,8 +31,12 @@ namespace MissileReflex.Src.Params
         [SerializeField] private float playerDefaultY = 0.5f;
         public float PlayerDefaultY => playerDefaultY;
 
-        [SerializeField] private Material[] teamColorMaterial;
-        public Material[] TeamColorMaterial => teamColorMaterial;
+        [SerializeField] private Material[] matTeamColor;
+        public Material[] MatTeamColor => matTeamColor;
+
+        [SerializeField] private Material[] matTeamColorMetal;
+        public Material[] MatTeamColorMetal => matTeamColorMetal;
+        
 
         public const float DeltaMilliF = 1e-3f;
 

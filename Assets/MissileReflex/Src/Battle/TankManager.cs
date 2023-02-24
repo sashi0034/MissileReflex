@@ -1,10 +1,12 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Fusion;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -12,6 +14,7 @@ namespace MissileReflex.Src.Battle
 {
     public record TankSpawnInfo(
         TankFighterTeam Team, 
+        int TeamMemberIndex,
         Vector3 InitialPos,
         string TankName)
     {};
@@ -24,7 +27,8 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private NetworkPrefabRef playerPrefab;
         [SerializeField] private NetworkPrefabRef aiPrefab;
 
-        [SerializeField] private TankInitialPositionData posData;
+        // チームごとのspawn位置
+        private TankSpawnSymbolGroup tankSpawnSymbolGroup = new ();
         
         private readonly List<TankFighter> _tankFighterList = new List<TankFighter>();
         public IReadOnlyList<TankFighter> List => _tankFighterList;
@@ -42,6 +46,9 @@ namespace MissileReflex.Src.Battle
             _processCalcTankSqrMagAdjMat =
                 new IntervalProcess(calcTankSqrMagAdjMat, ConstParam.Instance.TankAdjMatUpdateInterval);
             _localPlayerTank = null;
+
+            tankSpawnSymbolGroup = FindObjectOfType<TankSpawnSymbolGroup>();
+            Debug.Assert(tankSpawnSymbolGroup != null);
         }
 
         [EventFunction]
@@ -112,8 +119,17 @@ namespace MissileReflex.Src.Battle
 
             return new TankSpawnInfo(
                 team, 
-                posData.TeamElements[team.TeamId].PosObj[teamMemberIndex].position.FixY(ConstParam.Instance.PlayerDefaultY),
+                teamMemberIndex,
+                tankSpawnSymbolGroup.Groups[team.TeamId].List[teamMemberIndex].transform.position.FixY(ConstParam.Instance.PlayerDefaultY),
                 name);
+        }
+
+        public TankSpawnSymbol GetSpawnSymbol(TankFighter tank)
+        {
+            var team = tank.Team;
+            var teamMemberIndex = tank.TeamMemberIndex;
+            var symbol = tankSpawnSymbolGroup.Groups[team.TeamId].List[teamMemberIndex];
+            return symbol;
         }
 
         public float GetTankSqrMagAdjMatAt(TankFighterId id, int column)

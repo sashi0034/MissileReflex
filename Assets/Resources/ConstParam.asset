@@ -21,8 +21,13 @@ MonoBehaviour:
     updateInterval: 0.1
     shotRange: 10
   playerDefaultY: 0.5
-  teamColorMaterial:
+  matTeamColor:
   - {fileID: 2100000, guid: 37b439bc2bee00643a4bd05f09860df7, type: 2}
   - {fileID: 2100000, guid: f4ff01462b8e1be498f3206a4a4c0a57, type: 2}
   - {fileID: 2100000, guid: 0ce487d67e79f2c42a81121392a7d207, type: 2}
   - {fileID: 2100000, guid: 492beeb7db6bad247bbb693da0c3e508, type: 2}
+  matTeamColorMetal:
+  - {fileID: 2100000, guid: f54e0b9d3157196468b1b9d17be7ef18, type: 2}
+  - {fileID: 2100000, guid: ea800cde71de3ca4390da7f7951b3f55, type: 2}
+  - {fileID: 2100000, guid: ee0f46a321924f84ab7e658c6dd38abb, type: 2}
+  - {fileID: 2100000, guid: c61ba91bc2bad0e4db84051aae1fa8bc, type: 2}

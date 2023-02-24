@@ -98,7 +98,7 @@ namespace MissileReflex.Src.Battle
                 if (checking.IsAlive() == false) continue;
                 if (selfTank.Team.IsSame(checking.Team)) continue;
 
-                float checkingSqrMag = tankManager.GetTankSqrMagAdjMatAt(selfTank.Id, i);
+                float checkingSqrMag = tankManager.GetTankSqrMagAdjMatAt(selfTank.LocalId, i);
                 if (target != null && checkingSqrMag > targetSqrMag) continue;
                 
                 // 近いターゲットを更新
