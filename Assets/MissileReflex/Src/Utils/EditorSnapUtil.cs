@@ -5,10 +5,35 @@ namespace MissileReflex.Src.Utils
 {
     public class EditorSnapUtil : MonoBehaviour
     {
-        [Button]
+        private const string tagTarget = "Target";
+        private const string tagChildren = "Children";
+
+        [FoldoutGroup(tagTarget)] [SerializeField] private Transform[] snappingTargets;
+        
+        [FoldoutGroup(tagTarget)] [Button]
+        
+        public void SnapPosXZ(float snapping = 0.5f)
+        {
+            snapPosXZInternal(snappingTargets, snapping);
+        }
+        
+        [FoldoutGroup(tagTarget)] [Button]
+        
+        public void RandomRotY(float snapping = 15)
+        {
+            randamRotYInternal(snappingTargets, snapping);
+        }
+        
+        
+        [FoldoutGroup(tagChildren)] [Button]
         public void SnapPosXZEachChildren(float snapping = 0.5f)
         {
-            foreach (var child in transform.GetChildren())
+            snapPosXZInternal(transform.GetChildren(), snapping);
+        }
+        
+        private void snapPosXZInternal(Transform[] list, float snapping)
+        {
+            foreach (var child in list)
             {
                 var currPos = child.transform.position;
                 var newPos = new Vector3(
@@ -25,9 +50,14 @@ namespace MissileReflex.Src.Utils
         }
 
         [Button]
-        public void RandomRotYEachChildren(float snapping = 15)
+        [FoldoutGroup(tagChildren)] public void RandomRotYEachChildren(float snapping = 15)
         {
-            foreach (var child in transform.GetChildren())
+            randamRotYInternal(transform.GetChildren(), snapping);
+        }
+
+        private void randamRotYInternal(Transform[] list, float snapping)
+        {
+            foreach (var child in list)
             {
                 var rotY = snapping * Random.Range(0, (int)(360 / snapping));
                 child.transform.rotation = Quaternion.Euler(new Vector3(0, rotY, 0));
