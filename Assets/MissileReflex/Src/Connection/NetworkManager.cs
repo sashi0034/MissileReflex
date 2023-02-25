@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Fusion;
@@ -20,6 +22,8 @@ namespace MissileReflex.Src.Connection
         private Subject<Unit> _onEndSceneLoadDone = new Subject<Unit>();
         public Subject<Unit> OnEndSceneLoadDone => _onEndSceneLoadDone;
         
+        private NetworkRunner? _runner;
+        public NetworkRunner? Runner => _runner;
 
         private readonly BoolFlag _pushedMouseRight = new();
         private readonly BoolFlag _pushedMouseLeft = new();
@@ -98,11 +102,10 @@ namespace MissileReflex.Src.Connection
         {
         }
 
-        private NetworkRunner _runner;
-
-        public async UniTask StartBattle(GameMode mode)
+        public async UniTask StartBattleNetwork(GameMode mode)
         {
             // Create the Fusion runner and let it know that we will be providing user input
+            Debug.Assert(TryGetComponent<NetworkRunner>(out _) == false);
             _runner = gameObject.AddComponent<NetworkRunner>();
             _runner.ProvideInput = true;
 
@@ -118,23 +121,11 @@ namespace MissileReflex.Src.Connection
             });
 
             await UniTask.WhenAll(taskSceneLoad, taskStartGame.AsUniTask());
-
-            for (int i = 0; i < 2 * ConstParam.NumTankTeam; ++i)
-                battleRoot.TankManager.SpawnAi(_runner, battleRoot.TankManager.GetNextSpawnInfo($"AI [{i + 1}]"));
         }
 
-        private void OnGUI()
+        public bool IsRunningNetwork()
         {
-            if (
-#if UNITY_EDITOR
-                DebugParam.Instance.IsForceBattleOffline == false &&
-#endif
-                _runner == null)
-            {
-                if (GUI.Button(new Rect(0, 0, 200, 40), "Host")) StartBattle(GameMode.Host);
-
-                if (GUI.Button(new Rect(0, 40, 200, 40), "Join")) StartBattle(GameMode.Client);
-            }
+            return _runner != null;
         }
 
         private void Update()

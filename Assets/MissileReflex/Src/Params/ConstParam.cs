@@ -36,6 +36,11 @@ namespace MissileReflex.Src.Params
 
         [SerializeField] private Material[] matTeamColorMetal;
         public Material[] MatTeamColorMetal => matTeamColorMetal;
+
+        [SerializeField] private int battleTimeLimit = 180;
+        public int BattleTimeLimit => battleTimeLimit;
+        
+        
         
 
         public const float DeltaMilliF = 1e-3f;

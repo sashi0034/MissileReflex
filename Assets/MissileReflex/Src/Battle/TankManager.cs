@@ -28,7 +28,7 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private NetworkPrefabRef aiPrefab;
 
         // チームごとのspawn位置
-        private TankSpawnSymbolGroup tankSpawnSymbolGroup = new ();
+        private TankSpawnSymbolGroup? tankSpawnSymbolGroup;
         
         private readonly List<TankFighter> _tankFighterList = new List<TankFighter>();
         public IReadOnlyList<TankFighter> List => _tankFighterList;
@@ -110,6 +110,12 @@ namespace MissileReflex.Src.Battle
             });
         }
 
+        private TankSpawnSymbol getTankSpawnSymbol(TankFighterTeam team, int teamMemberIndex)
+        {
+            Debug.Assert(tankSpawnSymbolGroup != null);
+            return tankSpawnSymbolGroup.Groups[team.TeamId].List[teamMemberIndex];
+        }
+
         public TankSpawnInfo GetNextSpawnInfo(string name)
         {
             int numTank = _tankFighterList.Count;
@@ -120,7 +126,7 @@ namespace MissileReflex.Src.Battle
             return new TankSpawnInfo(
                 team, 
                 teamMemberIndex,
-                tankSpawnSymbolGroup.Groups[team.TeamId].List[teamMemberIndex].transform.position.FixY(ConstParam.Instance.PlayerDefaultY),
+                getTankSpawnSymbol(team, teamMemberIndex).transform.position.FixY(ConstParam.Instance.PlayerDefaultY),
                 name);
         }
 
@@ -128,7 +134,7 @@ namespace MissileReflex.Src.Battle
         {
             var team = tank.Team;
             var teamMemberIndex = tank.TeamMemberIndex;
-            var symbol = tankSpawnSymbolGroup.Groups[team.TeamId].List[teamMemberIndex];
+            var symbol = getTankSpawnSymbol(team, teamMemberIndex);
             return symbol;
         }
 

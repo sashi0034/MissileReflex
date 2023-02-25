@@ -71,7 +71,7 @@ namespace MissileReflex.Src.Battle
         [Networked] private int _teamMemberIndex { get; set; }
         public int TeamMemberIndex => _teamMemberIndex;
 
-        [Networked] private string _tankName { get; set; }
+        [Networked] private string _tankName { get; set; } = "";
         public string TankName => _tankName;
         
         private UniTask _interruptedTask = UniTask.CompletedTask;

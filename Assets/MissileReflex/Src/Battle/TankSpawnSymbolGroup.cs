@@ -14,7 +14,7 @@ namespace MissileReflex.Src.Battle
 
     public class TankSpawnSymbolGroup : MonoBehaviour
     {
-        [SerializeField] private List<TankSpawnSymbolTeamList> groups = new ();
+        [SerializeField] private List<TankSpawnSymbolTeamList> groups;
         public List<TankSpawnSymbolTeamList> Groups => groups;
         
         public List<TankSpawnSymbol> FlatTankSpawnSymbols()

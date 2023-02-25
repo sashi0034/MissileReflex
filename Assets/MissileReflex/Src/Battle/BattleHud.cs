@@ -7,6 +7,15 @@ namespace MissileReflex.Src.Battle
     {
         [SerializeField] private LabelTankNameManager labelTankNameManager;
         public LabelTankNameManager LabelTankNameManager => labelTankNameManager;
+
+        [SerializeField] private PanelRemainingTime panelRemainingTime;
+        public PanelRemainingTime PanelRemainingTime => panelRemainingTime;
+
+        [SerializeField] private PanelCurrTeamInfoManager panelCurrTeamInfoManager;
+        public PanelCurrTeamInfoManager PanelCurrTeamInfoManager => panelCurrTeamInfoManager;
+
+        [SerializeField] private LabelKillOpponentManager labelKillOpponentManager;
+        public LabelKillOpponentManager LabelKillOpponentManager => labelKillOpponentManager;
         
     }
 }
