@@ -750,8 +750,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3c16d6a64364ea5a66a96e4ec7cdb44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  battleRoot: {fileID: 3573201640426918183}
   labelKillOpponentPrefab: {fileID: 3638918851740222437, guid: 38dd2faa1e371b94184b5ba60f46c5bb,
     type: 3}
+  verticalLayoutGroup: {fileID: 8331302364986643190}
 --- !u!1 &8944983203435448059
 GameObject:
   m_ObjectHideFlags: 0

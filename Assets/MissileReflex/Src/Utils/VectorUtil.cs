@@ -18,6 +18,14 @@ namespace MissileReflex.Src.Utils
             return new Vector3(before.x, before.y, z);
         }
 
+        public static Vector2 FixX(this Vector2 before, float x)
+        {
+            return new Vector2(x, before.y);
+        }
+        public static Vector2 FixY(this Vector2 before, float y)
+        {
+            return new Vector2(before.x, y);
+        }
         public static float CalcCos(Vector3 vec1, Vector3 vec2)
         {
             return Vector3.Dot(vec1, vec2) / (vec1.magnitude * vec2.magnitude);

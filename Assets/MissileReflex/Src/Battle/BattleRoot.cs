@@ -80,6 +80,7 @@ namespace MissileReflex.Src.Battle
         {
             missileManager.Init();
             tankManager.Init();
+            hud.Init();
         }
     }
 }

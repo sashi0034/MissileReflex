@@ -204,12 +204,16 @@ namespace MissileReflex.Src.Battle
             effect.transform.position = transform.position;
             
             var lastAttacker = _hp.FindLastAttacker(Runner);
+            bool isKilledByLocalPlayer = lastAttacker != null && lastAttacker._ownerNetwotkPlayer == Runner.LocalPlayer;
             effect.Effect.cameraShake.enabled = 
-                // 自身がやられたときか
+                // ローカルプレイヤー自身がやられたときか
                 _ownerNetwotkPlayer == Runner.LocalPlayer ||
-                // 自身が攻撃したときにカメラシェイク
-                (lastAttacker!= null && lastAttacker._ownerNetwotkPlayer == Runner.LocalPlayer);
+                // ローカルプレイヤー自身が攻撃したときにカメラシェイク
+                isKilledByLocalPlayer;
             Util.DelayDestroyEffect(effect.ParticleSystem, cancel).Forget();
+            
+            // を倒したの表示
+            if (isKilledByLocalPlayer || IsOwnerLocalPlayer()) battleRoot.Hud.LabelKillOpponentManager.AppendLabel(lastAttacker, this);
             
             // リスポーン地点の演出
             getSpawnSymbol().AnimWither();

@@ -21,6 +21,14 @@ namespace MissileReflex.Src.Utils
         {
             Object.Destroy(gameObject);
         }
+
+        public static void DestroyAllChildren(Transform parent)
+        {
+            foreach (var child in parent.GetChildren())
+            {
+                Util.DestroyGameObject(child.gameObject);
+            }
+        }
         
         // https://nekojara.city/unity-enum-children
         public static Transform[] GetChildren(this Transform parent)

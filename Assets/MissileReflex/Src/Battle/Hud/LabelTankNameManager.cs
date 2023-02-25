@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using MissileReflex.Src.Utils;
+using UnityEngine;
 
 namespace MissileReflex.Src.Battle.Hud
 {
@@ -11,6 +12,11 @@ namespace MissileReflex.Src.Battle.Hud
             var result = Instantiate(labelTankName, transform);
             result.RegisterTank(tank);
             return result;
+        }
+
+        public void Init()
+        {
+            Util.DestroyAllChildren(transform);
         }
     }
 }
