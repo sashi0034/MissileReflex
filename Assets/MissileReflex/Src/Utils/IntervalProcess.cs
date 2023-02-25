@@ -27,6 +27,8 @@ namespace MissileReflex.Src.Utils
 
         public void Update(float deltaTime)
         {
+            if (interval <= 0) return;
+            
             _timeCount += deltaTime;
             while (_timeCount > interval)
             {
