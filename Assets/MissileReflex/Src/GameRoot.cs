@@ -10,12 +10,13 @@ namespace MissileReflex.Src
 {
     public class GameRoot : MonoBehaviour
     {
-                    
+#nullable disable
         [SerializeField] private BattleRoot battleRoot;
         public BattleRoot BattleRoot => battleRoot;
 
         [SerializeField] private NetworkManager networkManager;
         public NetworkManager Network => networkManager;
+#nullable enable
         
         
         [EventFunction]

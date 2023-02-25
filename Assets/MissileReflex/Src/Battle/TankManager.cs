@@ -21,11 +21,13 @@ namespace MissileReflex.Src.Battle
 
     public class TankManager : MonoBehaviour
     {
+#nullable disable
         [SerializeField] private BattleRoot battleRoot;
         [SerializeField] private Material[] tankMaterialList;
 
         [SerializeField] private NetworkPrefabRef playerPrefab;
         [SerializeField] private NetworkPrefabRef aiPrefab;
+#nullable enable
 
         // チームごとのspawn位置
         private TankSpawnSymbolGroup? tankSpawnSymbolGroup;

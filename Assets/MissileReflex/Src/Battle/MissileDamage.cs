@@ -8,8 +8,10 @@ namespace MissileReflex.Src.Battle
 {
     public class MissileDamage : NetworkBehaviour
     {
+#nullable disable
         [SerializeField] private Missile owner;
         [SerializeField] private sbyte damageAmount = 1;
+#nullable enable
         
         private int _hitTankCount = 0;
         public int HitTankCount => _hitTankCount;

@@ -9,7 +9,10 @@ namespace MissileReflex.Src.Battle
 {
     public class BattleProgressManager : MonoBehaviour
     {
+#nullable disable
         [SerializeField] private BattleRoot battleRoot;
+        [SerializeField] private NetworkObject battleSharedStatePrefab;
+#nullable enable
         private GameRoot gameRoot => battleRoot.GameRoot;
 
         private int _remainingTime = 0;

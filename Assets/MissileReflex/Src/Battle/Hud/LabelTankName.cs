@@ -9,8 +9,10 @@ namespace MissileReflex.Src.Battle.Hud
 {
     public class LabelTankName : MonoBehaviour
     {
+#nullable disable
         [SerializeField] private TextMeshProUGUI textMesh;
         [SerializeField] private RectTransform selfRect;
+#nullable enable
         public TextMeshProUGUI TextMesh => textMesh;
 
         private TankFighter? _followingTank;

@@ -17,7 +17,9 @@ namespace MissileReflex.Src.Connection
 {
     public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
+#nullable disable
         [SerializeField] private BattleRoot battleRoot;
+#nullable enable
 
         private Subject<Unit> _onEndSceneLoadDone = new Subject<Unit>();
         public Subject<Unit> OnEndSceneLoadDone => _onEndSceneLoadDone;

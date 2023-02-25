@@ -19,6 +19,7 @@ namespace MissileReflex.Src.Battle
     // TankFighterはAgentから動かす
     public class TankFighter : NetworkBehaviour
     {
+#nullable disable
         [SerializeField] private Rigidbody tankRigidbody;
         
         [SerializeField] private float accelSize = 10;
@@ -32,6 +33,7 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private GameObject selfView;
 
         [SerializeField] private TankExplosion effectTankExplosion;
+#nullable enable
         
         [Networked]
         private PlayerRef _ownerNetwotkPlayer { get; set; } = PlayerRef.None;

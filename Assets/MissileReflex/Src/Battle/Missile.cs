@@ -31,6 +31,7 @@ namespace MissileReflex.Src.Battle
     [DisallowMultipleComponent]
     public class Missile : NetworkBehaviour
     {
+#nullable disable
         [SerializeField] private MissileDamage missileDamage;
         public MissileDamage Damage => missileDamage;
         
@@ -43,6 +44,8 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private ParticleSystem missileExplosion;
 
         private NetworkObject _selfNetwork;
+        private MissilePhysic _physic;
+#nullable enable
         
         private BattleRoot BattleRoot => BattleRoot.Instance;
         public MissileManager Manager => BattleRoot.MissileManager;
@@ -52,7 +55,6 @@ namespace MissileReflex.Src.Battle
 
         private Vector3 _viewInitialRotation;
         private float _viewRotationAnimX = 0;
-        private MissilePhysic _physic;
 
         [Networked]
         private MissileSourceData _data { get; set; } = MissileSourceData.Empty;
@@ -69,7 +71,7 @@ namespace MissileReflex.Src.Battle
         private static readonly Vector3 invalidEffectExplosionPos = Vector3.positiveInfinity;
         [Networked] private Vector3 _requestedEffectExplosionPos { get; set; } = invalidEffectExplosionPos;
 
-        public Missile()
+        public void Awake()
         {
             _physic = new MissilePhysic(this);
         }

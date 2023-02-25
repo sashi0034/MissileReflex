@@ -30,7 +30,9 @@ namespace MissileReflex.Src.Battle
     
     public class TankAgentAi : MonoBehaviour, ITankAgent
     {
+#nullable disable
         [SerializeField] private TankFighter selfTank;
+#nullable enable
         private Vector3 selfTankPos => selfTank.transform.position;
         private ref TankFighterInput tankIn => ref selfTank.Input;
         private TankFighterPrediction tankPredict => selfTank.Prediction;

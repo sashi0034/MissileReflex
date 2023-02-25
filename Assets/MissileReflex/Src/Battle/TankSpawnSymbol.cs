@@ -12,9 +12,11 @@ namespace MissileReflex.Src.Battle
 {
     public class TankSpawnSymbol : MonoBehaviour
     {
+#nullable disable
         [SerializeField] private Material matStoppingColor;
         [SerializeField] private GameObject rotatingCube;
         [SerializeField] private MeshRenderer rotatingCubeMesh;
+#nullable enable
         
         private TankFighter? _targetFighter;
         private float _currRotating = 0;

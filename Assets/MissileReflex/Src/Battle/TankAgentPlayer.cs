@@ -14,7 +14,9 @@ namespace MissileReflex.Src.Battle
     {
         private BattleRoot BattleRoot => BattleRoot.Instance;
 
+#nullable disable
         [SerializeField] private TankFighter _selfTank;
+#nullable enable
         public TankFighter Tank => _selfTank;
         
         private Camera mainCamera => Camera.main;

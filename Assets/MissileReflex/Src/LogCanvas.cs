@@ -11,22 +11,21 @@ namespace MissileReflex.Src
 {
     public class LogCanvas : MonoBehaviour
     {
+#nullable disable
         [SerializeField] private TextMeshProUGUI textLog;
         [SerializeField] private TextMeshProUGUI textWhenSleep;
+#nullable enable
         
         public static LogCanvas? Instance;
 
         [SerializeField] private int maxLine = 16;
         private List<String> _currLog = new List<string>();
-
-        public LogCanvas()
-        {
-            Instance = this;
-        }
+        
         
         [EventFunction]
         private void Awake()
         {
+            Instance = this;
             if (!DebugParam.Instance.IsClearDebug) return;
             Util.DestroyGameObject(gameObject);
             Instance = null;
