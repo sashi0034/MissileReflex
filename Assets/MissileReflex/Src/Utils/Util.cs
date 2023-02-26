@@ -22,6 +22,18 @@ namespace MissileReflex.Src.Utils
             Object.Destroy(gameObject);
         }
 
+
+        public static bool EnsureSingleton<T>(T awakened, ref T instanceRef) where T : MonoBehaviour
+        {
+            if (instanceRef != null)
+            {
+                Util.DestroyGameObject(awakened.gameObject);
+                return false;
+            }
+            instanceRef = awakened;
+            return true;
+        }
+
         public static void DestroyAllChildren(Transform parent)
         {
             foreach (var child in parent.GetChildren())
@@ -99,6 +111,11 @@ namespace MissileReflex.Src.Utils
             await UniTask.WaitUntil(() => effect.isStopped, cancellationToken: cancel);
             Util.DestroyGameObject(effect.gameObject);
         }
+
+        public static void CallDelayedAfterFrame(Action action)
+        {
+            DOVirtual.DelayedCall(0, () => action());
+        }
         
         public static async UniTask ExecutePerFrame(int numFrame, Action action)
         {
@@ -122,6 +139,19 @@ namespace MissileReflex.Src.Utils
                 3 => order + "rd",
                 _ => order + "th"
             };
+        }
+        
+        public static Color ColourRgb(int r, int g, int b)
+        {
+            return new Color((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f);
+        }
+
+        public static Color ColourHex(int hexRgb)
+        {
+            int r = (hexRgb >> 16) & 0xff;
+            int g = (hexRgb >> 8) & 0xff;
+            int b = hexRgb & 0xff;
+            return ColourRgb(r, g, b);
         }
 
     }

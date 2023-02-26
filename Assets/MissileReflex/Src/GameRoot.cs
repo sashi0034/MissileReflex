@@ -25,12 +25,7 @@ namespace MissileReflex.Src
 
         private void Awake()
         {
-            if (_instance != null)
-            {
-                Util.DestroyGameObject(gameObject);
-                return;
-            }
-            _instance = this;
+            if (Util.EnsureSingleton(this, ref _instance) == false) return;
         }
         
         [EventFunction]

@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using Cysharp.Threading.Tasks;
 using MissileReflex.Src.Utils;
 using UnityEngine;
 
@@ -15,7 +16,13 @@ namespace MissileReflex.Src.Lobby
         [EventFunction]
         public void OnPushButton()
         {
-            lobbyHud.StartBattle().RunTaskHandlingError();
+            onPushButtonInternal().RunTaskHandlingError();
+        }
+
+        private async UniTask onPushButtonInternal()
+        {
+            await HudUtil.AnimSmallOneToZero(transform);
+            await lobbyHud.StartBattle();
         }
     }
 }

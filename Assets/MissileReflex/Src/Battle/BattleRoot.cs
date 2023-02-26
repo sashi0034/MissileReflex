@@ -47,8 +47,7 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         private void Awake()
         {
-            Debug.Assert(_instance == null);
-            _instance = this;
+            if (Util.EnsureSingleton(this, ref _instance) == false) return;
         }
 
         [EventFunction]

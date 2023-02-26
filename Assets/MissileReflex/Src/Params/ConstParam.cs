@@ -52,5 +52,7 @@ namespace MissileReflex.Src.Params
         public const float DeltaMilliF = 1e-3f;
 
         public const int NumTankTeam = 4;
+
+        public static readonly Color Transparent = new Color(0, 0, 0, 0);
     }
 }
