@@ -31,3 +31,5 @@ MonoBehaviour:
   - {fileID: 2100000, guid: ea800cde71de3ca4390da7f7951b3f55, type: 2}
   - {fileID: 2100000, guid: ee0f46a321924f84ab7e658c6dd38abb, type: 2}
   - {fileID: 2100000, guid: c61ba91bc2bad0e4db84051aae1fa8bc, type: 2}
+  battleTimeLimit: 180
+  battleTimeLastSpurt: 30

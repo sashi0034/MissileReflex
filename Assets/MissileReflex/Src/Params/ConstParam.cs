@@ -39,6 +39,9 @@ namespace MissileReflex.Src.Params
 
         [SerializeField] private int battleTimeLimit = 180;
         public int BattleTimeLimit => battleTimeLimit;
+
+        [SerializeField] private int battleTimeLastSpurt = 30;
+        public int BattleTimeLastSpurt => battleTimeLastSpurt;
         
         
         

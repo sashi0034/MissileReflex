@@ -17,7 +17,8 @@ namespace MissileReflex.Src.Battle.Hud
 #nullable enable
 
         private readonly Vector3[] panelLocalPosList = new Vector3[ConstParam.NumTankTeam];
-        public IReadOnlyList<Vector3> PanelLocalPosList => panelLocalPosList;  
+        public IReadOnlyList<Vector3> PanelLocalPosList => panelLocalPosList;
+        private bool _isLastSpurt = false;
 
         public void Start()
         {
@@ -30,14 +31,26 @@ namespace MissileReflex.Src.Battle.Hud
 
         public void Init()
         {
+            _isLastSpurt = false;
             foreach (var panel in panelCurrTeamInfoList)
             {
                 panel.Init();
             }
         }
 
+        public void EnterLastSpurt()
+        {
+            _isLastSpurt = true;
+            foreach (var panel in panelCurrTeamInfoList)
+            {
+                panel.EnterLastSpurt();
+            }
+        }
+
         public void UpdateInfo(BattleTeamStateWithId[] stateList)
         {
+            if (_isLastSpurt) return;
+            
             Debug.Assert(stateList.Count() == panelCurrTeamInfoList.Length);
             stateList.Sort((a, b) => b.State.Score - a.State.Score);
 

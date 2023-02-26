@@ -70,6 +70,11 @@ namespace MissileReflex.Src.Battle
             {
                 state.AddRemainingTime(-1);
                 battleRoot.Hud.PanelRemainingTime.UpdateText(state.RemainingTime);
+                
+                // ラストスパートではスコアを?にしたりする
+                if (state.RemainingTime == ConstParam.Instance.BattleTimeLastSpurt) 
+                    battleRoot.Hud.PanelCurrTeamInfoManager.EnterLastSpurt();
+                
                 await UniTask.Delay(1000);
             }
         }

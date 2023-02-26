@@ -29,6 +29,13 @@ namespace MissileReflex.Src.Battle.Hud
             _currOrder = invalidIndex;
         }
 
+        public void EnterLastSpurt()
+        {
+            textScore.text = "???";
+            textOrder.text = "?th";
+            iconAnimator.speed = 3f;
+        }
+
         public void UpdateInfo(
             PanelCurrTeamInfoManager manager, 
             BattleTeamState teamState, 
