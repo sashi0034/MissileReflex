@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿#nullable enable
+
+using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Fusion;
 using MissileReflex.Src.Params;
@@ -11,11 +14,15 @@ namespace MissileReflex.Src.Battle
     {
 #nullable disable
         [SerializeField] private BattleRoot battleRoot;
-        [SerializeField] private NetworkObject battleSharedStatePrefab;
+        [SerializeField] private NetworkPrefabRef battleSharedStatePrefab;
 #nullable enable
         private GameRoot gameRoot => battleRoot.GameRoot;
+        private BattleSharedState? _battleSharedState;
 
-        private int _remainingTime = 0;
+        public void RegisterSharedState(BattleSharedState state)
+        {
+            _battleSharedState = state;
+        }
 
         public void StartBattle(GameMode gameMode)
         {
@@ -24,6 +31,7 @@ namespace MissileReflex.Src.Battle
 
         private async UniTask startBattleInternal(GameMode gameMode)
         {
+            if (_battleSharedState != null) Util.DestroyGameObject(_battleSharedState.gameObject);
             battleRoot.Init();
 
             // ネットワーク準備
@@ -33,29 +41,57 @@ namespace MissileReflex.Src.Battle
             Debug.Assert(runner != null);
             if (runner == null) return;
 
+            // 共有状態オブジェクトの作成            
+            runner.Spawn(battleSharedStatePrefab);
+
             // AI召喚
             int numAi = 2 * ConstParam.NumTankTeam;
             for (int i = 0; i < numAi; ++i)
                 battleRoot.TankManager.SpawnAi(runner, battleRoot.TankManager.GetNextSpawnInfo($"AI [{i + 1}]"));
-
-            _remainingTime = ConstParam.Instance.BattleTimeLimit;
+            
+            // 共有状態オブジェクトがスポーンされるのを同期
+            await UniTask.WaitUntil(() => _battleSharedState != null);
+            updateHudTeamInfo();
+            
+            var state = _battleSharedState;
 
             // 制限時間が0になったら試合終了
-            await decRemainingTimeUntilZero();
+            await decRemainingTimeUntilZero(state);
 
             battleRoot.TerminateCancelBattle();
         }
 
-        private async UniTask decRemainingTimeUntilZero()
+        private async UniTask decRemainingTimeUntilZero(BattleSharedState state)
         {
-            _remainingTime++;
+            state.AddRemainingTime(1);
             
-            while (_remainingTime > 0)
+            while (state.RemainingTime > 0)
             {
-                _remainingTime--;
-                battleRoot.Hud.PanelRemainingTime.UpdateText(_remainingTime);
+                state.AddRemainingTime(-1);
+                battleRoot.Hud.PanelRemainingTime.UpdateText(state.RemainingTime);
                 await UniTask.Delay(1000);
             }
+        }
+        
+        public void MutateScoreOnKill(TankFighter attacker, TankFighter killed)
+        {
+            if (_battleSharedState == null) return; 
+            if (killed.Team.IsSame(attacker.Team)) return;
+            _battleSharedState.MutTeamStatesAt(attacker.Team.TeamId).IncScore();
+
+            // HUD更新
+            updateHudTeamInfo();
+        }
+
+        private void updateHudTeamInfo()
+        {
+            var stateWithId = new BattleTeamStateWithId[_battleSharedState.GetTeamStatesLength()];
+            for (var index = 0; index < _battleSharedState.GetTeamStatesLength(); index++)
+            {
+                var state = _battleSharedState.MutTeamStatesAt(index);
+                stateWithId[index] = new BattleTeamStateWithId(index, state);
+            }
+            battleRoot.Hud.PanelCurrTeamInfoManager.UpdateInfo(stateWithId);
         }
     }
 }

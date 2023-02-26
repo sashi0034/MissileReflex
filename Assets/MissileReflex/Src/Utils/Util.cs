@@ -112,6 +112,18 @@ namespace MissileReflex.Src.Utils
         public static Action EmptyAction => () => { };
         public static void DoEmpty(){ }
 
+        public static string StringifyOrder(int order)
+        {
+            int first = order % 10;
+            return first switch
+            {
+                1 => order + "st",
+                2 => order + "nd",
+                3 => order + "rd",
+                _ => order + "th"
+            };
+        }
+
     }
     
     [AttributeUsage(AttributeTargets.Method)]

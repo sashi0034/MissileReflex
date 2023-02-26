@@ -216,6 +216,9 @@ namespace MissileReflex.Src.Battle
             
             // を倒したの表示
             if (isKilledByLocalPlayer || IsOwnerLocalPlayer()) battleRoot.Hud.LabelKillOpponentManager.AppendLabel(lastAttacker, this);
+
+            // スコア加算
+            if (lastAttacker != null) battleRoot.Progress.MutateScoreOnKill(lastAttacker, this);
             
             // リスポーン地点の演出
             getSpawnSymbol().AnimWither();

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Fusion;
@@ -13,6 +13,7 @@ namespace MissileReflex.Src.Battle
     [DisallowMultipleComponent]
     public class BattleRoot : MonoBehaviour
     {
+#nullable disable
         private static BattleRoot _instance;
         public static BattleRoot Instance => _instance;
         
@@ -29,8 +30,9 @@ namespace MissileReflex.Src.Battle
         public GameRoot GameRoot => gameRoot;
 
         [SerializeField] private BattleProgressManager battleProgressManager;
-        public BattleProgressManager BattleProgressManager => battleProgressManager;
-        
+        public BattleProgressManager Progress => battleProgressManager;
+
+#nullable enable
         
         
 
@@ -72,7 +74,11 @@ namespace MissileReflex.Src.Battle
             {
                 if (GUI.Button(new Rect(0, 0, 200, 40), "Host")) battleProgressManager.StartBattle(GameMode.Host);
 
-                if (GUI.Button(new Rect(0, 40, 200, 40), "Join")) battleProgressManager.StartBattle(GameMode.Client);
+                if (GUI.Button(new Rect(0, 40, 200, 40), "Client")) battleProgressManager.StartBattle(GameMode.Client);
+                
+                if (GUI.Button(new Rect(0, 80, 200, 40), "Shared")) battleProgressManager.StartBattle(GameMode.Shared);
+                
+                if (GUI.Button(new Rect(0, 120, 200, 40), "AutoHostOrClient")) battleProgressManager.StartBattle(GameMode.AutoHostOrClient);
             }
         }
 
