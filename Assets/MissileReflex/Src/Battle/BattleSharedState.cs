@@ -6,6 +6,7 @@ using Fusion;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
+using UnityEngine.ProBuilder;
 
 namespace MissileReflex.Src.Battle
 {
@@ -16,7 +17,7 @@ namespace MissileReflex.Src.Battle
 
         public BattleTeamState IncScore(int delta)
         {
-            _score += delta;
+            _score = Mathf.Max(_score +　delta, 0);
             return this;
         }
     }
@@ -38,6 +39,7 @@ namespace MissileReflex.Src.Battle
         public void AddRemainingTime(int amount)
         {
             _remainingTime += amount;
+            if (_remainingTime < 0) _remainingTime = 0;
         }
         
         public ref BattleTeamState MutTeamStatesAt(int index)

@@ -24,9 +24,9 @@ namespace MissileReflex.Src.Battle.Hud
         {
             string message = 
                 attackedPlayer == killed
-                    ? "自分の攻撃でやられた"
+                    ? "<color=#ccd>自分の攻撃でやられた</color>"
                     : killed.IsOwnerLocalPlayer() 
-                        ? $"<color=#{getTeamColor(attackedPlayer)}>{attackedPlayer.TankName}</color>にやられた"
+                        ? $"<color=#{getTeamColor(attackedPlayer)}>{attackedPlayer.TankName}</color><color=#ccd>にやられた</color>"
                         :attackedPlayer.Team.IsSame(killed.Team)
                             ? $"<color=#{getTeamColor(killed)}>{killed.TankName}</color>を倒してしまった..."
                             : $"<color=#{getTeamColor(killed)}>{killed.TankName}</color>を倒した";

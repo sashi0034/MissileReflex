@@ -46,14 +46,16 @@ namespace MissileReflex.Src.Battle
             runner.Spawn(battleSharedStatePrefab);
 
             // AI召喚
-            int numAi = 2 * ConstParam.NumTankTeam;
+            // TODO: ちゃんと設定
+            int numPlayer = 2;
+            int numAi = 4 * ConstParam.NumTankTeam - numPlayer;
             for (int i = 0; i < numAi; ++i)
                 battleRoot.TankManager.SpawnAi(runner, battleRoot.TankManager.GetNextSpawnInfo($"AI [{i + 1}]"));
             
             // 共有状態オブジェクトがスポーンされるのを同期
             await UniTask.WaitUntil(() => _battleSharedState != null);
             updateHudTeamInfo();
-            
+
             var state = _battleSharedState;
 
             // 制限時間が0になったら試合終了
@@ -82,9 +84,10 @@ namespace MissileReflex.Src.Battle
         public void MutateScoreOnKill(TankFighter attacker, TankFighter killed)
         {
             if (_battleSharedState == null) return; 
-            if (killed.Team.IsSame(attacker.Team)) return;
+            // if (killed.Team.IsSame(attacker.Team)) return;
 
-            const int deltaScore = 1;
+            // 同士討ちは減点
+            int deltaScore = killed.Team.IsSame(attacker.Team) ? -1 : 1;
             _battleSharedState.MutTeamStatesAt(attacker.Team.TeamId).IncScore(deltaScore);
 
             // HUD更新
