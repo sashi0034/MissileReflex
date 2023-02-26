@@ -431,6 +431,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textOrder: {fileID: 4142878529543874641}
   textScore: {fileID: 4405891719402236772}
+  iconAnimator: {fileID: 5344561109583569950}
 --- !u!1 &7781102607542366603
 GameObject:
   m_ObjectHideFlags: 0
