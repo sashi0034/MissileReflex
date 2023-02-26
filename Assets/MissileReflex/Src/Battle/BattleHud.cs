@@ -23,6 +23,7 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
+            gameObject.SetActive(true);
             labelTankNameManager.Init();
             panelRemainingTime.Init();
             panelCurrTeamInfoManager.Init();

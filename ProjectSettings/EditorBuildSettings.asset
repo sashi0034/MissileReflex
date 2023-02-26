@@ -4,4 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/MissileReflex/Scenes/MainScene.unity
+    guid: 82a7db809cf6dbb4daca81d6e91c75a1
+  - enabled: 1
+    path: Assets/MissileReflex/Scenes/Arena_1.unity
+    guid: 66007b0c39379d145b0cd10d9eb54381
+  m_configObjects: {}

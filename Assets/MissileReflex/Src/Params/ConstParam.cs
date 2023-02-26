@@ -42,9 +42,12 @@ namespace MissileReflex.Src.Params
 
         [SerializeField] private int battleTimeLastSpurt = 30;
         public int BattleTimeLastSpurt => battleTimeLastSpurt;
-        
-        
-        
+
+        public const string LiteralMainScene = "MainScene";
+        public static string GetLiteralArena(int index)
+        {
+            return "Arena_" + index;
+        }
 
         public const float DeltaMilliF = 1e-3f;
 
