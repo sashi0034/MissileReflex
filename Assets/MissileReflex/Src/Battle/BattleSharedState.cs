@@ -14,9 +14,9 @@ namespace MissileReflex.Src.Battle
         private int _score;
         public int Score => _score;
 
-        public BattleTeamState IncScore()
+        public BattleTeamState IncScore(int delta)
         {
-            _score++;
+            _score += delta;
             return this;
         }
     }

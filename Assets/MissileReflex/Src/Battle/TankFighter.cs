@@ -154,6 +154,10 @@ namespace MissileReflex.Src.Battle
         {
             if (_interruptedTask.Status == UniTaskStatus.Pending) return;
             _interruptedTask = performDeadAndRespawn(battleRoot.CancelBattle);
+#if UNITY_EDITOR
+            _interruptedTask = _interruptedTask.RunTaskHandlingErrorAsync();
+#endif
+
         }
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)

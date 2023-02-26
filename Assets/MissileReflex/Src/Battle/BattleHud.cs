@@ -17,12 +17,17 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private LabelKillOpponentManager labelKillOpponentManager;
         public LabelKillOpponentManager LabelKillOpponentManager => labelKillOpponentManager;
 
+        [SerializeField] private LabelScoreAdditionOnKillManager labelScoreAdditionOnKillManager;
+        public LabelScoreAdditionOnKillManager LabelScoreAdditionOnKillManager => labelScoreAdditionOnKillManager;
+        
+
         public void Init()
         {
             labelTankNameManager.Init();
             panelRemainingTime.Init();
             panelCurrTeamInfoManager.Init();
             labelKillOpponentManager.Init();
+            labelScoreAdditionOnKillManager.Init();
         }
     }
 }

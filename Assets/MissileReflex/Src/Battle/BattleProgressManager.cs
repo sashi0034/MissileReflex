@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Fusion;
+using MissileReflex.Src.Battle.Hud;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
@@ -77,9 +78,13 @@ namespace MissileReflex.Src.Battle
         {
             if (_battleSharedState == null) return; 
             if (killed.Team.IsSame(attacker.Team)) return;
-            _battleSharedState.MutTeamStatesAt(attacker.Team.TeamId).IncScore();
+
+            const int deltaScore = 1;
+            _battleSharedState.MutTeamStatesAt(attacker.Team.TeamId).IncScore(deltaScore);
 
             // HUD更新
+            battleRoot.Hud.LabelScoreAdditionOnKillManager.BirthLabel(new LabelScoreAdditionOnKillArg(
+                killed.transform.position, attacker.Team, deltaScore));
             updateHudTeamInfo();
         }
 
