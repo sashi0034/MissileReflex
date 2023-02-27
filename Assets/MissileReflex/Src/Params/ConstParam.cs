@@ -1,4 +1,5 @@
-﻿using MissileReflex.Src.Battle;
+﻿using System;
+using MissileReflex.Src.Battle;
 using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
@@ -38,13 +39,13 @@ namespace MissileReflex.Src.Params
         public Material[] MatTeamColorMetal => matTeamColorMetal;
 
         [SerializeField] private int battleTimeLimit = 180;
-        public int BattleTimeLimit => battleTimeLimit;
+        public int BattleTimeLimit => overwriteIfDebug(battleTimeLimit, DebugParam.Instance.OwBattleTimeLimit);
 
         [SerializeField] private int battleTimeLastSpurt = 30;
-        public int BattleTimeLastSpurt => battleTimeLastSpurt;
+        public int BattleTimeLastSpurt => overwriteIfDebug(battleTimeLastSpurt, DebugParam.Instance.OwBattleTimeLastSpurt);
 
         [SerializeField] private int matchingTimeLimit = 60;
-        public int MatchingTimeLimit => matchingTimeLimit;
+        public int MatchingTimeLimit => overwriteIfDebug(matchingTimeLimit, DebugParam.Instance.OwMatchingTimeLimit);
         
 
         public const string LiteralMainScene = "MainScene";
@@ -59,5 +60,24 @@ namespace MissileReflex.Src.Params
         public const int MaxTankAgent = NumTankTeam * 4;
 
         public static readonly Color Transparent = new Color(0, 0, 0, 0);
+
+        private static int overwriteIfDebug(int release, int debug)
+        {
+            return overwriteIfDebugInternal(release, debug, -1);
+        }
+        private static float overwriteIfDebug(float release, float debug)
+        {
+            return overwriteIfDebugInternal(release, debug, -1);
+        }
+        private static T overwriteIfDebugInternal<T>(T release, T debug, T invalid) where T : IEquatable<T>
+        {
+            return
+#if !DEBUG
+                releaseValue;
+#else
+                debug.Equals(invalid) ? release : debug;
+#endif
+
+        }
     }
 }

@@ -54,7 +54,7 @@ namespace MissileReflex.Src.Lobby
             rpcallNotifyLoadedArena(Runner.LocalPlayer);
         }
 
-        [Rpc(RpcSources.All, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         private void rpcallNotifyLoadedArena(PlayerRef player)
         {
             modifyPlayerStatus(player, flag => flag.RaiseLoadedArena());

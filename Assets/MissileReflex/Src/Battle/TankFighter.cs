@@ -149,24 +149,27 @@ namespace MissileReflex.Src.Battle
             updateInputShoot(Runner.DeltaTime);
         }
 
-        [Rpc]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void rpcallStartDie()
         {
             if (_interruptedTask.Status == UniTaskStatus.Pending) return;
-            _interruptedTask = performDeadAndRespawn(battleRoot.CancelBattle);
-#if UNITY_EDITOR
-            _interruptedTask = _interruptedTask.RunTaskHandlingErrorAsync();
-#endif
-
+            _interruptedTask = performDeadAndRespawn(battleRoot.CancelBattle)
+                // 例外が起きた時も一応リスポーンするように
+                .RunTaskHandlingErrorAsync(_ => invokeRespawnAfterDead(battleRoot.CancelBattle));
         }
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)
         {
             await performDead(cancel);
 
+            invokeRespawnAfterDead(cancel);
+        }
+
+        private void invokeRespawnAfterDead(CancellationToken cancel)
+        {
             // 復活
             resetRespawn();
-            
+
             // 復活する演出
             performRespawnAfterDead(cancel).Forget();
         }

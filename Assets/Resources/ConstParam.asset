@@ -33,3 +33,4 @@ MonoBehaviour:
   - {fileID: 2100000, guid: c61ba91bc2bad0e4db84051aae1fa8bc, type: 2}
   battleTimeLimit: 180
   battleTimeLastSpurt: 30
+  matchingTimeLimit: 60
