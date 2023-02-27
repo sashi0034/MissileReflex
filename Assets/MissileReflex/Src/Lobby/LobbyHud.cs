@@ -13,21 +13,28 @@ namespace MissileReflex.Src.Lobby
     {
 #nullable disable
         [SerializeField] private GameRoot gameRoot;
+
         public GameRoot GameRoot => gameRoot;
+
+        [SerializeField] private PanelStartMatching panelStartMatching;
+        public PanelStartMatching PanelStartMatching => panelStartMatching;
+        
+                
+#nullable enable
+
+        private LobbySharedState? _sharedState;
+        public LobbySharedState? SharedState => _sharedState;
+
+        public void RegisterSharedState(LobbySharedState state)
+        {
+            _sharedState = state;
+        }
 
         private void Awake() {}
 
-        public async UniTask StartBattle()
+        public void Init()
         {
-            gameObject.SetActive(false);
-
-            // TODO: 新規ステージ
-            const int arenaIndex = 1;
-            await gameRoot.LoadScene(ConstParam.GetLiteralArena(arenaIndex));
-            
-            gameRoot.BattleRoot.Progress.StartBattle(GameMode.Single);
+            _sharedState = null;
         }
-        
-#nullable enable
     }
 }

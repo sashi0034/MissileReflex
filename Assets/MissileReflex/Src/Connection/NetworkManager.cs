@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Fusion;
 using Fusion.Sockets;
@@ -30,18 +31,19 @@ namespace MissileReflex.Src.Connection
         private readonly BoolFlag _pushedMouseRight = new();
         private readonly BoolFlag _pushedMouseLeft = new();
 
+        public void ModifyRunner(Action<NetworkRunner> modifier)
+        {
+            Debug.Assert(_runner != null);
+            if (_runner == null) return;
+            modifier(_runner);
+        }
+
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
             if (runner.IsServer)
-            {
-                battleRoot.TankManager.SpawnPlayer(runner, player, battleRoot.TankManager.GetNextSpawnInfo(
-                    $"Player [{player.PlayerId}]"));
                 Debug.Log("connected player: " + player.PlayerId);
-            }
             else
-            {
                 Debug.Log("runner is not server: " + runner);
-            }
         }
 
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
@@ -104,7 +106,7 @@ namespace MissileReflex.Src.Connection
         {
         }
 
-        public async UniTask StartBattleNetwork(GameMode mode)
+        public async UniTask DebugStartBattleNetwork(GameMode mode)
         {
             // Create the Fusion runner and let it know that we will be providing user input
             Debug.Assert(TryGetComponent<NetworkRunner>(out _) == false);
@@ -118,11 +120,37 @@ namespace MissileReflex.Src.Connection
             {
                 GameMode = mode,
                 SessionName = "TestRoom",
+                PlayerCount = ConstParam.MaxTankAgent,
                 Scene = SceneManager.GetActiveScene().buildIndex,
                 SceneManager = gameObject.AddComponent<NetworkSceneManagerBase>()
             });
 
             await UniTask.WhenAll(taskSceneLoad, taskStartGame.AsUniTask());
+        }
+        
+        public async UniTask StartMatching(GameMode mode)
+        {
+            // Create the Fusion runner and let it know that we will be providing user input
+            Debug.Assert(TryGetComponent<NetworkRunner>(out _) == false);
+            _runner = gameObject.AddComponent<NetworkRunner>();
+            _runner.ProvideInput = false;
+            
+            // TODO: runnerを本当にAddComponentする必要があるか確認 (Serializeでいける?)
+            
+            // Start or join (depends on gamemode) a session with a specific name
+            var taskStartGame = _runner.StartGame(new StartGameArgs
+            {
+                GameMode = mode,
+                PlayerCount = ConstParam.MaxTankAgent,
+                SceneManager = gameObject.AddComponent<NetworkSceneManagerBase>()
+            });
+            
+            await UniTask.WhenAll(taskStartGame.AsUniTask());
+            
+            // TODO: 多分これで切断処理
+            // _runner.Disconnect(_runner.LocalPlayer);
+            // Util.DestroyComponent(gameObject.GetComponent<NetworkSceneManagerBase>());
+            // Util.DestroyComponent(_runner);
         }
 
         public bool IsRunningNetwork()
@@ -132,6 +160,7 @@ namespace MissileReflex.Src.Connection
 
         private void Update()
         {
+            if (_runner == null || _runner.ProvideInput == false) return;
             if (Input.GetMouseButtonDown(0)) _pushedMouseLeft.UpFlag();
             if (Input.GetMouseButtonDown(1)) _pushedMouseRight.UpFlag();
         }

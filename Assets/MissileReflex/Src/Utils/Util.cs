@@ -25,7 +25,7 @@ namespace MissileReflex.Src.Utils
 
         public static bool EnsureSingleton<T>(T awakened, ref T instanceRef) where T : MonoBehaviour
         {
-            if (instanceRef != null)
+            if (instanceRef != null & instanceRef != awakened)
             {
                 Util.DestroyGameObject(awakened.gameObject);
                 return false;
@@ -88,12 +88,6 @@ namespace MissileReflex.Src.Utils
             return newColor;
         }
 
-        public static void ResetScaleAndActivate(MonoBehaviour actor)
-        {
-            actor.transform.localScale = Vector3.one;
-            actor.gameObject.SetActive(true);
-        }
-
         public static T DebugTrace<T>(this T target) where T : IFormattable
         {
             Debug.Log(target.ToString());
@@ -152,6 +146,29 @@ namespace MissileReflex.Src.Utils
             int g = (hexRgb >> 8) & 0xff;
             int b = hexRgb & 0xff;
             return ColourRgb(r, g, b);
+        }
+        
+        public static void DeactivateGameObjects(params MonoBehaviour[] objects)
+        {
+            foreach (var behaviour in objects)
+            {
+                behaviour.gameObject.SetActive(false);
+            }
+        }
+        public static void ActivateGameObjects(params MonoBehaviour[] objects)
+        {
+            foreach (var behaviour in objects)
+            {
+                behaviour.gameObject.SetActive(true);
+            }
+        }
+        public static void ActivateAndResetScale(params MonoBehaviour[] objects)
+        {
+            foreach (var target in objects)
+            {
+                target.gameObject.SetActive(true);
+                target.transform.localScale = Vector3.one;
+            }
         }
 
     }

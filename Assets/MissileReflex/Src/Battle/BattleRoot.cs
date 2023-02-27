@@ -58,7 +58,7 @@ namespace MissileReflex.Src.Battle
             if (DebugParam.Instance.IsForceBattleOffline)
             {
                 Debug.Log("start offline battle");
-                battleProgressManager.StartBattle(GameMode.Single);
+                battleProgressManager.DebugStartBattle(GameMode.Single);
             }
 #endif
         }
@@ -71,13 +71,13 @@ namespace MissileReflex.Src.Battle
 #endif
                 gameRoot.Network.IsRunningNetwork() == false)
             {
-                if (GUI.Button(new Rect(0, 0, 200, 40), "Host")) battleProgressManager.StartBattle(GameMode.Host);
+                if (GUI.Button(new Rect(0, 0, 200, 40), "Host")) battleProgressManager.DebugStartBattle(GameMode.Host);
 
-                if (GUI.Button(new Rect(0, 40, 200, 40), "Client")) battleProgressManager.StartBattle(GameMode.Client);
+                if (GUI.Button(new Rect(0, 40, 200, 40), "Client")) battleProgressManager.DebugStartBattle(GameMode.Client);
                 
-                if (GUI.Button(new Rect(0, 80, 200, 40), "Shared")) battleProgressManager.StartBattle(GameMode.Shared);
+                if (GUI.Button(new Rect(0, 80, 200, 40), "Shared")) battleProgressManager.DebugStartBattle(GameMode.Shared);
                 
-                if (GUI.Button(new Rect(0, 120, 200, 40), "AutoHostOrClient")) battleProgressManager.StartBattle(GameMode.AutoHostOrClient);
+                if (GUI.Button(new Rect(0, 120, 200, 40), "AutoHostOrClient")) battleProgressManager.DebugStartBattle(GameMode.AutoHostOrClient);
             }
         }
 

@@ -25,30 +25,42 @@ namespace MissileReflex.Src.Battle
             _battleSharedState = state;
         }
 
-        public void StartBattle(GameMode gameMode)
+
+        public void DebugStartBattle(GameMode gameMode)
         {
-            startBattleInternal(gameMode).RunTaskHandlingError();
+            gameRoot.Network.DebugStartBattleNetwork(gameMode)
+                .ContinueWith(startBattleInternal).RunTaskHandlingError();
+        }
+        
+        public void StartBattle()
+        {
+            startBattleInternal().RunTaskHandlingError();
         }
 
-        private async UniTask startBattleInternal(GameMode gameMode)
+        private async UniTask startBattleInternal()
         {
-            if (_battleSharedState != null) Util.DestroyGameObject(_battleSharedState.gameObject);
-            battleRoot.Init();
-
-            // ネットワーク準備
-            await gameRoot.Network.StartBattleNetwork(gameMode);
-
             var runner = gameRoot.Network.Runner;
             Debug.Assert(runner != null);
             if (runner == null) return;
+            runner.SessionInfo.IsOpen = false;
+            
+            if (_battleSharedState != null) Util.DestroyGameObject(_battleSharedState.gameObject);
+            battleRoot.Init();
 
             // 共有状態オブジェクトの作成            
             runner.Spawn(battleSharedStatePrefab);
 
+            // プレイヤー召喚
+            var sortedPlayers = runner.ActivePlayers.ToList();
+            sortedPlayers.Sort((a, b) => a.PlayerId - b.PlayerId);
+            foreach (var player in sortedPlayers)
+                battleRoot.TankManager.SpawnPlayer(runner, player, battleRoot.TankManager.GetNextSpawnInfo(
+                    $"Player [{player.PlayerId}]"));
+            
+            runner.ProvideInput = true;
+            
             // AI召喚
-            // TODO: ちゃんと設定
-            int numPlayer = 2;
-            int numAi = 4 * ConstParam.NumTankTeam - numPlayer;
+            int numAi =  ConstParam.MaxTankAgent - sortedPlayers.Count;
             for (int i = 0; i < numAi; ++i)
                 battleRoot.TankManager.SpawnAi(runner, battleRoot.TankManager.GetNextSpawnInfo($"AI [{i + 1}]"));
             

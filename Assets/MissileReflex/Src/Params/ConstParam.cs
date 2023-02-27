@@ -43,6 +43,10 @@ namespace MissileReflex.Src.Params
         [SerializeField] private int battleTimeLastSpurt = 30;
         public int BattleTimeLastSpurt => battleTimeLastSpurt;
 
+        [SerializeField] private int matchingTimeLimit = 60;
+        public int MatchingTimeLimit => matchingTimeLimit;
+        
+
         public const string LiteralMainScene = "MainScene";
         public static string GetLiteralArena(int index)
         {
@@ -52,6 +56,7 @@ namespace MissileReflex.Src.Params
         public const float DeltaMilliF = 1e-3f;
 
         public const int NumTankTeam = 4;
+        public const int MaxTankAgent = NumTankTeam * 4;
 
         public static readonly Color Transparent = new Color(0, 0, 0, 0);
     }

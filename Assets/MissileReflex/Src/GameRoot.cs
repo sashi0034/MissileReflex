@@ -4,6 +4,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using MissileReflex.Src.Battle;
 using MissileReflex.Src.Connection;
+using MissileReflex.Src.Lobby;
 using MissileReflex.Src.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,12 +16,18 @@ namespace MissileReflex.Src
     {
 #nullable disable
         private static GameRoot _instance;
+        public static GameRoot Instance => _instance;
         
         [SerializeField] private BattleRoot battleRoot;
         public BattleRoot BattleRoot => battleRoot;
+        public BattleHud BattleHud => battleRoot.Hud;
 
         [SerializeField] private NetworkManager networkManager;
         public NetworkManager Network => networkManager;
+
+        [SerializeField] private LobbyHud lobbyHud;
+        public LobbyHud LobbyHud => lobbyHud;
+        
 #nullable enable
 
         private void Awake()
