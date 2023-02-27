@@ -34,6 +34,8 @@ namespace MissileReflex.Src
             
             // マッチング終了まで待機
             var sharedState = await gameRoot.LobbyHud.PanelStartMatching.OnMatchingFinished.Take(1);
+            
+            // 部屋を閉じる
             gameRoot.Network.ModifyRunner(runner => runner.SessionInfo.IsOpen = false);
 
             // TODO: 新規ステージ

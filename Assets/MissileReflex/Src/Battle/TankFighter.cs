@@ -76,7 +76,7 @@ namespace MissileReflex.Src.Battle
         [Networked] private string _tankName { get; set; } = "";
         public string TankName => _tankName;
         
-        private UniTask _interruptedTask = UniTask.CompletedTask;
+        private UniTask _taskDeadAndRespawn = UniTask.CompletedTask;
 
         public override void Spawned()
         {
@@ -133,7 +133,7 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         public override void FixedUpdateNetwork()
         {
-            if (_interruptedTask.Status == UniTaskStatus.Pending) return;
+            if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return;
             
             if (_state == ETankFighterState.Dead) return;
 
@@ -152,8 +152,8 @@ namespace MissileReflex.Src.Battle
         [Rpc(RpcSources.All, RpcTargets.All)]
         private void rpcallStartDie()
         {
-            if (_interruptedTask.Status == UniTaskStatus.Pending) return;
-            _interruptedTask = performDeadAndRespawn(battleRoot.CancelBattle)
+            if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return;
+            _taskDeadAndRespawn = performDeadAndRespawn(battleRoot.CancelBattle)
                 // 例外が起きた時も一応リスポーンするように
                 .RunTaskHandlingErrorAsync(_ => invokeRespawnAfterDead(battleRoot.CancelBattle));
         }

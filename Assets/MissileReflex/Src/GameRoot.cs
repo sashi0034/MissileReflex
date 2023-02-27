@@ -4,6 +4,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using MissileReflex.Src.Battle;
 using MissileReflex.Src.Connection;
+using MissileReflex.Src.Front;
 using MissileReflex.Src.Lobby;
 using MissileReflex.Src.Utils;
 using UnityEngine;
@@ -27,7 +28,10 @@ namespace MissileReflex.Src
 
         [SerializeField] private LobbyHud lobbyHud;
         public LobbyHud LobbyHud => lobbyHud;
-        
+
+        [SerializeField] private FrontHud frontHud;
+        public FrontHud FrontHud => frontHud;
+
 #nullable enable
 
         private void Awake()

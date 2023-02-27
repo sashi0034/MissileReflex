@@ -1,10 +1,12 @@
 ﻿#nullable enable
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Fusion;
+using MissileReflex.Src.Front;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using TMPro;
@@ -40,7 +42,12 @@ namespace MissileReflex.Src.Lobby
         [EventFunction]
         public void OnPushButton()
         {
-            onPushButtonInternal().RunTaskHandlingError();
+            onPushButtonInternal().RunTaskHandlingError(ex =>
+            {
+                gameRoot.FrontHud.PopupMessageBelt.PerformPopupCaution(PopupMessageBeltErrorKind.Handle(ex));
+                Util.DeactivateGameObjects(message, labelMatchingParticipant);
+                HudUtil.AnimBigZeroToOne(button.transform).Forget();
+            });
         }
 
         private async UniTask onPushButtonInternal()
@@ -52,7 +59,7 @@ namespace MissileReflex.Src.Lobby
             // 接続開始
             await lobbyHud.GameRoot.Network.StartMatching(GameMode.AutoHostOrClient);
 
-            if (tryGetNetworkRunner(out var runner) == false || runner == null) return;
+            if (tryGetNetworkRunner(out var runner) == false || runner == null) throw new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected);
 
             runner.Spawn(lobbySharedStatePrefab, onBeforeSpawned: (_, obj) =>
             {
@@ -63,13 +70,17 @@ namespace MissileReflex.Src.Lobby
             var sharedState = await syncSpawnLobbySharedState();
             HudUtil.AnimBigZeroToOne(labelMatchingParticipant.transform).Forget();
 
+            // 人が集まるまで待機
             while (true)
             {
+                if (runner == null) throw new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected);
+
                 sharedState.DecRemainingCount();
                 message.text = $"対戦相手を探しています...\n{sharedState.MatchingRemainingCount}";
-                labelMatchingParticipant.SetText(runner.SessionInfo.PlayerCount);
+                int numParticipants = runner.ActivePlayers.Count();
+                labelMatchingParticipant.SetText(numParticipants);
                 if (sharedState.MatchingRemainingCount <= 0) break;
-                if (runner.SessionInfo.PlayerCount == ConstParam.MaxTankAgent) break;
+                if (numParticipants == ConstParam.MaxTankAgent) break;
                 DOTween.Sequence()
                     .Append(message.transform.DOScale(1.05f, 0.5f).SetEase(Ease.OutBack))
                     .Append(message.transform.DOScale(1.0f, 0.5f).SetEase(Ease.InSine));
@@ -92,8 +103,6 @@ namespace MissileReflex.Src.Lobby
             Debug.Assert(runner != null);
             if (runner != null) return true;
             
-            Util.DeactivateGameObjects(message, labelMatchingParticipant);
-            Util.ActivateAndResetScale(button);
             return false;
 
         }
