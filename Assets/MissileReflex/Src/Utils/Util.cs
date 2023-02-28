@@ -1,11 +1,13 @@
 ﻿#nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace System.Runtime.CompilerServices
 {
@@ -168,6 +170,15 @@ namespace MissileReflex.Src.Utils
             {
                 target.gameObject.SetActive(true);
                 target.transform.localScale = Vector3.one;
+            }
+        }
+        
+        public static void ShuffleList<T>(this IList<T> array)  
+        {  
+            for (var i = array.Count - 1; i > 0; --i)
+            {
+                var j = Random.Range(0, i + 1);
+                (array[i], array[j]) = (array[j], array[i]);
             }
         }
 

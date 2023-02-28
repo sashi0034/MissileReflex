@@ -33,13 +33,19 @@ namespace MissileReflex.Src.Battle
         [Networked] private int _remainingTime { get; set; }
         public int RemainingTime => _remainingTime;
 
-        [Networked] [Capacity(ConstParam.NumTankTeam)]
+        [Networked(OnChanged = nameof(testTemp))] [Capacity(ConstParam.NumTankTeam)]
         private NetworkArray<BattleTeamState> _teamStates { get; } = MakeInitializer(new BattleTeamState[ConstParam.NumTankTeam]);
 
         public void AddRemainingTime(int amount)
         {
             _remainingTime += amount;
             if (_remainingTime < 0) _remainingTime = 0;
+        }
+        
+        private static void testTemp(Changed<BattleSharedState> changed)
+        {
+            // TODO: Tank用にそれぞれ状態を作り、切断対策にコピーも取る
+            Debug.Log("changed! " + Time.frameCount);
         }
         
         public ref BattleTeamState MutTeamStatesAt(int index)

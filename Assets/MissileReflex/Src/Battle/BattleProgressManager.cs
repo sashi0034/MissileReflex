@@ -20,6 +20,7 @@ namespace MissileReflex.Src.Battle
 #nullable enable
         private GameRoot gameRoot => battleRoot.GameRoot;
         private BattleSharedState? _battleSharedState;
+        public BattleSharedState? SharedState => _battleSharedState;
 
         public void RegisterSharedState(BattleSharedState state)
         {
@@ -29,6 +30,7 @@ namespace MissileReflex.Src.Battle
 
         public void DebugStartBattle(GameMode gameMode)
         {
+            battleRoot.Init();
             gameRoot.Network.DebugStartBattleNetwork(gameMode)
                 .ContinueWith(startBattleInternal).RunTaskHandlingError();
         }
@@ -46,38 +48,46 @@ namespace MissileReflex.Src.Battle
             var runner = gameRoot.Network.Runner;
             Debug.Assert(runner != null);
             if (runner == null) throw new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected);
-            runner.SessionInfo.IsOpen = false;
-            
-            Debug.Assert(_battleSharedState == null);
-            battleRoot.Init();
 
-            // 共有状態オブジェクトの作成            
-            runner.Spawn(battleSharedStatePrefab);
-
-            // プレイヤー召喚
-            var sortedPlayers = runner.ActivePlayers.ToList();
-            sortedPlayers.Sort((a, b) => a.PlayerId - b.PlayerId);
-            foreach (var player in sortedPlayers)
-                battleRoot.TankManager.SpawnPlayer(runner, player, battleRoot.TankManager.GetNextSpawnInfo(
-                    $"Player [{player.PlayerId}]"));
-            
-            runner.ProvideInput = true;
-            
-            // AI召喚
-            int numAi =  ConstParam.MaxTankAgent - sortedPlayers.Count;
-            for (int i = 0; i < numAi; ++i)
-                battleRoot.TankManager.SpawnAi(runner, battleRoot.TankManager.GetNextSpawnInfo($"AI [{i + 1}]"));
+            // ホストがいろいろ生成
+            if (runner.IsServer)
+            {
+                // プレイヤー召喚
+                summonTanks(runner);
+                
+                // 共有状態オブジェクトの作成            
+                runner.Spawn(battleSharedStatePrefab);
+            }
             
             // 共有状態オブジェクトがスポーンされるのを同期
             await UniTask.WaitUntil(() => _battleSharedState != null);
             updateHudTeamInfo();
 
+            runner.ProvideInput = true;
+
             var state = _battleSharedState;
+            if (state == null) throw new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected);
 
             // 制限時間が0になったら試合終了
             await decRemainingTimeUntilZero(state);
 
             battleRoot.TerminateCancelBattle();
+        }
+
+        private void summonTanks(NetworkRunner runner)
+        {
+            // プレイヤー召喚
+            var players = runner.ActivePlayers.ToList();
+            players.ShuffleList();
+            players.Sort((a, b) => a.PlayerId - b.PlayerId);
+            foreach (var player in players)
+                battleRoot.TankManager.SpawnPlayer(runner, player, battleRoot.TankManager.GetNextSpawnInfo(
+                    $"Player [{player.PlayerId}]"));
+
+            // AI召喚
+            int numAi = ConstParam.MaxTankAgent - players.Count;
+            for (int i = 0; i < numAi; ++i)
+                battleRoot.TankManager.SpawnAi(runner, battleRoot.TankManager.GetNextSpawnInfo($"AI [{i + 1}]"));
         }
 
         private async UniTask decRemainingTimeUntilZero(BattleSharedState state)

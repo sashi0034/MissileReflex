@@ -25,7 +25,8 @@ namespace MissileReflex.Src
         {
             Util.ActivateGameObjects(
                 gameRoot.Network, 
-                gameRoot.LobbyHud);
+                gameRoot.LobbyHud,
+                gameRoot.FrontHud);
             Util.DeactivateGameObjects(
                 gameRoot.BattleRoot, 
                 gameRoot.BattleHud);
@@ -44,6 +45,7 @@ namespace MissileReflex.Src
 
             // プレイヤー全員がシーンロードを終わるまで待機
             if (sharedState != null) sharedState.NotifyLocalLoadedArena();
+            gameRoot.BattleRoot.Init();
             await UniTask.WaitUntil(() => sharedState == null || sharedState.IsAllPlayersLoadedArena());
 
             HudUtil.AnimSmallOneToZero(gameRoot.LobbyHud.transform).Forget();

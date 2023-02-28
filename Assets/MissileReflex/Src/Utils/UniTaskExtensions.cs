@@ -27,6 +27,7 @@ namespace MissileReflex.Src.Utils
         {
             return
 #if UNITY_EDITOR
+                // atとinの間に色を付ける
                 message
                     .Replace(" at ", "</color> at ")
                     .replaceFirst("</color> at ", " at ")

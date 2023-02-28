@@ -60,7 +60,11 @@ namespace MissileReflex.Src.Connection
 
         private void subscribeLifetimeObject(NetworkLifetimeObject lifetimeObject)
         {
-            lifetimeObject.OnEndShutdown.Subscribe(reason => _lastLastShutdownReason = reason);
+            lifetimeObject.OnEndShutdown.Subscribe(reason =>
+            {
+                // この時点ではbattleRoot.Progress.SharedState.RemainingTimeは生きている
+                _lastLastShutdownReason = reason;
+            });
         }
 
         public async UniTask StartMatching(GameMode mode)

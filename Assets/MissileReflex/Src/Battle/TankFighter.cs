@@ -149,7 +149,7 @@ namespace MissileReflex.Src.Battle
             updateInputShoot(Runner.DeltaTime);
         }
 
-        [Rpc(RpcSources.All, RpcTargets.All)]
+        [Rpc]
         private void rpcallStartDie()
         {
             if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return;
@@ -160,6 +160,7 @@ namespace MissileReflex.Src.Battle
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)
         {
+            // 位置移動もdeadの中でやっている
             await performDead(cancel);
 
             invokeRespawnAfterDead(cancel);

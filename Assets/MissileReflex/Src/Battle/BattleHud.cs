@@ -1,10 +1,12 @@
 ﻿using MissileReflex.Src.Battle.Hud;
+using MissileReflex.Src.Utils;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
 {
     public class BattleHud : MonoBehaviour
     {
+#nullable disable
         [SerializeField] private LabelTankNameManager labelTankNameManager;
         public LabelTankNameManager LabelTankNameManager => labelTankNameManager;
 
@@ -19,11 +21,24 @@ namespace MissileReflex.Src.Battle
 
         [SerializeField] private LabelScoreAdditionOnKillManager labelScoreAdditionOnKillManager;
         public LabelScoreAdditionOnKillManager LabelScoreAdditionOnKillManager => labelScoreAdditionOnKillManager;
+
+        [SerializeField] private SectionTeamResult sectionTeamResult;
+        public SectionTeamResult SectionTeamResult => sectionTeamResult;
         
+#nullable enable
 
         public void Init()
         {
-            gameObject.SetActive(true);
+            Util.ActivateGameObjects(
+                this,
+                labelTankNameManager,
+                panelRemainingTime,
+                panelCurrTeamInfoManager,
+                labelKillOpponentManager,
+                labelScoreAdditionOnKillManager);
+            Util.DeactivateGameObjects(
+                sectionTeamResult);
+            
             labelTankNameManager.Init();
             panelRemainingTime.Init();
             panelCurrTeamInfoManager.Init();
