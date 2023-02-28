@@ -5,6 +5,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Fusion;
 using MissileReflex.Src.Battle.Hud;
+using MissileReflex.Src.Front;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
@@ -34,17 +35,20 @@ namespace MissileReflex.Src.Battle
         
         public void StartBattle()
         {
-            startBattleInternal().RunTaskHandlingError();
+            startBattleInternal().RunTaskHandlingError(ex =>
+            {
+                gameRoot.FrontHud.PopupMessageBelt.PerformPopupCaution(PopupMessageBeltErrorKind.Handle(ex, gameRoot.Network));
+            });
         }
 
         private async UniTask startBattleInternal()
         {
             var runner = gameRoot.Network.Runner;
             Debug.Assert(runner != null);
-            if (runner == null) return;
+            if (runner == null) throw new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected);
             runner.SessionInfo.IsOpen = false;
             
-            if (_battleSharedState != null) Util.DestroyGameObject(_battleSharedState.gameObject);
+            Debug.Assert(_battleSharedState == null);
             battleRoot.Init();
 
             // 共有状態オブジェクトの作成            

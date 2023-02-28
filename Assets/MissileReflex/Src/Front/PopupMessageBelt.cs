@@ -3,6 +3,8 @@
 using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Fusion;
+using MissileReflex.Src.Connection;
 using MissileReflex.Src.Utils;
 using TMPro;
 using UnityEngine;
@@ -25,10 +27,14 @@ namespace MissileReflex.Src.Front
             Kind = kind;
         }
 
-        public static PopupMessageBeltErrorKind Handle(Exception ex)
+        public static PopupMessageBeltErrorKind Handle(Exception ex, NetworkManager networkManager)
         {
             if (ex is PopupMessageBeltErrorKind expected) return expected;
-            return new PopupMessageBeltErrorKind(EPopupMessageBeltKind.Unexpected);
+            return networkManager.LastShutdownReason switch
+            {
+                ShutdownReason.DisconnectedByPluginLogic => new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected),
+                _ => new PopupMessageBeltErrorKind(EPopupMessageBeltKind.Unexpected)
+            };
         }
     }
     

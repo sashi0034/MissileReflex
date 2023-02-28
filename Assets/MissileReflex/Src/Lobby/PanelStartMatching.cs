@@ -28,8 +28,8 @@ namespace MissileReflex.Src.Lobby
 #nullable enable
         private GameRoot gameRoot => lobbyHud.GameRoot;
 
-        private Subject<LobbySharedState> _onMatchingFinished = new Subject<LobbySharedState>();
-        public IObservable<LobbySharedState> OnMatchingFinished => _onMatchingFinished;
+        private Subject<LobbySharedState?> _onMatchingFinished = new ();
+        public IObservable<LobbySharedState?> OnMatchingFinished => _onMatchingFinished;
         
 
         [EventFunction]
@@ -44,7 +44,7 @@ namespace MissileReflex.Src.Lobby
         {
             onPushButtonInternal().RunTaskHandlingError(ex =>
             {
-                gameRoot.FrontHud.PopupMessageBelt.PerformPopupCaution(PopupMessageBeltErrorKind.Handle(ex));
+                gameRoot.FrontHud.PopupMessageBelt.PerformPopupCaution(PopupMessageBeltErrorKind.Handle(ex, gameRoot.Network));
                 Util.DeactivateGameObjects(message, labelMatchingParticipant);
                 HudUtil.AnimBigZeroToOne(button.transform).Forget();
             });

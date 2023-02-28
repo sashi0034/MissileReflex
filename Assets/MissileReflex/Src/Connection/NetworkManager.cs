@@ -24,6 +24,8 @@ namespace MissileReflex.Src.Connection
 #nullable enable
         private NetworkLifetimeObject? _lifetimeObject;
         public NetworkRunner? Runner => _lifetimeObject != null ? _lifetimeObject.NetworkRunner : null;
+        private ShutdownReason _lastLastShutdownReason = ShutdownReason.Ok;
+        public ShutdownReason LastShutdownReason => _lastLastShutdownReason;
 
 
         public void ModifyRunner(Action<NetworkRunner> modifier)
@@ -37,6 +39,8 @@ namespace MissileReflex.Src.Connection
         {
             _lifetimeObject = Instantiate(networkLifetimeObjectPrefab, transform);
             _lifetimeObject.Init(battleRoot);
+            subscribeLifetimeObject(_lifetimeObject);
+
             var runner = _lifetimeObject.NetworkRunner;
             runner.ProvideInput = true;
 
@@ -53,11 +57,18 @@ namespace MissileReflex.Src.Connection
 
             await UniTask.WhenAll(taskSceneLoad, taskStartGame.AsUniTask());
         }
-        
+
+        private void subscribeLifetimeObject(NetworkLifetimeObject lifetimeObject)
+        {
+            lifetimeObject.OnEndShutdown.Subscribe(reason => _lastLastShutdownReason = reason);
+        }
+
         public async UniTask StartMatching(GameMode mode)
         {
             _lifetimeObject = Instantiate(networkLifetimeObjectPrefab, transform);
             _lifetimeObject.Init(battleRoot);
+            subscribeLifetimeObject(_lifetimeObject);
+            
             var runner = _lifetimeObject.NetworkRunner;
             runner.ProvideInput = false;
 

@@ -43,8 +43,8 @@ namespace MissileReflex.Src
             await gameRoot.LoadScene(ConstParam.GetLiteralArena(arenaIndex));
 
             // プレイヤー全員がシーンロードを終わるまで待機
-            sharedState.NotifyLocalLoadedArena();
-            await UniTask.WaitUntil(() => sharedState.IsAllPlayersLoadedArena());
+            if (sharedState != null) sharedState.NotifyLocalLoadedArena();
+            await UniTask.WaitUntil(() => sharedState == null || sharedState.IsAllPlayersLoadedArena());
 
             HudUtil.AnimSmallOneToZero(gameRoot.LobbyHud.transform).Forget();
             

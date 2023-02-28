@@ -24,6 +24,10 @@ namespace MissileReflex.Src.Connection
         private Subject<Unit> _onEndSceneLoadDone = new Subject<Unit>();
         public Subject<Unit> OnEndSceneLoadDone => _onEndSceneLoadDone;
 
+        private Subject<ShutdownReason> _onEndShutdown = new();
+        public IObservable<ShutdownReason> OnEndShutdown => _onEndShutdown;
+        
+
         private readonly BoolFlag _pushedMouseRight = new();
         private readonly BoolFlag _pushedMouseLeft = new();
 
@@ -49,7 +53,9 @@ namespace MissileReflex.Src.Connection
         {}
 
         public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
-        {}
+        {
+            _onEndShutdown.OnNext(shutdownReason);
+        }
 
         public void OnConnectedToServer(NetworkRunner runner)
         {}
