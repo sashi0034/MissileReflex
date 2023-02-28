@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -182,6 +183,51 @@ namespace MissileReflex.Src.Utils
             }
         }
 
+        public static void AssertNotNullSerializeFieldsRecursive(
+            MonoBehaviour checking, 
+            string projectNameSpace, 
+            List<MonoBehaviour> checkedList)
+        {
+#if UNITY_EDITOR
+            bool isRoot = checkedList.Count == 0;
+            var fields = checking.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+            checkedList.Add(checking);
+
+            foreach (var field in fields)
+            {
+                if (field.GetCustomAttribute(typeof(SerializeField), true) == null) continue;
+
+                var fieldValue = field.GetValue(checking);
+                
+                if (fieldValue == null ||
+                    TryAccessGameObject(fieldValue) is UnassignedReferenceException)
+                {
+                    Debug.LogError( $"{field.Name} is null in {checking.name}");
+                }
+
+                var fieldType = field.FieldType;
+                if (fieldType.Namespace == null) continue;
+                if (fieldType.Namespace.StartsWith(projectNameSpace) == false) continue;
+                if (fieldValue is MonoBehaviour fieldMonoBehaviour && checkedList.Contains(fieldMonoBehaviour) == false)
+                    AssertNotNullSerializeFieldsRecursive(fieldMonoBehaviour, projectNameSpace, checkedList);
+            } 
+            if (isRoot) Debug.Log("done null check: " + checkedList.Count);
+#endif
+        }
+
+        public static Exception? TryAccessGameObject(object? fieldValue)
+        {
+            if (fieldValue is not GameObject fieldGameObject) return null;
+            try
+            {
+                _ = fieldGameObject.activeSelf;
+            }
+            catch (Exception e)
+            {
+                return e;
+            }
+            return null;
+        }
     }
     
     [AttributeUsage(AttributeTargets.Method)]

@@ -37,6 +37,7 @@ namespace MissileReflex.Src
         private void Awake()
         {
             if (Util.EnsureSingleton(this, ref _instance) == false) return;
+            Util.AssertNotNullSerializeFieldsRecursive(this, nameof(MissileReflex),new ());
         }
         
         [EventFunction]
