@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using UnityEngine;
@@ -8,9 +9,11 @@ namespace MissileReflex.Src.Battle.Hud
 {
     public class LabelKillOpponentManager : MonoBehaviour
     {
+#nullable disable
         [SerializeField] private BattleRoot battleRoot;
         [SerializeField] private LabelKillOpponent labelKillOpponentPrefab;
         [SerializeField] private VerticalLayoutGroup verticalLayoutGroup;
+#nullable enable
 
         public void Start()
         { }

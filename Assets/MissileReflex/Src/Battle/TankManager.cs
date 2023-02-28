@@ -56,6 +56,7 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         private void Update()
         {
+            if (battleRoot.CancelBattle.IsCancellationRequested) return;
             _processCalcTankSqrMagAdjMat.Update(Time.deltaTime);
         }
 

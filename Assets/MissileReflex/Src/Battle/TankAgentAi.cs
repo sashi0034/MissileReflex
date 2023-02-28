@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -37,8 +38,8 @@ namespace MissileReflex.Src.Battle
         private ref TankFighterInput tankIn => ref selfTank.Input;
         private TankFighterPrediction tankPredict => selfTank.Prediction;
 
-        private BattleRoot BattleRoot => BattleRoot.Instance;
-        private TankManager tankManager => BattleRoot.TankManager;
+        private BattleRoot battleRoot => BattleRoot.Instance;
+        private TankManager tankManager => battleRoot.TankManager;
 
         private static TankAiAgentParam param => ConstParam.Instance.TankAiAgentParam;
         
@@ -49,20 +50,20 @@ namespace MissileReflex.Src.Battle
         public void Init(TankSpawnInfo spawnInfo)
         {
             selfTank.Init(spawnInfo, null);
-            processAiRoutine().Forget();
+            processAiRoutine(battleRoot.CancelBattle).RunTaskHandlingError();
         }
 
-        private async UniTask processAiRoutine()
+        private async UniTask processAiRoutine(CancellationToken cancel)
         {
             while (gameObject != null)
             {
-                await UniTask.Delay(aiUpdateInterval);
+                await UniTask.Delay(aiUpdateInterval, cancellationToken: cancel);
 
-                await processAiRoutineFrame();
+                await processAiRoutineFrame(cancel);
             }
         }
 
-        private async UniTask processAiRoutineFrame()
+        private async UniTask processAiRoutineFrame(CancellationToken cancel)
         {
             if (selfTank.IsAlive() == false) return;
 
@@ -73,7 +74,7 @@ namespace MissileReflex.Src.Battle
             if (approachingMissile != null)
             {
                 // ミサイルと当たりそうなので避ける
-                await avoidApproachingMissile(approachingMissile, aiUpdateInterval);
+                await avoidApproachingMissile(approachingMissile, aiUpdateInterval, cancel);
                 return;
             }
 
@@ -115,7 +116,7 @@ namespace MissileReflex.Src.Battle
             return target;
         }
 
-        private async UniTask avoidApproachingMissile(Missile approachingMissile, int evasionTime)
+        private async UniTask avoidApproachingMissile(Missile approachingMissile, int evasionTime, CancellationToken cancel)
         {
             var missilePos = approachingMissile.Pos;
             var evasionVec = findSpaciousOrthogonalVec(selfTankPos, missilePos - selfTankPos);
@@ -127,7 +128,7 @@ namespace MissileReflex.Src.Battle
             tankIn.SetShotRadFromVec3(missilePos - selfTankPos);
             tankIn.MakeShotRequest();
             
-            await UniTask.Delay(evasionTime);
+            await UniTask.Delay(evasionTime, cancellationToken: cancel);
         }
 
         private static bool isNoWallBetweenTargetTank(Vector3 selfPos, TankFighter targetTank)

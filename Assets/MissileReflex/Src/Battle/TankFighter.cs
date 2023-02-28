@@ -133,29 +133,29 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         public override void FixedUpdateNetwork()
         {
+            if (battleRoot.CancelBattle.IsCancellationRequested) return;
             if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return;
             
             if (_state == ETankFighterState.Dead) return;
 
-            if (_hp.Value <= 0)
-            {
-                // 死んだ
-                rpcallStartDie();
-                return;
-            }
+            // 死んでるかチェック
+            if (checkStartDie()) return;
             
             checkInputMove(Runner.DeltaTime);
             
             updateInputShoot(Runner.DeltaTime);
         }
-
-        [Rpc]
-        private void rpcallStartDie()
+        
+        private bool checkStartDie()
         {
-            if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return;
+            if (_hp.Value > 0) return false;
+            if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return false;
+            
+            // 死んだ
             _taskDeadAndRespawn = performDeadAndRespawn(battleRoot.CancelBattle)
                 // 例外が起きた時も一応リスポーンするように
                 .RunTaskHandlingErrorAsync(_ => invokeRespawnAfterDead(battleRoot.CancelBattle));
+            return true;
         }
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)
@@ -223,7 +223,8 @@ namespace MissileReflex.Src.Battle
             Util.DelayDestroyEffect(effect.ParticleSystem, cancel).Forget();
             
             // を倒したの表示
-            if (isKilledByLocalPlayer || IsOwnerLocalPlayer()) battleRoot.Hud.LabelKillOpponentManager.AppendLabel(lastAttacker, this);
+            if (lastAttacker != null && (isKilledByLocalPlayer || IsOwnerLocalPlayer())) 
+                battleRoot.Hud.LabelKillOpponentManager.AppendLabel(lastAttacker, this);
 
             // スコア加算
             if (lastAttacker != null) battleRoot.Progress.MutateScoreOnKill(lastAttacker, this);

@@ -42,10 +42,25 @@ namespace MissileReflex.Src.Battle
 
             // 無敵中ならキャンセル
             if (tank.IsImmortalNow()) return false;
-                
-            tank.Hp.CauseDamage(damageAmount, owner.OwnerFighter);
-            _hitTankCount++;
+
+            if (hasAuthorityDamageTank(tank)) rpcallDamageTank(tank);
             return true;
+        }
+
+        private bool hasAuthorityDamageTank(TankFighter tank)
+        {
+            return
+                // AIはホストでダメージ判定
+                (tank.OwnerNetworkPlayer == PlayerRef.None && Runner.IsServer) ||
+                // プレイヤーは自分の捜査対象のみ判定
+                tank.OwnerNetworkPlayer == Runner.LocalPlayer;
+        }
+
+        [Rpc]
+        private void rpcallDamageTank(TankFighter target)
+        {
+            target.Hp.CauseDamage(damageAmount, owner.OwnerFighter);
+            _hitTankCount++;
         }
         
         private bool checkHitWithMissile(Collider other)
