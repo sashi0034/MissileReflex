@@ -14,11 +14,11 @@ namespace MissileReflex.Src.Utils
             await target.DOScale(0f, 0.3f).SetEase(Ease.InBack);
             target.gameObject.SetActive(false);
         }
-        public static async UniTask AnimBigZeroToOne(Transform target)
+        public static async UniTask AnimBigZeroToOne(Transform target, float duration = 0.3f)
         {
             target.gameObject.SetActive(true);
             target.localScale = Vector3.zero;
-            await target.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+            await target.DOScale(1f, duration).SetEase(Ease.OutBack);
         }
 
     }

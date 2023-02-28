@@ -87,6 +87,7 @@ namespace MissileReflex.Src.Battle
             gameObject.SetActive(true);
             missileManager.Init();
             tankManager.Init();
+            battleProgressManager.Init();
             hud.Init();
         }
     }

@@ -10,54 +10,40 @@ using UnityEngine.ProBuilder;
 
 namespace MissileReflex.Src.Battle
 {
-    public struct BattleTeamState : INetworkStruct
+    public record BattleTankScore(
+        TankFighterId Id,
+        TankFighterTeam Team,
+        string TankName,
+        TankScore Score);
+    
+    public record BattleTeamScore(
+        int TeamId,
+        int Score,
+        int Order)
     {
-        private int _score;
-        public int Score => _score;
-
-        public BattleTeamState IncScore(int delta)
+        public BattleTeamScore AddScore(int score)
         {
-            _score = Mathf.Max(_score +　delta, 0);
-            return this;
+            return this with { Score = Score + score };
         }
-    }
-
-    public record BattleTeamStateWithId(
-        int Id,
-        BattleTeamState State
-        )
-    {}
+        public BattleTeamScore SetOrder(int order)
+        {
+            return this with { Order = order };
+        }
+    };
 
     public class BattleSharedState : NetworkBehaviour
     {
         [Networked] private int _remainingTime { get; set; }
         public int RemainingTime => _remainingTime;
 
-        [Networked(OnChanged = nameof(testTemp))] [Capacity(ConstParam.NumTankTeam)]
-        private NetworkArray<BattleTeamState> _teamStates { get; } = MakeInitializer(new BattleTeamState[ConstParam.NumTankTeam]);
+        // [Networked] [Capacity(ConstParam.NumTankTeam)]
+        // private NetworkArray<BattleTeamState> _teamStates { get; } = MakeInitializer(new BattleTeamState[ConstParam.NumTankTeam]);
 
         public void AddRemainingTime(int amount)
         {
             _remainingTime += amount;
             if (_remainingTime < 0) _remainingTime = 0;
         }
-        
-        private static void testTemp(Changed<BattleSharedState> changed)
-        {
-            // TODO: Tank用にそれぞれ状態を作り、切断対策にコピーも取る
-            Debug.Log("changed! " + Time.frameCount);
-        }
-        
-        public ref BattleTeamState MutTeamStatesAt(int index)
-        {
-            return ref _teamStates.GetRef(index);
-        }
-
-        public int GetTeamStatesLength()
-        {
-            return _teamStates.Length;
-        }
-        
 
         private static BattleRoot battleRoot => BattleRoot.Instance; 
 

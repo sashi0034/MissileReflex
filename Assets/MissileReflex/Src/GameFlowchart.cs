@@ -51,7 +51,7 @@ namespace MissileReflex.Src
             HudUtil.AnimSmallOneToZero(gameRoot.LobbyHud.transform).Forget();
             
             // 試合開始
-            gameRoot.BattleRoot.Progress.StartBattle();
+            gameRoot.BattleRoot.Progress.FlowBattle();
             
         }
         

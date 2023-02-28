@@ -62,8 +62,9 @@ namespace MissileReflex.Src.Connection
         {
             lifetimeObject.OnEndShutdown.Subscribe(reason =>
             {
-                // この時点ではbattleRoot.Progress.SharedState.RemainingTimeは生きている
+                // この時点では各NetworkObjectsは生きているはず
                 _lastLastShutdownReason = reason;
+                battleRoot.Progress.FinalizeResult();
             });
         }
 
@@ -89,7 +90,7 @@ namespace MissileReflex.Src.Connection
             // _runner.Disconnect(_runner.LocalPlayer);
             // Util.DestroyComponent(gameObject.GetComponent<NetworkSceneManagerBase>());
             // Util.DestroyComponent(_runner);
-            // Shutdown()かも?
+            // Shutdown() かも?
         }
 
         public bool IsRunningNetwork()

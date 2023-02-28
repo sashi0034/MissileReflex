@@ -1,5 +1,9 @@
-﻿using MissileReflex.Src.Battle.Hud;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using MissileReflex.Src.Battle.Hud;
 using MissileReflex.Src.Utils;
+using TMPro;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
@@ -24,6 +28,12 @@ namespace MissileReflex.Src.Battle
 
         [SerializeField] private SectionTeamResult sectionTeamResult;
         public SectionTeamResult SectionTeamResult => sectionTeamResult;
+
+        [SerializeField] private TextMeshProUGUI labelBattleFinish;
+        public TextMeshProUGUI LabelBattleFinish => labelBattleFinish;
+
+        [SerializeField] private TextMeshProUGUI labelBattleStart;
+        public TextMeshProUGUI LabelBattleStart => labelBattleStart;
         
 #nullable enable
 
@@ -37,13 +47,39 @@ namespace MissileReflex.Src.Battle
                 labelKillOpponentManager,
                 labelScoreAdditionOnKillManager);
             Util.DeactivateGameObjects(
-                sectionTeamResult);
+                sectionTeamResult,
+                labelBattleFinish,
+                labelBattleStart);
             
             labelTankNameManager.Init();
             panelRemainingTime.Init();
             panelCurrTeamInfoManager.Init();
             labelKillOpponentManager.Init();
             labelScoreAdditionOnKillManager.Init();
+        }
+
+        public IEnumerable<MonoBehaviour> ListHudOnPlaying()
+        {
+            return new MonoBehaviour[]
+            {
+                panelRemainingTime,
+                panelCurrTeamInfoManager
+            };
+        }
+
+        public async UniTask PerformLabelBattleStart()
+        {
+            await performAppearCenterLabel(labelBattleStart.transform);
+        }
+        public async UniTask PerformLabelBattleFinish()
+        {
+            await performAppearCenterLabel(labelBattleFinish.transform);
+        }
+        private static async UniTask performAppearCenterLabel(Transform label)
+        {
+            await HudUtil.AnimBigZeroToOne(label, 1f);
+            await UniTask.Delay(2500);
+            await HudUtil.AnimSmallOneToZero(label);
         }
     }
 }

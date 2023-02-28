@@ -156,6 +156,17 @@ namespace MissileReflex.Src.Battle
         }
     }
 
+    public struct TankScore : INetworkStruct
+    {
+        private int _score;
+        public int Score => _score;
+
+        public TankScore IncScore(int delta)
+        {
+            _score = Mathf.Max(_score +　delta, 0);
+            return this;
+        }
+    }
     public readonly struct TankFighterId
     {
         private readonly int _value;

@@ -4,25 +4,35 @@ using UnityEngine;
 
 namespace MissileReflex.Src.Utils
 {
-    public static class UniTaskExtensions
+    public static class UniTaskUtil
     {
         public static async UniTask RunTaskHandlingErrorAsync(this UniTask task, Action<Exception> onError) {
             try {
                 await task;
             } catch(Exception e)
             {
+                LogTaskHandlingError(e);
                 onError(e);
-                Debug.LogError($"{e.Message}\n{e.StackTrace.colorizeStackTrance()}");
             }
         }
     
         public static async UniTask RunTaskHandlingErrorAsync(this UniTask task) {
             try {
                 await task;
-            } catch(Exception e) {
-                Debug.LogError($"{e.Message}\n{e.StackTrace.colorizeStackTrance()}");
+            } catch(Exception e)
+            {
+                LogTaskHandlingError(e);
             }
         }
+
+        public static void LogTaskHandlingError(Exception e)
+        {
+            if (e is OperationCanceledException)
+                Debug.LogWarning($"{e.Message}\n{e.StackTrace.colorizeStackTrance()}");
+            else
+                Debug.LogError($"{e.Message}\n{e.StackTrace.colorizeStackTrance()}");
+        }
+
         private static string colorizeStackTrance(this string message)
         {
             return

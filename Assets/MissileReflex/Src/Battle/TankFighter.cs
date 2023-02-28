@@ -76,6 +76,10 @@ namespace MissileReflex.Src.Battle
         [Networked] private string _tankName { get; set; } = "";
         public string TankName => _tankName;
         
+        [Networked]         
+        private ref TankScore _earnedScore => ref MakeRef<TankScore>();
+        public ref TankScore EarnedScore => ref _earnedScore;
+        
         private UniTask _taskDeadAndRespawn = UniTask.CompletedTask;
 
         public override void Spawned()
@@ -211,11 +215,11 @@ namespace MissileReflex.Src.Battle
             // 爆発
             var effect = Instantiate(effectTankExplosion, transform.parent);
             Debug.Assert(effect != null);
-            effect.transform.position = transform.position;
+            if (effect != null) effect.transform.position = transform.position;
             
             var lastAttacker = _hp.FindLastAttacker(Runner);
             bool isKilledByLocalPlayer = lastAttacker != null && lastAttacker._ownerNetwotkPlayer == Runner.LocalPlayer;
-            effect.Effect.cameraShake.enabled = 
+            if (effect != null) effect.Effect.cameraShake.enabled = 
                 // ローカルプレイヤー自身がやられたときか
                 _ownerNetwotkPlayer == Runner.LocalPlayer ||
                 // ローカルプレイヤー自身が攻撃したときにカメラシェイク

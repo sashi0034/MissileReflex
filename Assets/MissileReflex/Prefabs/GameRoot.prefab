@@ -1740,6 +1740,7 @@ MonoBehaviour:
   - {fileID: 7175768429699230095}
   - {fileID: 4195503362763902127}
   buttonConfirm: {fileID: 7772577955657674598}
+  battleHud: {fileID: 2602170366940902541}
 --- !u!1 &4903319290278021510
 GameObject:
   m_ObjectHideFlags: 0
@@ -2443,6 +2444,8 @@ MonoBehaviour:
   labelKillOpponentManager: {fileID: 4651861915046544033}
   labelScoreAdditionOnKillManager: {fileID: 4790662404073280834}
   sectionTeamResult: {fileID: 4586995977178840929}
+  labelBattleFinish: {fileID: 4063797849866152905}
+  labelBattleStart: {fileID: 1111338612053455992}
 --- !u!1 &6259149965912865688
 GameObject:
   m_ObjectHideFlags: 0

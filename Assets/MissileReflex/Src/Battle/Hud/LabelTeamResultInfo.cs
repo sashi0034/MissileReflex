@@ -11,9 +11,16 @@ namespace MissileReflex.Src.Battle.Hud
     {
 #nullable disable
         [SerializeField] private TextMeshProUGUI textOrder;
+        public TextMeshProUGUI TextOrder => textOrder;
+        
         [SerializeField] private Image imageTeam;
+        public Image ImageTeam => imageTeam;
+
         [SerializeField] private TextMeshProUGUI textScore;
+        public TextMeshProUGUI TextScore => textScore;
+        
         [SerializeField] private UiTextAndText[] textScoreAndPlayerList;
+        public UiTextAndText[] TextScoreAndPlayerList => textScoreAndPlayerList;
 #nullable enable
     }
 }

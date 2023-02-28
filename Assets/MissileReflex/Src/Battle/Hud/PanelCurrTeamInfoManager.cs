@@ -47,24 +47,27 @@ namespace MissileReflex.Src.Battle.Hud
             }
         }
 
-        public void UpdateInfo(BattleTeamStateWithId[] stateList)
+        public void UpdateInfo(BattleTeamScore[] sortedScores)
         {
             if (_isLastSpurt) return;
             
-            Debug.Assert(stateList.Count() == panelCurrTeamInfoList.Length);
-            stateList.Sort((a, b) => b.State.Score - a.State.Score);
-
-            int checkingScore = -1;
-            int checkingOrder = 0;
-            for (var index = 0; index < stateList.Length; index++)
+            Debug.Assert(sortedScores.Count() == panelCurrTeamInfoList.Length);
+            
+            for (var index = 0; index < sortedScores.Length; index++)
             {
-                var state = stateList[index];
-                var (teamId, teamState) = state;
-
-                if (checkingScore != (checkingScore = teamState.Score)) checkingOrder++;
-
-                panelCurrTeamInfoList[teamId].UpdateInfo(this, teamState, checkingOrder, index);
+                var score = sortedScores[index];
+                panelCurrTeamInfoList[score.TeamId].UpdateInfo(this, score, score.Order, index);
             }
+        }
+
+        public Sprite[] GetIcons()
+        {
+            return panelCurrTeamInfoList.Select(panel => panel.ImageIcon.sprite).ToArray();
+        }
+        
+        public Animator[] GetIconAnimators()
+        {
+            return panelCurrTeamInfoList.Select(panel => panel.Animator).ToArray();
         }
     }
 }

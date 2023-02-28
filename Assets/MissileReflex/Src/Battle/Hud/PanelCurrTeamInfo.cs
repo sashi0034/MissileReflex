@@ -5,6 +5,7 @@ using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace MissileReflex.Src.Battle.Hud
 {
@@ -17,7 +18,12 @@ namespace MissileReflex.Src.Battle.Hud
         [SerializeField] private TextMeshProUGUI textScore;
         public TextMeshProUGUI TextScore => textScore;
 
+        [SerializeField] private Image imageIcon;
+        public Image ImageIcon => imageIcon;
+
         [SerializeField] private Animator iconAnimator;
+        public Animator Animator => iconAnimator;
+
 #nullable enable
         private const int invalidIndex = -1;
         private int _currOrder = invalidIndex;
@@ -38,11 +44,11 @@ namespace MissileReflex.Src.Battle.Hud
 
         public void UpdateInfo(
             PanelCurrTeamInfoManager manager, 
-            BattleTeamState teamState, 
+            BattleTeamScore teamScore, 
             int order, 
             int viewIndex)
         {
-            textScore.text = teamState.Score.ToString();
+            textScore.text = teamScore.Score.ToString();
             textOrder.text = Util.StringifyOrder(order);
             iconAnimator.speed = 0.5f + 0.5f * (ConstParam.NumTankTeam - order);
 

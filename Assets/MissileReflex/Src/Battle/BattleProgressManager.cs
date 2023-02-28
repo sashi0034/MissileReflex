@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -8,10 +9,15 @@ using MissileReflex.Src.Battle.Hud;
 using MissileReflex.Src.Front;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
+using Sirenix.Utilities;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
 {
+    public record BattleFinalResult(
+        BattleTankScore[] TankScores,
+        BattleTeamScore[] TeamScores);
+    
     public class BattleProgressManager : MonoBehaviour
     {
 #nullable disable
@@ -21,7 +27,13 @@ namespace MissileReflex.Src.Battle
         private GameRoot gameRoot => battleRoot.GameRoot;
         private BattleSharedState? _battleSharedState;
         public BattleSharedState? SharedState => _battleSharedState;
+        private BattleFinalResult? _result;
 
+        public void Init()
+        {
+            _result = null;
+        }
+        
         public void RegisterSharedState(BattleSharedState state)
         {
             _battleSharedState = state;
@@ -32,15 +44,37 @@ namespace MissileReflex.Src.Battle
         {
             battleRoot.Init();
             gameRoot.Network.DebugStartBattleNetwork(gameMode)
-                .ContinueWith(startBattleInternal).RunTaskHandlingError();
+                .ContinueWith(startBattleInternal)
+                .RunTaskHandlingError();
         }
         
-        public void StartBattle()
+        public void FlowBattle()
         {
-            startBattleInternal().RunTaskHandlingError(ex =>
+            flowBattleInternal().RunTaskHandlingError(showUiHandlingError);
+        }
+
+        private void showUiHandlingError(Exception e)
+        {
+            // エラーが起こった時にポップアップ表示
+            gameRoot.FrontHud.PopupMessageBelt.PerformPopupCaution(
+                PopupMessageBeltErrorKind.Handle(e, gameRoot.Network));
+        }
+
+        private async UniTask flowBattleInternal()
+        {
+            try
             {
-                gameRoot.FrontHud.PopupMessageBelt.PerformPopupCaution(PopupMessageBeltErrorKind.Handle(ex, gameRoot.Network));
-            });
+                await startBattleInternal();
+            }
+            catch (Exception e)
+            {
+                UniTaskUtil.LogTaskHandlingError(e);
+                showUiHandlingError(e);
+            }
+
+            await performFinishBattle();
+            
+            Debug.Log("finish battle flowchart");
         }
 
         private async UniTask startBattleInternal()
@@ -49,19 +83,18 @@ namespace MissileReflex.Src.Battle
             Debug.Assert(runner != null);
             if (runner == null) throw new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected);
 
-            // ホストがいろいろ生成
-            if (runner.IsServer)
-            {
-                // プレイヤー召喚
-                summonTanks(runner);
-                
-                // 共有状態オブジェクトの作成            
-                runner.Spawn(battleSharedStatePrefab);
-            }
-            
+            // ホストで共有状態オブジェクトの作成     
+            if (runner.IsServer) runner.Spawn(battleSharedStatePrefab);
+            updateHudTeamInfo();
+                        
             // 共有状態オブジェクトがスポーンされるのを同期
             await UniTask.WaitUntil(() => _battleSharedState != null);
-            updateHudTeamInfo();
+            
+            // スタートの表示
+            battleRoot.Hud.PerformLabelBattleStart().Forget();
+            
+            // ホストでタンク召喚
+            if (runner.IsServer) summonTanks(runner);
 
             runner.ProvideInput = true;
 
@@ -70,8 +103,26 @@ namespace MissileReflex.Src.Battle
 
             // 制限時間が0になったら試合終了
             await decRemainingTimeUntilZero(state);
-
+            
+            FinalizeResult();
+            
+            // キャンセルトークン発行
             battleRoot.TerminateCancelBattle();
+        }
+
+        private async UniTask performFinishBattle()
+        {
+            // フィニッシュを中央に表示
+            await battleRoot.Hud.PerformLabelBattleFinish();
+            
+            foreach (var hud in battleRoot.Hud.ListHudOnPlaying())
+            {
+                // いらないHUDを消す
+                HudUtil.AnimSmallOneToZero(hud.transform).Forget();
+            }
+            
+            // リザルト表示
+            if (_result != null) await battleRoot.Hud.SectionTeamResult.PerformResult(_result);
         }
 
         private void summonTanks(NetworkRunner runner)
@@ -114,7 +165,7 @@ namespace MissileReflex.Src.Battle
 
             // 同士討ちは減点
             int deltaScore = killed.Team.IsSame(attacker.Team) ? -1 : 1;
-            _battleSharedState.MutTeamStatesAt(attacker.Team.TeamId).IncScore(deltaScore);
+            attacker.EarnedScore.IncScore(deltaScore);
 
             // HUD更新
             battleRoot.Hud.LabelScoreAdditionOnKillManager.BirthLabel(new LabelScoreAdditionOnKillArg(
@@ -124,13 +175,51 @@ namespace MissileReflex.Src.Battle
 
         private void updateHudTeamInfo()
         {
-            var stateWithId = new BattleTeamStateWithId[_battleSharedState.GetTeamStatesLength()];
-            for (var index = 0; index < _battleSharedState.GetTeamStatesLength(); index++)
+            if (_battleSharedState == null) return;
+            var scores = calcTeamScoreList();
+            battleRoot.Hud.PanelCurrTeamInfoManager.UpdateInfo(scores);
+        }
+
+        public void FinalizeResult()
+        {
+            var tankScores = battleRoot.TankManager.List
+                .Where(tank => tank != null)
+                .Select(tank => new BattleTankScore(tank.LocalId, tank.Team, tank.TankName, tank.EarnedScore));
+
+            var teamScores = calcTeamScoreList();
+
+            _result = new BattleFinalResult(tankScores.ToArray(), teamScores);
+        }
+
+        private BattleTeamScore[] calcTeamScoreList()
+        {
+            var scoreList = new BattleTeamScore[ConstParam.NumTankTeam];
+            for (int i = 0; i < scoreList.Length; i++)
             {
-                var state = _battleSharedState.MutTeamStatesAt(index);
-                stateWithId[index] = new BattleTeamStateWithId(index, state);
+                scoreList[i] = new BattleTeamScore(i, 0, 0);
             }
-            battleRoot.Hud.PanelCurrTeamInfoManager.UpdateInfo(stateWithId);
+            foreach (var fighter in battleRoot.TankManager.List)
+            {
+                if (fighter == null) continue;
+                int teamId = fighter.Team.TeamId;
+                scoreList[teamId] = scoreList[teamId].AddScore(fighter.EarnedScore.Score);
+            }
+            
+            // 順位順にして
+            scoreList.Sort((a, b) => b.Score - a.Score);
+
+            int checkingScore = -1;
+            int checkingOrder = 0;
+            for (var index = 0; index < scoreList.Length; index++)
+            {
+                var score = scoreList[index];
+
+                if (checkingScore != (checkingScore = score.Score)) checkingOrder++;
+
+                scoreList[index] = score.SetOrder(checkingOrder);
+            }
+            
+            return scoreList;
         }
     }
 }
