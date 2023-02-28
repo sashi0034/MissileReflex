@@ -166,6 +166,11 @@ namespace MissileReflex.Src.Battle
             _score = Mathf.Max(_score +　delta, 0);
             return this;
         }
+
+        public override string ToString()
+        {
+            return _score.ToString();
+        }
     }
     public readonly struct TankFighterId
     {

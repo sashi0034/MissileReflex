@@ -14,6 +14,7 @@ namespace MissileReflex.Src.Battle
         TankFighterId Id,
         TankFighterTeam Team,
         string TankName,
+        bool IsLocalPlayer,
         TankScore Score);
     
     public record BattleTeamScore(

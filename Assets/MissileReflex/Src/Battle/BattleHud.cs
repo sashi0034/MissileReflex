@@ -39,7 +39,7 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
-            Util.ActivateGameObjects(
+            Util.ActivateAndResetScale(
                 this,
                 labelTankNameManager,
                 panelRemainingTime,
@@ -56,6 +56,7 @@ namespace MissileReflex.Src.Battle
             panelCurrTeamInfoManager.Init();
             labelKillOpponentManager.Init();
             labelScoreAdditionOnKillManager.Init();
+            sectionTeamResult.Init();
         }
 
         public IEnumerable<MonoBehaviour> ListHudOnPlaying()
@@ -63,7 +64,8 @@ namespace MissileReflex.Src.Battle
             return new MonoBehaviour[]
             {
                 panelRemainingTime,
-                panelCurrTeamInfoManager
+                panelCurrTeamInfoManager,
+                labelKillOpponentManager
             };
         }
 

@@ -20,6 +20,18 @@ namespace MissileReflex.Src.Utils
             target.localScale = Vector3.zero;
             await target.DOScale(1f, duration).SetEase(Ease.OutBack);
         }
+        
+        public static async UniTask AnimRectTransformSizeZeroToBeforeY(RectTransform rect, float animDuration)
+        {
+            float beforeY = rect.sizeDelta.y;
+            rect.sizeDelta = rect.sizeDelta.FixY(0);
+
+            await DOTween.To(
+                () => rect.sizeDelta.y,
+                y => rect.sizeDelta = rect.sizeDelta.FixY(y),
+                beforeY,
+                animDuration).SetEase(Ease.OutBack);
+        }
 
     }
 }

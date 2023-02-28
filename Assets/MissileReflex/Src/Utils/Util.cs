@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using MissileReflex.Src.Params;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -202,7 +203,8 @@ namespace MissileReflex.Src.Utils
                 if (fieldValue == null ||
                     TryAccessGameObject(fieldValue) is UnassignedReferenceException)
                 {
-                    Debug.LogError( $"{field.Name} is null in {checking.name}");
+                    Debug.LogError( 
+                        $"<color={ConstParam.ColorCodeGamingGreen}>{field.Name}</color> is null in <color={ConstParam.ColorCodeGamingGreen}>{checking.name}</color>");
                 }
 
                 var fieldType = field.FieldType;

@@ -10,6 +10,7 @@ using MissileReflex.Src.Front;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using Sirenix.Utilities;
+using UniRx;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
@@ -28,6 +29,9 @@ namespace MissileReflex.Src.Battle
         private BattleSharedState? _battleSharedState;
         public BattleSharedState? SharedState => _battleSharedState;
         private BattleFinalResult? _result;
+        private readonly Subject<Unit> _onBattleCompleted = new();
+        public IObservable<Unit> OnBattleCompleted => _onBattleCompleted;
+        
 
         public void Init()
         {
@@ -75,6 +79,8 @@ namespace MissileReflex.Src.Battle
             await performFinishBattle();
             
             Debug.Log("finish battle flowchart");
+            
+            _onBattleCompleted.OnNext(Unit.Default);
         }
 
         private async UniTask startBattleInternal()
@@ -184,7 +190,7 @@ namespace MissileReflex.Src.Battle
         {
             var tankScores = battleRoot.TankManager.List
                 .Where(tank => tank != null)
-                .Select(tank => new BattleTankScore(tank.LocalId, tank.Team, tank.TankName, tank.EarnedScore));
+                .Select(tank => new BattleTankScore(tank.LocalId, tank.Team, tank.TankName, tank.IsOwnerLocalPlayer(), tank.EarnedScore));
 
             var teamScores = calcTeamScoreList();
 

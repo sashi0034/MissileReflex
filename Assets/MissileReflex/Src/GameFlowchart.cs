@@ -18,19 +18,38 @@ namespace MissileReflex.Src
         [EventFunction]
         private void Start()
         {
-            flowGame().RunTaskHandlingError();
+            init();
+            loopGame().RunTaskHandlingError();
+        }
+
+        private void init()
+        {
+            Util.ActivateGameObjects(
+                gameRoot.Network,
+                gameRoot.LobbyHud,
+                gameRoot.FrontHud);
+            Util.DeactivateGameObjects(
+                gameRoot.BattleRoot,
+                gameRoot.BattleHud);
+        }
+
+        private async UniTask loopGame()
+        {
+            while (true)
+            {
+                try
+                {
+                    await flowGame();
+                }
+                catch (Exception e)
+                {
+                    UniTaskUtil.LogTaskHandlingError(e);
+                }
+            }
         }
 
         private async UniTask flowGame()
         {
-            Util.ActivateGameObjects(
-                gameRoot.Network, 
-                gameRoot.LobbyHud,
-                gameRoot.FrontHud);
-            Util.DeactivateGameObjects(
-                gameRoot.BattleRoot, 
-                gameRoot.BattleHud);
-            
             gameRoot.LobbyHud.Init();
             
             // マッチング終了まで待機
@@ -52,7 +71,11 @@ namespace MissileReflex.Src
             
             // 試合開始
             gameRoot.BattleRoot.Progress.FlowBattle();
-            
+
+            // 終了まで待つ
+            await gameRoot.BattleRoot.Progress.OnBattleCompleted.Take(1);
+
+            await HudUtil.AnimBigZeroToOne(gameRoot.LobbyHud.transform);
         }
         
         

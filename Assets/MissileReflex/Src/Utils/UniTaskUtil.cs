@@ -1,5 +1,6 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
+using MissileReflex.Src.Params;
 using UnityEngine;
 
 namespace MissileReflex.Src.Utils
@@ -41,7 +42,7 @@ namespace MissileReflex.Src.Utils
                 message
                     .Replace(" at ", "</color> at ")
                     .replaceFirst("</color> at ", " at ")
-                    .Replace(" in ", " in<color=#76b900> ") + "</color>";
+                    .Replace(" in ", $" in<color={ConstParam.ColorCodeGamingGreen}> ") + "</color>";
 #else
                 message;
 #endif
