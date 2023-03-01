@@ -70,6 +70,7 @@ namespace MissileReflex.Src.Lobby
 
         private async UniTask onPushButtonInternal()
         {
+            SeManager.Instance.PlaySe(SeManager.Instance.SeMatchingStart);
             await HudUtil.AnimSmallOneToZero(button.transform);
             HudUtil.AnimBigZeroToOne(message.transform).Forget();
             message.text = "サーバーに接続しています...";
