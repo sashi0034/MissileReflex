@@ -1,5 +1,6 @@
 ﻿using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MissileReflex.Src.Params
 {
@@ -14,6 +15,10 @@ namespace MissileReflex.Src.Params
 #if DEBUG
         [SerializeField] private bool isForceBattleOffline;
         public bool IsForceBattleOffline => isForceBattleOffline;
+
+        [SerializeField] private bool isGuiDebugStartBattle = false;
+        public bool IsGuiDebugStartBattle => isGuiDebugStartBattle;
+        
 
         [SerializeField] private int owBattleTimeLimit = -1;
         public int OwBattleTimeLimit => owBattleTimeLimit;

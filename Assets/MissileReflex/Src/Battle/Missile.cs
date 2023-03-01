@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using Cysharp.Threading.Tasks;
 using Fusion;
 using MissileReflex.Src.Params;
@@ -24,7 +25,6 @@ namespace MissileReflex.Src.Battle
 
     public record MissileInitArg(
         MissileSourceData SourceData,
-        Vector3 InitialPos,
         Vector3 InitialVel,
         TankFighter Attacker);
     
@@ -65,6 +65,7 @@ namespace MissileReflex.Src.Battle
 
         [Networked] 
         private int _reflectedCount { get; set; } = 0;
+        public int ReflectedCount => _reflectedCount;
 
         public Vector3 Pos => transform.position;
 
@@ -83,6 +84,7 @@ namespace MissileReflex.Src.Battle
             _viewInitialRotation = view.transform.localRotation.eulerAngles;
 
             transform.parent = Manager.transform;
+            transform.position = _ownerFighter.transform.position.FixY(ConstParam.Instance.MissileOffsetY);
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -98,7 +100,6 @@ namespace MissileReflex.Src.Battle
         {
             _data = arg.SourceData;
             _ownerFighter = arg.Attacker;
-            transform.position = arg.InitialPos;
             rigidBody.velocity = arg.InitialVel;
         }
 

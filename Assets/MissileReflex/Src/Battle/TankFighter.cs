@@ -36,9 +36,9 @@ namespace MissileReflex.Src.Battle
 #nullable enable
         
         [Networked]
-        private PlayerRef _ownerNetwotkPlayer { get; set; } = PlayerRef.None;
+        private PlayerRef _ownerNetworkPlayer { get; set; } = PlayerRef.None;
 
-        public PlayerRef OwnerNetworkPlayer => _ownerNetwotkPlayer;
+        public PlayerRef OwnerNetworkPlayer => _ownerNetworkPlayer;
 
         private BattleRoot battleRoot => BattleRoot.Instance;
 
@@ -109,7 +109,7 @@ namespace MissileReflex.Src.Battle
             _hp = new TankFighterHp(1);
             _state = ETankFighterState.Alive;
 
-            if (ownerPlayer != null) _ownerNetwotkPlayer = ownerPlayer.Value;
+            if (ownerPlayer != null) _ownerNetworkPlayer = ownerPlayer.Value;
             
             transform.position = spawnInfo.InitialPos;
             _initialPos = spawnInfo.InitialPos;
@@ -135,7 +135,7 @@ namespace MissileReflex.Src.Battle
 
         public bool IsOwnerLocalPlayer()
         {
-            return Runner.LocalPlayer == _ownerNetwotkPlayer;
+            return Runner.LocalPlayer == _ownerNetworkPlayer;
         }
         
         [EventFunction]
@@ -160,10 +160,17 @@ namespace MissileReflex.Src.Battle
             if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return false;
             
             // 死んだ
+            rpcallStartDie();
+            return true;
+        }
+
+        [Rpc]
+        private void rpcallStartDie()
+        {
+            if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return;
             _taskDeadAndRespawn = performDeadAndRespawn(battleRoot.CancelBattle)
                 // 例外が起きた時も一応リスポーンするように
                 .RunTaskHandlingErrorAsync(_ => invokeRespawnAfterDead(battleRoot.CancelBattle));
-            return true;
         }
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)
@@ -222,10 +229,10 @@ namespace MissileReflex.Src.Battle
             if (effect != null) effect.transform.position = transform.position;
             
             var lastAttacker = _hp.FindLastAttacker(Runner);
-            bool isKilledByLocalPlayer = lastAttacker != null && lastAttacker._ownerNetwotkPlayer == Runner.LocalPlayer;
+            bool isKilledByLocalPlayer = lastAttacker != null && lastAttacker._ownerNetworkPlayer == Runner.LocalPlayer;
             if (effect != null) effect.Effect.cameraShake.enabled = 
                 // ローカルプレイヤー自身がやられたときか
-                _ownerNetwotkPlayer == Runner.LocalPlayer ||
+                _ownerNetworkPlayer == Runner.LocalPlayer ||
                 // ローカルプレイヤー自身が攻撃したときにカメラシェイク
                 isKilledByLocalPlayer;
             Util.DelayDestroyEffect(effect.ParticleSystem, cancel).Forget();
@@ -330,15 +337,12 @@ namespace MissileReflex.Src.Battle
         
         private void shootMissile(Vector3 initialVel)
         {
-            var initialPos = transform.position;
-
             const float missileSpeed = 10f;
             
             tankFighterCannon.AnimShot();
             
             battleRoot.MissileManager.ShootMissile(new MissileInitArg(
                 new MissileSourceData(missileSpeed),
-                initialPos,
                 initialVel,
                 this), 
                 Runner);

@@ -18,6 +18,9 @@ namespace MissileReflex.Src.Params
 
         [SerializeField] private Vector3 missileColBoxHalfExt = Vector3.one / 4;
         public Vector3 MissileColBoxHalfExt => missileColBoxHalfExt;
+        
+        [SerializeField] private float missileOffsetY = 0.8f;
+        public float MissileOffsetY => missileOffsetY;
 
         [SerializeField] private float tankAdjMatUpdateInterval = 0.1f;
         public float TankAdjMatUpdateInterval => tankAdjMatUpdateInterval;

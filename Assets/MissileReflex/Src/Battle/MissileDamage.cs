@@ -18,8 +18,7 @@ namespace MissileReflex.Src.Battle
 
         private int _hitMissileCount = 0;
         public int HitMissileCount => _hitMissileCount;
-
-        private bool _hasEnteredMissileOwner = false;
+        
 
         [EventFunction]
         public void OnTriggerEnter(Collider other)
@@ -33,12 +32,8 @@ namespace MissileReflex.Src.Battle
         {
             if (Missile.IsColliderTankFighter(other, out var tank) == false) return false;
 
-            if (_hasEnteredMissileOwner == false)
-            {
-                // ミサイル発射した人自体ならキャンセル
-                _hasEnteredMissileOwner = true;
-                return false;
-            }
+            // ミサイル発射した人自体に当たり判定が発生するのは、一度跳ね返ってから            
+            if (owner.ReflectedCount == 0 && tank == owner.OwnerFighter) return false;
 
             // 無敵中ならキャンセル
             if (tank.IsImmortalNow()) return false;
@@ -53,7 +48,7 @@ namespace MissileReflex.Src.Battle
                 // AIはホストでダメージ判定
                 (tank.OwnerNetworkPlayer == PlayerRef.None && Runner.IsServer) ||
                 // プレイヤーは自分の捜査対象のみ判定
-                tank.OwnerNetworkPlayer == Runner.LocalPlayer;
+                tank.IsOwnerLocalPlayer();
         }
 
         [Rpc]

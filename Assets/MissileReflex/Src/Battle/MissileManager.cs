@@ -16,8 +16,6 @@ namespace MissileReflex.Src.Battle
         
         [SerializeField] private NetworkPrefabRef[] missilePrefab;
 
-        [SerializeField] private float missileOffsetY = 0.5f;
-
         private readonly List<Missile> _missileList = new List<Missile>();
         private IntervalProcess _intervalProcess = new();
 
@@ -40,15 +38,15 @@ namespace MissileReflex.Src.Battle
         public void ShootMissile(MissileInitArg arg, NetworkRunner runner)
         {
             var team = arg.Attacker.Team;
+            var attackerPlayer = arg.Attacker.OwnerNetworkPlayer;
             runner.Spawn(
-                missilePrefab[team.TeamId], arg.Attacker.transform.position, Quaternion.identity, 
+                missilePrefab[team.TeamId], arg.Attacker.transform.position, Quaternion.identity, attackerPlayer,
                 onBeforeSpawned: (_, obj) =>
             {
                 var missile = obj.GetComponent<Missile>();
                 _missileList.Add(missile);
 
-                var fixedArg = arg with { InitialPos = arg.InitialPos.FixY(missileOffsetY) };
-                missile.Init(fixedArg);
+                missile.Init(arg);
             });
         }
 

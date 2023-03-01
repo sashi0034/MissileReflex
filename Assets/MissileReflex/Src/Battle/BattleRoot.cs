@@ -65,20 +65,17 @@ namespace MissileReflex.Src.Battle
 
         private void OnGUI()
         {
-            if (
-#if UNITY_EDITOR
-                DebugParam.Instance.IsForceBattleOffline == false &&
-#endif
-                gameRoot.Network.IsRunningNetwork() == false)
-            {
-                if (GUI.Button(new Rect(0, 0, 200, 40), "Host")) battleProgressManager.DebugStartBattle(GameMode.Host);
+#if DEBUG
+            if (DebugParam.Instance.IsGuiDebugStartBattle == false) return;
+            if (DebugParam.Instance.IsForceBattleOffline || gameRoot.Network.IsRunningNetwork()) return;
 
-                if (GUI.Button(new Rect(0, 40, 200, 40), "Client")) battleProgressManager.DebugStartBattle(GameMode.Client);
-                
-                if (GUI.Button(new Rect(0, 80, 200, 40), "Shared")) battleProgressManager.DebugStartBattle(GameMode.Shared);
-                
-                if (GUI.Button(new Rect(0, 120, 200, 40), "AutoHostOrClient")) battleProgressManager.DebugStartBattle(GameMode.AutoHostOrClient);
-            }
+            const int w = 200;
+            const int h = 40;
+            if (GUI.Button(new Rect(0, h * 0, w, h), "Host")) battleProgressManager.DebugStartBattle(GameMode.Host);
+            if (GUI.Button(new Rect(0, h * 1, w, h), "Client")) battleProgressManager.DebugStartBattle(GameMode.Client);
+            if (GUI.Button(new Rect(0, h * 2, w, h), "Shared")) battleProgressManager.DebugStartBattle(GameMode.Shared);
+            if (GUI.Button(new Rect(0, h * 3, w, h), "AutoHostOrClient")) battleProgressManager.DebugStartBattle(GameMode.AutoHostOrClient);
+#endif
         }
 
         public void Init()
