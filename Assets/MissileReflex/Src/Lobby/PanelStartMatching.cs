@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Fusion;
+using MissileReflex.Src.Connection;
 using MissileReflex.Src.Front;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
@@ -32,22 +33,39 @@ namespace MissileReflex.Src.Lobby
         public IObservable<LobbySharedState?> OnMatchingFinished => _onMatchingFinished;
         
 
-        [EventFunction]
-        private void Start()
+        public void CleanRestart()
         {
             Util.ActivateAndResetScale(button);
-            Util.DeactivateGameObjects(message, labelMatchingParticipant);
+            Util.DeactivateGameObjects(
+                message, 
+                labelMatchingParticipant);
+            
+            // 接続済みの部屋があれば再開
+            if (gameRoot.Network.Runner != null && lobbyHud.SharedState != null)
+                ResumeSameRoom(gameRoot.Network.Runner, lobbyHud.SharedState);
+        }
+
+        private void ResumeSameRoom(NetworkRunner runner, LobbySharedState sharedState)
+        {
+            Util.DeactivateGameObjects(button);
+            Util.ActivateAndResetScale(
+                message, 
+                labelMatchingParticipant);
+            
+            processAfterConnectSucceeded(runner, sharedState).RunTaskHandlingError(handleMatchingError);
         }
 
         [EventFunction]
         public void OnPushButton()
         {
-            onPushButtonInternal().RunTaskHandlingError(ex =>
-            {
-                gameRoot.FrontHud.PopupMessageBelt.PerformPopupCaution(PopupMessageBeltErrorKind.Handle(ex, gameRoot.Network));
-                Util.DeactivateGameObjects(message, labelMatchingParticipant);
-                HudUtil.AnimBigZeroToOne(button.transform).Forget();
-            });
+            onPushButtonInternal().RunTaskHandlingError(handleMatchingError);
+        }
+
+        private void handleMatchingError(Exception ex)
+        {
+            gameRoot.FrontHud.PopupMessageBelt.PerformPopupCautionFromException(ex);
+            Util.DeactivateGameObjects(message, labelMatchingParticipant);
+            HudUtil.AnimBigZeroToOne(button.transform).Forget();
         }
 
         private async UniTask onPushButtonInternal()
@@ -59,7 +77,7 @@ namespace MissileReflex.Src.Lobby
             // 接続開始
             await lobbyHud.GameRoot.Network.StartMatching(GameMode.AutoHostOrClient);
 
-            if (tryGetNetworkRunner(out var runner) == false || runner == null) throw new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected);
+            if (tryGetNetworkRunner(out var runner) == false || runner == null) throw new NetworkObjectMissingException();
 
             runner.Spawn(lobbySharedStatePrefab, onBeforeSpawned: (_, obj) =>
             {
@@ -68,19 +86,36 @@ namespace MissileReflex.Src.Lobby
             
             // 共有状態オブジェクトがスポーンされるのを同期
             var sharedState = await syncSpawnLobbySharedState();
+            sharedState.NotifyPlayerInfo(new PlayerGeneralInfo(
+                // TODO: ちゃんとしたパラメータにする
+                new PlayerRating(1000), 
+                $"プレイヤー [{sharedState.Runner.LocalPlayer.PlayerId}]"
+                ));
             HudUtil.AnimBigZeroToOne(labelMatchingParticipant.transform).Forget();
 
             // 人が集まるまで待機
+            await processAfterConnectSucceeded(runner, sharedState);
+        }
+
+        private async UniTask processAfterConnectSucceeded(NetworkRunner runner, LobbySharedState sharedState)
+        {
             while (true)
             {
-                if (runner == null) throw new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected);
+                if (runner == null) throw new NetworkObjectMissingException();
 
                 sharedState.DecRemainingCount();
-                message.text = $"対戦相手を探しています...\n{sharedState.MatchingRemainingCount}";
                 int numParticipants = runner.ActivePlayers.Count();
+                bool isGathered = sharedState.MatchingRemainingCount <= 0 || numParticipants == ConstParam.MaxTankAgent;
+
+                message.text = isGathered
+                    ? "ホストを待っています"
+                    : $"対戦相手を探しています...\n{sharedState.MatchingRemainingCount}";
                 labelMatchingParticipant.SetText(numParticipants);
-                if (sharedState.MatchingRemainingCount <= 0) break;
-                if (numParticipants == ConstParam.MaxTankAgent) break;
+
+                // ホストがバトルからロビーに戻って来てなかったらダメ
+                // そろってたら始める
+                if (sharedState.HasEnteredBattle == false && isGathered) break;
+                
                 DOTween.Sequence()
                     .Append(message.transform.DOScale(1.05f, 0.5f).SetEase(Ease.OutBack))
                     .Append(message.transform.DOScale(1.0f, 0.5f).SetEase(Ease.InSine));
@@ -104,7 +139,6 @@ namespace MissileReflex.Src.Lobby
             if (runner != null) return true;
             
             return false;
-
         }
     }
 }

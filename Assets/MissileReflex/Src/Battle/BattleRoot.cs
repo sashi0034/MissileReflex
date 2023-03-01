@@ -90,5 +90,11 @@ namespace MissileReflex.Src.Battle
             battleProgressManager.Init();
             hud.Init();
         }
+
+        public void ClearBattle()
+        {
+            missileManager.ClearBattle();
+            tankManager.ClearBattle();
+        }
     }
 }

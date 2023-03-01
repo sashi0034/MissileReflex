@@ -18,25 +18,6 @@ namespace MissileReflex.Src.Front
         HostDisconnected
     }
 
-    public class PopupMessageBeltErrorKind : Exception
-    {
-        public readonly EPopupMessageBeltKind Kind;
-
-        public PopupMessageBeltErrorKind(EPopupMessageBeltKind kind)
-        {
-            Kind = kind;
-        }
-
-        public static PopupMessageBeltErrorKind Handle(Exception ex, NetworkManager networkManager)
-        {
-            if (ex is PopupMessageBeltErrorKind expected) return expected;
-            return networkManager.LastShutdownReason switch
-            {
-                ShutdownReason.DisconnectedByPluginLogic => new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected),
-                _ => new PopupMessageBeltErrorKind(EPopupMessageBeltKind.Unexpected)
-            };
-        }
-    }
     
     public class PopupMessageBelt : MonoBehaviour
     {
@@ -46,17 +27,27 @@ namespace MissileReflex.Src.Front
 #nullable enable
         private UniTask _taskPerform = UniTask.CompletedTask;
         
-        public void PerformPopupCaution(PopupMessageBeltErrorKind kind)
+        public void PerformPopupCautionFromException(Exception e)
         {
             if (_taskPerform.Status == UniTaskStatus.Pending) return;
-            _taskPerform = performPopupCautionInternal(kind);
+            _taskPerform = performPopupCautionInternal(EPopupMessageBeltKind.Unexpected);
+        }
+        public void PerformPopupCautionOnShutdown(ShutdownReason kind)
+        {
+            if (_taskPerform.Status == UniTaskStatus.Pending) return;
+            _taskPerform = kind switch
+            {
+                ShutdownReason.DisconnectedByPluginLogic  => performPopupCautionInternal(EPopupMessageBeltKind.HostDisconnected),
+                ShutdownReason.Ok => UniTask.CompletedTask,
+                _ => performPopupCautionInternal(EPopupMessageBeltKind.ConnectionFailed),
+            };
         }
         
-        private async UniTask performPopupCautionInternal(PopupMessageBeltErrorKind kind)
+        private async UniTask performPopupCautionInternal(EPopupMessageBeltKind kind)
         {
             Util.ActivateGameObjects(this);
             
-            message.text = kind.Kind switch
+            message.text = kind switch
             {
                 EPopupMessageBeltKind.Unexpected => "予期せぬエラーが発生しました",
                 EPopupMessageBeltKind.ConnectionFailed => "通信接続に失敗しました",

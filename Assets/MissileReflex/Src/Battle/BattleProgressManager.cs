@@ -6,6 +6,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Fusion;
 using MissileReflex.Src.Battle.Hud;
+using MissileReflex.Src.Connection;
 using MissileReflex.Src.Front;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
@@ -60,8 +61,7 @@ namespace MissileReflex.Src.Battle
         private void showUiHandlingError(Exception e)
         {
             // エラーが起こった時にポップアップ表示
-            gameRoot.FrontHud.PopupMessageBelt.PerformPopupCaution(
-                PopupMessageBeltErrorKind.Handle(e, gameRoot.Network));
+            gameRoot.FrontHud.PopupMessageBelt.PerformPopupCautionFromException(e);
         }
 
         private async UniTask flowBattleInternal()
@@ -87,7 +87,7 @@ namespace MissileReflex.Src.Battle
         {
             var runner = gameRoot.Network.Runner;
             Debug.Assert(runner != null);
-            if (runner == null) throw new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected);
+            if (runner == null) throw new NetworkObjectMissingException();
 
             // ホストで共有状態オブジェクトの作成     
             if (runner.IsServer) runner.Spawn(battleSharedStatePrefab);
@@ -105,12 +105,13 @@ namespace MissileReflex.Src.Battle
             runner.ProvideInput = true;
 
             var state = _battleSharedState;
-            if (state == null) throw new PopupMessageBeltErrorKind(EPopupMessageBeltKind.HostDisconnected);
+            if (state == null) throw new NetworkObjectMissingException();
 
             // 制限時間が0になったら試合終了
             await decRemainingTimeUntilZero(state);
             
             FinalizeResult();
+            runner.ProvideInput = false;
             
             // キャンセルトークン発行
             battleRoot.TerminateCancelBattle();
@@ -138,13 +139,19 @@ namespace MissileReflex.Src.Battle
             players.ShuffleList();
             players.Sort((a, b) => a.PlayerId - b.PlayerId);
             foreach (var player in players)
-                battleRoot.TankManager.SpawnPlayer(runner, player, battleRoot.TankManager.GetNextSpawnInfo(
-                    $"Player [{player.PlayerId}]"));
+            {
+                var playerInfo = gameRoot.LobbyHud.SharedState != null 
+                    ? gameRoot.LobbyHud.SharedState.GetPlayerStatus(player).Info
+                    : new PlayerGeneralInfo(); 
+                
+                battleRoot.TankManager.SpawnPlayer(runner, player, battleRoot.TankManager.GetNextSpawnInfo(playerInfo));
 
+            }
             // AI召喚
             int numAi = ConstParam.MaxTankAgent - players.Count;
             for (int i = 0; i < numAi; ++i)
-                battleRoot.TankManager.SpawnAi(runner, battleRoot.TankManager.GetNextSpawnInfo($"AI [{i + 1}]"));
+                battleRoot.TankManager.SpawnAi(runner, battleRoot.TankManager.GetNextSpawnInfo(
+                    new PlayerGeneralInfo(PlayerRating.InvalidRating, $"AI [{i + 1}]")));
         }
 
         private async UniTask decRemainingTimeUntilZero(BattleSharedState state)
@@ -188,9 +195,14 @@ namespace MissileReflex.Src.Battle
 
         public void FinalizeResult()
         {
-            var tankScores = battleRoot.TankManager.List
-                .Where(tank => tank != null)
-                .Select(tank => new BattleTankScore(tank.LocalId, tank.Team, tank.TankName, tank.IsOwnerLocalPlayer(), tank.EarnedScore));
+            var aliveTanks = battleRoot.TankManager.List
+                .Where(tank => tank != null).ToArray();
+            
+            if (aliveTanks.Length == 0) return;
+            
+            var tankScores = aliveTanks
+                .Select(tank => new BattleTankScore(
+                    tank.LocalId, tank.Team, tank.TankName, tank.IsOwnerLocalPlayer(), tank.EarnedScore, tank.PlayerRating));
 
             var teamScores = calcTeamScoreList();
 

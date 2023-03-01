@@ -120,7 +120,17 @@ namespace MissileReflex.Src.Utils
             for (int i = 0; i < numFrame; ++i)
             {
                 action();
-                await UniTask.DelayFrame(1);
+                await UniTask.DelayFrame(0);
+            }
+        }
+        
+        public static async UniTask ExecutePerFrameWhileSec(float seconds, Action action)
+        {
+            while (seconds > 0)
+            {
+                action();
+                await UniTask.DelayFrame(0);
+                seconds -= Time.deltaTime;
             }
         }
 

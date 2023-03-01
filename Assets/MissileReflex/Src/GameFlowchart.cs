@@ -50,7 +50,7 @@ namespace MissileReflex.Src
 
         private async UniTask flowGame()
         {
-            gameRoot.LobbyHud.Init();
+            gameRoot.LobbyHud.CleanRestart();
             
             // マッチング終了まで待機
             var sharedState = await gameRoot.LobbyHud.PanelStartMatching.OnMatchingFinished.Take(1);
@@ -66,6 +66,7 @@ namespace MissileReflex.Src
             if (sharedState != null) sharedState.NotifyLocalLoadedArena();
             gameRoot.BattleRoot.Init();
             await UniTask.WaitUntil(() => sharedState == null || sharedState.IsAllPlayersLoadedArena());
+            if (sharedState != null) sharedState.NotifyEnteredBattle();
 
             HudUtil.AnimSmallOneToZero(gameRoot.LobbyHud.transform).Forget();
             
@@ -75,7 +76,16 @@ namespace MissileReflex.Src
             // 終了まで待つ
             await gameRoot.BattleRoot.Progress.OnBattleCompleted.Take(1);
 
+            // ロビーを表示
             await HudUtil.AnimBigZeroToOne(gameRoot.LobbyHud.transform);
+            
+            // バトルの後片付け
+            gameRoot.BattleRoot.ClearBattle();
+            
+            await gameRoot.LoadScene(ConstParam.LiteralMainScene);
+            
+            // 部屋をまた開ける
+            gameRoot.Network.ModifyRunner(runner => runner.SessionInfo.IsOpen = true);
         }
         
         

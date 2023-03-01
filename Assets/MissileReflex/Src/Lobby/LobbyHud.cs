@@ -4,6 +4,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Fusion;
 using MissileReflex.Src.Params;
+using MissileReflex.Src.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -32,9 +33,15 @@ namespace MissileReflex.Src.Lobby
 
         private void Awake() {}
 
-        public void Init()
+        // まだ通信接続していてSharedStateがあれば再利用する
+        public void CleanRestart()
         {
-            _sharedState = null;
+            Util.ActivateGameObjects(
+                panelStartMatching);
+
+            if (_sharedState != null) _sharedState.CleanRestart();
+            
+            panelStartMatching.CleanRestart();
         }
     }
 }

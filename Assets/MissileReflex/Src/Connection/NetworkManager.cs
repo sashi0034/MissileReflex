@@ -16,16 +16,18 @@ using UnityEngine.Serialization;
 
 namespace MissileReflex.Src.Connection
 {
+    public class NetworkObjectMissingException : Exception
+    { }
+    
     public class NetworkManager : MonoBehaviour
     {
 #nullable disable
         [SerializeField] private BattleRoot battleRoot;
+        private GameRoot gameRoot => battleRoot.GameRoot;
         [SerializeField] private NetworkLifetimeObject networkLifetimeObjectPrefab;
 #nullable enable
         private NetworkLifetimeObject? _lifetimeObject;
         public NetworkRunner? Runner => _lifetimeObject != null ? _lifetimeObject.NetworkRunner : null;
-        private ShutdownReason _lastLastShutdownReason = ShutdownReason.Ok;
-        public ShutdownReason LastShutdownReason => _lastLastShutdownReason;
 
 
         public void ModifyRunner(Action<NetworkRunner> modifier)
@@ -63,7 +65,7 @@ namespace MissileReflex.Src.Connection
             lifetimeObject.OnEndShutdown.Subscribe(reason =>
             {
                 // この時点では各NetworkObjectsは生きているはず
-                _lastLastShutdownReason = reason;
+                gameRoot.FrontHud.PopupMessageBelt.PerformPopupCautionOnShutdown(reason);
                 battleRoot.Progress.FinalizeResult();
             });
         }

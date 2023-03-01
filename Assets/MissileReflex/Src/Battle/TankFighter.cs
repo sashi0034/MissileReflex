@@ -76,6 +76,9 @@ namespace MissileReflex.Src.Battle
         [Networked] private string _tankName { get; set; } = "";
         public string TankName => _tankName;
         
+        [Networked] private PlayerRating _playerRating { get; set; }
+        public PlayerRating PlayerRating => _playerRating;
+        
         [Networked]         
         private ref TankScore _earnedScore => ref MakeRef<TankScore>();
         public ref TankScore EarnedScore => ref _earnedScore;
@@ -115,6 +118,7 @@ namespace MissileReflex.Src.Battle
             _teamMemberIndex = spawnInfo.TeamMemberIndex;
 
             _tankName = spawnInfo.TankName;
+            _playerRating = spawnInfo.Rating;
         }
         private void resetRespawn()
         {

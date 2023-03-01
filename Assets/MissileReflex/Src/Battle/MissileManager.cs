@@ -23,12 +23,18 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
+            ClearBattle();
+            _intervalProcess = new IntervalProcess(predictMissileHit, ConstParam.Instance.MissilePredictInterval);
+        }
+
+        public void ClearBattle()
+        {
             foreach (var missile in _missileList)
             {
-                Util.DestroyGameObject(missile.gameObject);
+                if (missile == null) continue;
+                missile.Runner.Despawn(missile.GetComponent<NetworkObject>());
             }
             _missileList.Clear();
-            _intervalProcess = new IntervalProcess(predictMissileHit, ConstParam.Instance.MissilePredictInterval);
         }
 
         public void ShootMissile(MissileInitArg arg, NetworkRunner runner)

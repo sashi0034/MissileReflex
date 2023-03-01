@@ -16,7 +16,8 @@ namespace MissileReflex.Src.Battle
         TankFighterTeam Team, 
         int TeamMemberIndex,
         Vector3 InitialPos,
-        string TankName)
+        string TankName,
+        PlayerRating Rating)
     {};
 
     public class TankManager : MonoBehaviour
@@ -43,7 +44,7 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
-            _tankFighterList.Clear();
+            ClearBattle();
             _tankSqrMagAdjMat = new float[,]{};
             _processCalcTankSqrMagAdjMat =
                 new IntervalProcess(calcTankSqrMagAdjMat, ConstParam.Instance.TankAdjMatUpdateInterval);
@@ -51,6 +52,15 @@ namespace MissileReflex.Src.Battle
 
             tankSpawnSymbolGroup = FindObjectOfType<TankSpawnSymbolGroup>();
             Debug.Assert(tankSpawnSymbolGroup != null);
+        }
+
+        public void ClearBattle()
+        {
+            foreach (var tank in _tankFighterList)
+            {
+                if (tank != null) tank.Runner.Despawn(tank.GetComponent<NetworkObject>());
+            }
+            _tankFighterList.Clear();
         }
 
         [EventFunction]
@@ -119,7 +129,7 @@ namespace MissileReflex.Src.Battle
             return tankSpawnSymbolGroup.Groups[team.TeamId].List[teamMemberIndex];
         }
 
-        public TankSpawnInfo GetNextSpawnInfo(string name)
+        public TankSpawnInfo GetNextSpawnInfo(PlayerGeneralInfo info)
         {
             int numTank = _tankFighterList.Count;
 
@@ -130,7 +140,8 @@ namespace MissileReflex.Src.Battle
                 team, 
                 teamMemberIndex,
                 getTankSpawnSymbol(team, teamMemberIndex).transform.position.FixY(ConstParam.Instance.PlayerDefaultY),
-                name);
+                info.Name,
+                info.Rating);
         }
 
         public TankSpawnSymbol GetSpawnSymbol(TankFighter tank)
@@ -152,6 +163,7 @@ namespace MissileReflex.Src.Battle
             
             foreach (var tank in _tankFighterList)
             {
+                if (tank == null) continue;
                 if (tank.IsOwnerLocalPlayer() == false) continue;
                 _localPlayerTank = tank;
                 return tank;

@@ -11,10 +11,7 @@ using UnityEngine.UI;
 
 namespace MissileReflex.Src.Battle.Hud
 {
-    public class ButtonConfirm : 
-        MonoBehaviour,
-        IPointerEnterHandler,
-        IPointerExitHandler
+    public class ButtonConfirm : MonoBehaviour
     {
 #nullable disable
         [SerializeField] private Image bgImage;
@@ -26,25 +23,12 @@ namespace MissileReflex.Src.Battle.Hud
         private UniTask _animConfirm = UniTask.CompletedTask;
 
         public void Init()
-        {
-            transform.localScale = Vector3.one;
-            bgImage.gameObject.SetActive(false);
-        }
+        {}
 
-        public void OnPointerEnter(PointerEventData eventData)
+        [EventFunction]
+        public void OnPushButton()
         {
             if (_animConfirm.Status == UniTaskStatus.Pending) return;
-            bgImage.gameObject.SetActive(true);
-        }
-
-        public void OnPointerExit(PointerEventData eventData)
-        {
-            if (_animConfirm.Status == UniTaskStatus.Pending) return;
-            bgImage.gameObject.SetActive(false);
-        }
-
-        public void OnPointerClick(PointerEventData eventData)
-        {
             _animConfirm = HudUtil.AnimSmallOneToZero(transform);
             _onConfirmed.OnNext(Unit.Default);
         }

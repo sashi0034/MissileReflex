@@ -11,12 +11,27 @@ namespace MissileReflex.Src.Lobby
 {
     public struct LobbyPlayerStatus : INetworkStruct
     {
+        private PlayerGeneralInfo _info;
+        public PlayerGeneralInfo Info => _info;
+        
         private bool _hasLoadedArena;
         public bool HasLoadedArena => _hasLoadedArena;
 
         public LobbyPlayerStatus RaiseLoadedArena()
         {
             _hasLoadedArena = true;
+            return this;
+        }
+
+        public LobbyPlayerStatus SetInfo(PlayerGeneralInfo info)
+        {
+            _info = info;
+            return this;
+        }
+
+        public LobbyPlayerStatus CleanParams()
+        {
+            _hasLoadedArena = false;
             return this;
         }
     }
@@ -33,6 +48,9 @@ namespace MissileReflex.Src.Lobby
         [Networked] private int _matchingRemainingCount { get; set; } = Int32.MaxValue;
         public int MatchingRemainingCount => _matchingRemainingCount;
 
+        [Networked] private NetworkBool _hasEnteredBattle { get; set; } = false;
+        public bool HasEnteredBattle => _hasEnteredBattle;
+
         public override void Spawned()
         {
             transform.parent = lobbyHud.transform;
@@ -41,7 +59,7 @@ namespace MissileReflex.Src.Lobby
         
         public void Init()
         {
-            _matchingRemainingCount = ConstParam.Instance.MatchingTimeLimit;
+            CleanRestart();
         }
 
         public void DecRemainingCount()
@@ -49,6 +67,16 @@ namespace MissileReflex.Src.Lobby
             _matchingRemainingCount--;
         }
 
+        public void NotifyPlayerInfo(PlayerGeneralInfo info)
+        {
+            rpcallNotifyPlayerInfo(Runner.LocalPlayer, info);
+        }
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        private void rpcallNotifyPlayerInfo(PlayerRef player, PlayerGeneralInfo info)
+        {
+            modifyPlayerStatus(player, status => status.SetInfo(info));
+        }
+        
         public void NotifyLocalLoadedArena()
         {
             rpcallNotifyLoadedArena(Runner.LocalPlayer);
@@ -60,6 +88,18 @@ namespace MissileReflex.Src.Lobby
             modifyPlayerStatus(player, flag => flag.RaiseLoadedArena());
         }
 
+        // バトルが終わった後に、同じ部屋で対戦できるように
+        public void CleanRestart()
+        {
+            _hasEnteredBattle = false;
+            _matchingRemainingCount = ConstParam.Instance.MatchingTimeLimit;
+            
+            foreach (var player in Runner.ActivePlayers)
+            {
+                modifyPlayerStatus(player, status => status.CleanParams());
+            }
+        }
+
         public bool IsAllPlayersLoadedArena()
         {
             foreach (var player in Runner.ActivePlayers)
@@ -67,6 +107,18 @@ namespace MissileReflex.Src.Lobby
                 if (getPlayerStatusOrDefault(player).HasLoadedArena == false) return false;
             }
             return true;
+        }
+
+        public void NotifyEnteredBattle()
+        {
+            _hasEnteredBattle = true;
+        }
+
+        public LobbyPlayerStatus GetPlayerStatus(PlayerRef player)
+        {
+            if (playerStatus.TryGet(player, out var status)) return status;
+            Debug.Assert(false);
+            return new LobbyPlayerStatus();
         }
 
         private void modifyPlayerStatus(PlayerRef? nullablePlayer, Func<LobbyPlayerStatus, LobbyPlayerStatus> modifier)

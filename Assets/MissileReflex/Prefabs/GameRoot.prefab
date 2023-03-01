@@ -704,7 +704,7 @@ GameObject:
   - component: {fileID: 3748178397114898987}
   - component: {fileID: 4616862455359294422}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: VerticalLayout
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -758,7 +758,7 @@ MonoBehaviour:
   m_ChildControlWidth: 0
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
+  m_ChildScaleHeight: 1
   m_ReverseArrangement: 0
 --- !u!1 &1715207265502051887
 GameObject:
@@ -1734,6 +1734,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc84116063154a188a7a6659b766b481, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  verticalLayout: {fileID: 3748178397114898987}
   labelTeamResultInfos:
   - {fileID: 6213259468166567462}
   - {fileID: 8267611604584326950}
