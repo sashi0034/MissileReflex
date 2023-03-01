@@ -33,6 +33,7 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private GameObject selfView;
 
         [SerializeField] private TankExplosion effectTankExplosion;
+        [SerializeField] private TankSe tankSe;
 #nullable enable
         
         [Networked]
@@ -85,6 +86,8 @@ namespace MissileReflex.Src.Battle
         
         private UniTask _taskDeadAndRespawn = UniTask.CompletedTask;
 
+        private AudioListener? _audioListener;
+
         public override void Spawned()
         {
             transform.parent = battleRoot.TankManager.transform;
@@ -93,11 +96,32 @@ namespace MissileReflex.Src.Battle
             _prediction.Init();
             battleRoot.Hud.LabelTankNameManager.BirthWith(this);
             getSpawnSymbol().Init(this);
+            
+            if (IsOwnerLocalPlayer()) attachAudioListener();
+        }
+
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            if (_audioListener != null) detachAudioListener();
         }
 
         private TankSpawnSymbol getSpawnSymbol()
         {
             return battleRoot.TankManager.GetSpawnSymbol(this);
+        }
+
+        private void attachAudioListener()
+        {
+            _audioListener = gameObject.AddComponent<AudioListener>();
+            if (Camera.main == null) return;
+            Camera.main.GetComponent<AudioListener>().enabled = false;
+        }
+        private void detachAudioListener()
+        {
+            if (_audioListener == null) return;
+            Destroy(_audioListener);
+            if (Camera.main == null) return;
+            Camera.main.GetComponent<AudioListener>().enabled = true;
         }
 
 
@@ -117,7 +141,7 @@ namespace MissileReflex.Src.Battle
             _team = spawnInfo.Team;
             _teamMemberIndex = spawnInfo.TeamMemberIndex;
 
-            _tankName = spawnInfo.TankName;
+            _tankName = spawnInfo.TankName != "" ? spawnInfo.TankName : "(null)";
             _playerRating = spawnInfo.Rating;
         }
         private void resetRespawn()
@@ -215,6 +239,8 @@ namespace MissileReflex.Src.Battle
             
             _state = ETankFighterState.Dead;
             
+            tankSe.PlaySeTouchedMissile();
+            
             await selfView.transform.DORotate(new Vector3(0, 0, 180), 0.3f)
                 .SetEase(Ease.OutBack).SetLink(gameObject);
             await UniTask.Delay(0.3f.ToIntMilli(), cancellationToken: cancel);
@@ -227,6 +253,8 @@ namespace MissileReflex.Src.Battle
             var effect = Instantiate(effectTankExplosion, transform.parent);
             Debug.Assert(effect != null);
             if (effect != null) effect.transform.position = transform.position;
+            
+            tankSe.PlaySeExplosion();
             
             var lastAttacker = _hp.FindLastAttacker(Runner);
             bool isKilledByLocalPlayer = lastAttacker != null && lastAttacker._ownerNetworkPlayer == Runner.LocalPlayer;
@@ -333,6 +361,7 @@ namespace MissileReflex.Src.Battle
             // 発射
             _shotCoolingTime = maxShotCoolingTime;
             shootMissile(shotDirection);
+            tankSe.PlaySeShot();
         }
         
         private void shootMissile(Vector3 initialVel)

@@ -51,6 +51,7 @@ namespace MissileReflex.Src.Battle
             rigidBody.velocity = 
                 _reflectedVelListInFrame.Aggregate((sum, elem) => sum += elem) / _reflectedVelListInFrame.Count;
             transform.position = _positionOld;
+            owner.PlaySeReflected();
         }
     }
 }

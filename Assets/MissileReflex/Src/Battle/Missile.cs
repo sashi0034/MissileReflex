@@ -5,7 +5,9 @@ using Cysharp.Threading.Tasks;
 using Fusion;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
+using Unity.VisualScripting;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace MissileReflex.Src.Battle
 {
@@ -42,6 +44,9 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private int lifeTimeReflectedCount = 3;
 
         [SerializeField] private ParticleSystem missileExplosion;
+
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip seReflected;
 
         private NetworkObject _selfNetwork;
         private MissilePhysic _physic;
@@ -129,6 +134,14 @@ namespace MissileReflex.Src.Battle
             rigidBody.velocity = rigidBody.velocity.normalized * _data.Speed;
         }
 
+        public void PlaySeReflected()
+        {
+            if (audioSource.enabled == false) return;
+            const float pitchRange = 0.1f;
+            audioSource.pitch = 1.0f + Random.Range(-pitchRange, pitchRange);
+            audioSource.PlayOneShot(seReflected);
+        }
+
         public void RequestEffectExplosion(Vector3 pos)
         {
             _requestedEffectExplosionPos = pos;
@@ -149,6 +162,11 @@ namespace MissileReflex.Src.Battle
             var effect = Instantiate(missileExplosion, Manager.transform);
             effect.transform.position = pos;
             Util.DelayDestroyEffect(effect, BattleRoot.CancelBattle).Forget();
+            var explosionAudio = effect.GetComponent<AudioSource>();
+            Debug.Assert(explosionAudio != null);
+            if (explosionAudio == null) return;
+            explosionAudio.pitch = Random.Range(0.9f, 1.1f);
+            explosionAudio.Play();
         }
         
         private void updateViewAnim(float deltaTime)

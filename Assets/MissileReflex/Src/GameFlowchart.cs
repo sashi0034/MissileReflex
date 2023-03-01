@@ -18,6 +18,13 @@ namespace MissileReflex.Src
         [EventFunction]
         private void Start()
         {
+#if DEBUG
+            if (DebugParam.Instance.IsForceBattleOffline || DebugParam.Instance.IsGuiDebugStartBattle)
+            {
+                debugBattle();
+                return;
+            }
+#endif
             init();
             loopGame().RunTaskHandlingError();
         }
@@ -32,6 +39,20 @@ namespace MissileReflex.Src
                 gameRoot.BattleRoot,
                 gameRoot.BattleHud);
         }
+
+#if DEBUG
+        private void debugBattle()
+        {
+            Util.ActivateGameObjects(
+                gameRoot.BattleRoot,
+                gameRoot.BattleHud,
+                gameRoot.Network);
+            Util.DeactivateGameObjects(
+                gameRoot.LobbyHud,
+                gameRoot.FrontHud);
+        }
+#endif
+
 
         private async UniTask loopGame()
         {
