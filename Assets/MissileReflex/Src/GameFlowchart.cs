@@ -19,7 +19,7 @@ namespace MissileReflex.Src
         private void Start()
         {
 #if DEBUG
-            if (DebugParam.Instance.IsForceBattleOffline || DebugParam.Instance.IsGuiDebugStartBattle)
+            if (DebugParam.Instance.IsForceOfflineBattle || DebugParam.Instance.IsGuiDebugStartBattle)
             {
                 debugBattle();
                 return;

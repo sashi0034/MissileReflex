@@ -13,8 +13,8 @@ namespace MissileReflex.Src.Params
         public bool IsClearDebug => isClearDebug;
 
 #if DEBUG
-        [SerializeField] private bool isForceBattleOffline;
-        public bool IsForceBattleOffline => isForceBattleOffline;
+        [SerializeField] private bool isForceOfflineBattle;
+        public bool IsForceOfflineBattle => isForceOfflineBattle;
 
         [SerializeField] private bool isGuiDebugStartBattle = false;
         public bool IsGuiDebugStartBattle => isGuiDebugStartBattle;

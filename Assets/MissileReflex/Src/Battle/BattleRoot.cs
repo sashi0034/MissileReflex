@@ -55,7 +55,7 @@ namespace MissileReflex.Src.Battle
         {
             
 #if UNITY_EDITOR
-            if (DebugParam.Instance.IsForceBattleOffline)
+            if (DebugParam.Instance.IsForceOfflineBattle)
             {
                 Debug.Log("start offline battle");
                 battleProgressManager.DebugStartBattle(GameMode.Single);
@@ -67,7 +67,7 @@ namespace MissileReflex.Src.Battle
         {
 #if DEBUG
             if (DebugParam.Instance.IsGuiDebugStartBattle == false) return;
-            if (DebugParam.Instance.IsForceBattleOffline || gameRoot.Network.IsRunningNetwork()) return;
+            if (DebugParam.Instance.IsForceOfflineBattle || gameRoot.Network.IsRunningNetwork()) return;
 
             const int w = 200;
             const int h = 40;
