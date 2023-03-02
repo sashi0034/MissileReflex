@@ -3573,7 +3573,7 @@ MonoBehaviour:
   m_InputType: 0
   m_AsteriskChar: 42
   m_KeyboardType: 0
-  m_LineType: 1
+  m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
   m_CharacterValidation: 0
@@ -3933,6 +3933,7 @@ MonoBehaviour:
   gameRoot: {fileID: 3573201640852897262}
   panelStartMatching: {fileID: 486505158721354076}
   sectionMenuContents: {fileID: 6171015795884604796}
+  panelSelectMenu: {fileID: 3647428019532706550}
 --- !u!1 &4906246774350084044
 GameObject:
   m_ObjectHideFlags: 0
@@ -4899,7 +4900,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5941308194428752023
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6898,7 +6899,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -7112,6 +7113,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f558d52dd9d2450f882ad3de210d479c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lobbyHud: {fileID: 8842213316950949460}
   initialSelectedMenu: {fileID: 9131488627469999322}
 --- !u!1 &8198092657152163106
 GameObject:

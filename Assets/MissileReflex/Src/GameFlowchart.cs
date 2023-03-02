@@ -38,6 +38,8 @@ namespace MissileReflex.Src
             Util.DeactivateGameObjects(
                 gameRoot.BattleRoot,
                 gameRoot.BattleHud);
+            
+            gameRoot.LobbyHud.Init();
         }
 
 #if DEBUG

@@ -9,10 +9,16 @@ namespace MissileReflex.Src.Utils
 {
     public static class HudUtil
     {
-        public static async UniTask AnimSmallOneToZero(Transform target)
+        public static async UniTask AnimSmallOneToZero(Transform target, float duration = 0.3f)
         {
             target.localScale = Vector3.one;
-            await target.DOScale(0f, 0.3f).SetEase(Ease.InBack);
+            await target.DOScale(0f, duration).SetEase(Ease.InBack);
+            target.gameObject.SetActive(false);
+        }
+        public static async UniTask AnimSmallOneToZeroX(Transform target, float duration = 0.3f)
+        {
+            target.localScale = Vector3.one;
+            await target.DOScaleX(0f, duration).SetEase(Ease.InBack);
             target.gameObject.SetActive(false);
         }
         public static async UniTask AnimBigZeroToOne(Transform target, float duration = 0.3f)
@@ -21,7 +27,12 @@ namespace MissileReflex.Src.Utils
             target.localScale = Vector3.zero;
             await target.DOScale(1f, duration).SetEase(Ease.OutBack);
         }
-        
+        public static async UniTask AnimBigZeroToOneX(Transform target, float duration = 0.3f)
+        {
+            target.gameObject.SetActive(true);
+            target.localScale = new Vector3(0, 1, 1);
+            await target.DOScaleX(1f, duration).SetEase(Ease.OutBack);
+        }
         public static async UniTask AnimRectTransformSizeZeroToBeforeY(RectTransform rect, float animDuration)
         {
             float beforeY = rect.sizeDelta.y;

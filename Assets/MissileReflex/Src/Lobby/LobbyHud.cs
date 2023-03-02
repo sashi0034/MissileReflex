@@ -22,6 +22,10 @@ namespace MissileReflex.Src.Lobby
 
         [SerializeField] private SectionMenuContents sectionMenuContents;
         public SectionMenuContents SectionMenuContents => sectionMenuContents;
+
+        [SerializeField] private PanelSelectMenu panelSelectMenu;
+        public PanelSelectMenu PanelSelectMenu => panelSelectMenu;
+        
         
 #nullable enable
 
@@ -33,7 +37,11 @@ namespace MissileReflex.Src.Lobby
             _sharedState = state;
         }
 
-        private void Awake() {}
+        public void Init()
+        {
+            sectionMenuContents.Init();
+            panelSelectMenu.Init();
+        }
 
         // まだ通信接続していてSharedStateがあれば再利用する
         public void CleanRestart()

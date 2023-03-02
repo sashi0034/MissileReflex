@@ -49,7 +49,6 @@ namespace MissileReflex.Src.Lobby
         public void OnPointerClick(PointerEventData eventData)
         {
             parentPanel.ChangeSelectedMenu(this);
-            EnableSelect();
         }
 
         public void EnableSelect()
