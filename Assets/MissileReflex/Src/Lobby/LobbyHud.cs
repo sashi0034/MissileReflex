@@ -19,8 +19,10 @@ namespace MissileReflex.Src.Lobby
 
         [SerializeField] private PanelStartMatching panelStartMatching;
         public PanelStartMatching PanelStartMatching => panelStartMatching;
+
+        [SerializeField] private SectionMenuContents sectionMenuContents;
+        public SectionMenuContents SectionMenuContents => sectionMenuContents;
         
-                
 #nullable enable
 
         private LobbySharedState? _sharedState;
