@@ -2,6 +2,7 @@
 !.gitignore
 !/MissileReflex
 !/Resources
+!/UIOutline
 
 # ignre Photon except settings
 !/Photon
