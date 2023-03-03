@@ -62,6 +62,10 @@ namespace MissileReflex.Src.Params
         public const int NumTankTeam = 4;
         public const int MaxTankAgent = NumTankTeam * 4;
 
+        public const int DefaultPlayerRating = 1000;
+
+        public const string SaveDataMainKey = "save_data_main";
+
         public static readonly Color Transparent = new Color(0, 0, 0, 0);
 
         public const string ColorCodeGamingGreen = "#76b900";

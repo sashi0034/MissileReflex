@@ -5,8 +5,11 @@ using Cysharp.Threading.Tasks;
 using Fusion;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
+using Newtonsoft.Json.Bson;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 namespace MissileReflex.Src.Lobby
 {
@@ -52,6 +55,7 @@ namespace MissileReflex.Src.Lobby
             if (_sharedState != null) _sharedState.CleanRestart();
             
             panelStartMatching.CleanRestart();
+            sectionMenuContents.CleanRestart();
         }
     }
 }

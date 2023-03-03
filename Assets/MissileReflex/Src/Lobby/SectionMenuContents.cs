@@ -41,5 +41,10 @@ namespace MissileReflex.Src.Lobby
                 Util.DeactivateGameObjects(section);
             }
         }
+
+        public void CleanRestart()
+        {
+            sectionPlayerInfo.CleanRestart();
+        }
     }
 }

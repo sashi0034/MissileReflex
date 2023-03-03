@@ -6,7 +6,11 @@ using MissileReflex.Src.Battle;
 using MissileReflex.Src.Connection;
 using MissileReflex.Src.Front;
 using MissileReflex.Src.Lobby;
+using MissileReflex.Src.Params;
+using MissileReflex.Src.Storage;
 using MissileReflex.Src.Utils;
+using Sirenix.OdinInspector;
+using Sirenix.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -32,6 +36,9 @@ namespace MissileReflex.Src
         [SerializeField] private FrontHud frontHud;
         public FrontHud FrontHud => frontHud;
 
+        [SerializeField] private SaveData saveData = new();
+        public SaveData SaveData => saveData;
+        
 #nullable enable
 
         private void Awake()
@@ -58,6 +65,27 @@ namespace MissileReflex.Src
             
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
             Debug.Log("finish load scene: " + sceneName);
+        }
+
+#if UNITY_EDITOR
+        [Button]
+        public void ResetSaveData()
+        {
+            saveData = new SaveData();
+        }
+#endif
+        
+        public void ReadSaveData()
+        {
+            string jsonData = ES3.Load<string>(ConstParam.SaveDataMainKey, defaultValue: "");
+            if (jsonData.IsNullOrWhitespace()) return;
+            
+            Debug.Log("read save data:\n" + jsonData);
+
+            var temp = JsonUtility.FromJson<SaveData>(jsonData);
+            Debug.Assert(temp != null);
+            if (temp == null) return;
+            saveData = temp;
         }
     }
 }

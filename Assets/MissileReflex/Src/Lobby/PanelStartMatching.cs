@@ -29,7 +29,7 @@ namespace MissileReflex.Src.Lobby
 #nullable enable
         private GameRoot gameRoot => lobbyHud.GameRoot;
 
-        private Subject<LobbySharedState?> _onMatchingFinished = new ();
+        private readonly Subject<LobbySharedState?> _onMatchingFinished = new ();
         public IObservable<LobbySharedState?> OnMatchingFinished => _onMatchingFinished;
         
 

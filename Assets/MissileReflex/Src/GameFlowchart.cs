@@ -58,6 +58,8 @@ namespace MissileReflex.Src
 
         private async UniTask loopGame()
         {
+            gameRoot.ReadSaveData();
+
             while (true)
             {
                 try
