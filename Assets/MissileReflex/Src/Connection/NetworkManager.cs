@@ -19,6 +19,9 @@ namespace MissileReflex.Src.Connection
     public class NetworkObjectMissingException : Exception
     { }
     
+    public class NetworkObjectAlreadyExistException : Exception
+    { }
+    
     public class NetworkManager : MonoBehaviour
     {
 #nullable disable
@@ -66,12 +69,15 @@ namespace MissileReflex.Src.Connection
             {
                 // この時点では各NetworkObjectsは生きているはず
                 gameRoot.FrontHud.PopupMessageBelt.PerformPopupCautionOnShutdown(reason);
+                gameRoot.LobbyHud.SectionMultiChatRef.PostInfoMessageLocal("ホストがルームを解散しました");
                 battleRoot.Progress.FinalizeResult();
             });
         }
 
         public async UniTask StartMatching(GameMode mode)
         {
+            Debug.Assert(_lifetimeObject == null);
+            if (_lifetimeObject != null) return;
             _lifetimeObject = Instantiate(networkLifetimeObjectPrefab, transform);
             _lifetimeObject.Init(battleRoot);
             subscribeLifetimeObject(_lifetimeObject);
@@ -87,12 +93,6 @@ namespace MissileReflex.Src.Connection
             });
             
             await UniTask.WhenAll(taskStartGame.AsUniTask());
-            
-            // TODO: 多分これで切断処理
-            // _runner.Disconnect(_runner.LocalPlayer);
-            // Util.DestroyComponent(gameObject.GetComponent<NetworkSceneManagerBase>());
-            // Util.DestroyComponent(_runner);
-            // Shutdown() かも?
         }
 
         public bool IsRunningNetwork()

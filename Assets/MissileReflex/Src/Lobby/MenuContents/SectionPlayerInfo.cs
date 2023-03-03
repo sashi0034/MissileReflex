@@ -70,7 +70,7 @@ namespace MissileReflex.Src.Lobby.MenuContents
             gameRoot.SaveData.SetPlayerName(newNameCorrected);
             gameRoot.WriteSaveData();
             
-            lobbyHud.SectionMultiChatRef.RpcallPostInfoMessage(
+            lobbyHud.SectionMultiChatRef.PostInfoMessageAuto(
                 $"{oldName} が名前を {newNameCorrected} に変更しました");
         }
 

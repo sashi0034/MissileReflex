@@ -64,6 +64,8 @@ namespace MissileReflex.Src.Params
 
         public const int DefaultPlayerRating = 1000;
 
+        public const int RatingDeltaCriterion = 50;
+
         public const string SaveDataMainKey = "save_data_main";
 
         public static readonly Color Transparent = new Color(0, 0, 0, 0);

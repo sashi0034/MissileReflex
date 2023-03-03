@@ -2,6 +2,7 @@
 
 using System;
 using Fusion;
+using MissileReflex.Src.Params;
 using UnityEngine;
 
 namespace MissileReflex.Src
@@ -28,6 +29,16 @@ namespace MissileReflex.Src
         public override string ToString()
         {
             return _value.ToString();
+        }
+
+        public PlayerRating CalcNewRating(int resultOrder, int numKilled)
+        {
+            Debug.Assert(resultOrder is > 0 and <= ConstParam.NumTankTeam);
+            const float halfOrder = (1f + ConstParam.NumTankTeam) / 2;
+            float teamRatingDelta = (halfOrder - resultOrder) * ConstParam.RatingDeltaCriterion;
+            int ratingDelta = (int)(teamRatingDelta + numKilled);
+
+            return new PlayerRating(_value + ratingDelta);
         }
     }
 }

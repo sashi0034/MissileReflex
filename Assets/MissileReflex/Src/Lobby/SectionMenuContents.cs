@@ -40,6 +40,7 @@ namespace MissileReflex.Src.Lobby
             {
                 Util.DeactivateGameObjects(section);
             }
+            sectionMultiChat.Init();
         }
 
         public void CleanRestart()

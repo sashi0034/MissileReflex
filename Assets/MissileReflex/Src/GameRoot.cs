@@ -67,15 +67,13 @@ namespace MissileReflex.Src
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
             Debug.Log("finish load scene: " + sceneName);
         }
-
-#if UNITY_EDITOR
+        
         [Button]
         public void ResetSaveData()
         {
             saveData = new SaveData();
         }
-#endif
-        
+
         public void ReadSaveData()
         {
             string jsonData = ES3.Load<string>(ConstParam.SaveDataMainKey, defaultValue: "");

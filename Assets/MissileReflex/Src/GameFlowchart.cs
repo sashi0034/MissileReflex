@@ -59,6 +59,7 @@ namespace MissileReflex.Src
         private async UniTask loopGame()
         {
             await UniTask.DelayFrame(1);
+            gameRoot.ResetSaveData();
             gameRoot.ReadSaveData();
 
             while (true)

@@ -132,5 +132,18 @@ namespace MissileReflex.Src.Lobby
         {
             return playerStatus.ContainsKey(player) ? playerStatus[player] : new LobbyPlayerStatus();
         }
+
+        [Rpc(RpcSources.All, RpcTargets.All)]
+        public void RpcallPostChatMessage(string playerCaption, string content)
+        {
+            lobbyHud.SectionMultiChatRef.PostChatMessageLocal(playerCaption, content);
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.All)]
+        public void RpcallPostInfoMessage(string content)
+        {
+            lobbyHud.SectionMultiChatRef.PostInfoMessageLocal(content);
+        }
+        
     }
 }

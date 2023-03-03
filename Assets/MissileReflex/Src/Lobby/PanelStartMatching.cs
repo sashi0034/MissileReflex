@@ -8,6 +8,7 @@ using DG.Tweening;
 using Fusion;
 using MissileReflex.Src.Connection;
 using MissileReflex.Src.Front;
+using MissileReflex.Src.Lobby.MenuContents;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using TMPro;
@@ -70,12 +71,17 @@ namespace MissileReflex.Src.Lobby
 
         private async UniTask onPushButtonInternal()
         {
+            button.interactable = false;
+
             SeManager.Instance.PlaySe(SeManager.Instance.SeMatchingStart);
             await HudUtil.AnimSmallOneToZero(button.transform);
+            button.interactable = true;
+            
             HudUtil.AnimBigZeroToOne(message.transform).Forget();
             message.text = "サーバーに接続しています...";
             
             // 接続開始
+            if (lobbyHud.SharedState != null) throw new NetworkObjectAlreadyExistException();
             await lobbyHud.GameRoot.Network.StartMatching(GameMode.AutoHostOrClient);
 
             if (tryGetNetworkRunner(out var runner) == false || runner == null) throw new NetworkObjectMissingException();
@@ -94,7 +100,7 @@ namespace MissileReflex.Src.Lobby
                 ));
             HudUtil.AnimBigZeroToOne(labelMatchingParticipant.transform).Forget();
             
-            lobbyHud.SectionMultiChatRef.RpcallPostInfoMessage(sharedState.Runner.ActivePlayers.Count() == 1
+            lobbyHud.SectionMultiChatRef.PostInfoMessageAuto(sharedState.Runner.ActivePlayers.Count() == 1
                 ? $"{gameRoot.SaveData.PlayerName} がルームを作成しました"
                 : $"{gameRoot.SaveData.PlayerName} がルームに参加しました");
 

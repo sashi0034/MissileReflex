@@ -34,21 +34,25 @@ namespace MissileReflex.Src.Lobby.MenuContents
 #nullable enable
         
         private int _numPosted = 0;
+        private IDisposable? _subscribedOnSubmit;
         
 
-        [EventFunction]
-        private void Start()
+        public void Init()
         {
+            _numPosted = 0;
             foreach (var child in scrollContent.transform.GetChildren())
             {
                 Util.DestroyGameObject(child.gameObject);
             }
 
-            panelInputChatContent.OnSubmitInput.Subscribe(input =>
+            _subscribedOnSubmit?.Dispose();
+            _subscribedOnSubmit = panelInputChatContent.OnSubmitInput.Subscribe(input =>
             {
                 if (input.IsNullOrWhitespace()) return;
                 // ローカルプレイヤーのチャット送信
-                rpcallPostChatMessage(stringifyLocalPlayerCaption(), input);
+                PostChatMessageAuto(
+                    stringifyLocalPlayerCaption(), 
+                    input);
                 panelInputChatContent.CleanInputContent();
             });
         }
@@ -56,6 +60,7 @@ namespace MissileReflex.Src.Lobby.MenuContents
         [EventFunction]
         private void OnEnable()
         {
+            // 非表示から表示させるとたまにレイアウトが崩れるので再構築
             rebuildScrollView();
         }
 
@@ -74,19 +79,28 @@ namespace MissileReflex.Src.Lobby.MenuContents
         {
             return $"{gameRoot.SaveData.PlayerName} (<u><i>{gameRoot.SaveData.PlayerRating}</u></i>)";
         }
-
-        [Rpc(RpcSources.All, RpcTargets.All)]
-        private void rpcallPostChatMessage(string playerCaption, string content)
+        
+        public void PostChatMessageAuto(string playerCaption, string content)
+        {
+            if (lobbyHud.SharedState != null)
+                lobbyHud.SharedState.RpcallPostChatMessage(playerCaption, content);
+            else
+                PostChatMessageLocal(playerCaption, content);
+        }
+        
+        public void PostInfoMessageAuto(string content)
+        {
+            if (lobbyHud.SharedState != null)
+                lobbyHud.SharedState.RpcallPostInfoMessage(content);
+            else
+                PostInfoMessageLocal(content);
+        }
+        
+        public void PostChatMessageLocal(string playerCaption, string content)
         {
             var newContent = appendNewPostedContent();
             newContent.TextCaption.text = playerCaption + $" <color=black>{DateTime.Now:yyyy/MMM/dd hh:mm:ss}";
             newContent.TextContent.text = content;
-        }
-
-        [Rpc(RpcSources.All, RpcTargets.All)]
-        public void RpcallPostInfoMessage(string content)
-        {
-            PostInfoMessageLocal(content);
         }
 
         public void PostInfoMessageLocal(string content)
