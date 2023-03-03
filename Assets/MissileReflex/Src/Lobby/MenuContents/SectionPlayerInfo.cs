@@ -1,7 +1,10 @@
 ﻿#nullable enable
 
+using System;
 using Cysharp.Threading.Tasks;
+using MissileReflex.Src.Storage;
 using MissileReflex.Src.Utils;
+using Sirenix.Utilities;
 using TMPro;
 using UnityEngine;
 
@@ -26,6 +29,11 @@ namespace MissileReflex.Src.Lobby.MenuContents
         private int ratingDeltaByLastBattle = 0;
         public int RatingDeltaByLastBattle => ratingDeltaByLastBattle;
 
+        [EventFunction]
+        private void Start()
+        {
+            inputPlayerName.onEndEdit.AddListener(onSubmitPlayerName);
+        }
 
         public void SetRatingDeltaByLastBattle(int delta)
         {
@@ -40,6 +48,30 @@ namespace MissileReflex.Src.Lobby.MenuContents
             bool isShowRatingDelta = ratingDeltaByLastBattle != 0;
             textRatingDelta.gameObject.SetActive(isShowRatingDelta);
             if (isShowRatingDelta) performRatingDelta().RunTaskHandlingError();
+        }
+
+        private void onSubmitPlayerName(string newName)
+        {
+            // ダメ
+            if (newName.IsNullOrWhitespace())
+            {
+                inputPlayerName.text = gameRoot.SaveData.PlayerName;
+                return;
+            }
+
+            const int maxPlayerNameLength = 16;
+            var newNameCorrected = newName[..Math.Min(newName.Length, maxPlayerNameLength)]
+                .Replace("<", "")
+                .Replace(">", "");
+
+            string oldName = gameRoot.SaveData.PlayerName;
+
+            inputPlayerName.text = newNameCorrected;
+            gameRoot.SaveData.SetPlayerName(newNameCorrected);
+            gameRoot.WriteSaveData();
+            
+            lobbyHud.SectionMultiChatRef.RpcallPostInfoMessage(
+                $"{oldName} が名前を {newNameCorrected} に変更しました");
         }
 
         private async UniTask performRatingDelta()

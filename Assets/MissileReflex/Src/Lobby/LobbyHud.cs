@@ -3,6 +3,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Fusion;
+using MissileReflex.Src.Lobby.MenuContents;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using Newtonsoft.Json.Bson;
@@ -34,6 +35,9 @@ namespace MissileReflex.Src.Lobby
 
         private LobbySharedState? _sharedState;
         public LobbySharedState? SharedState => _sharedState;
+        
+        public SectionMultiChat SectionMultiChatRef => sectionMenuContents.SectionMultiChat;
+
 
         public void RegisterSharedState(LobbySharedState state)
         {

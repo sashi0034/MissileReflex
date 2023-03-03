@@ -1,8 +1,12 @@
 ﻿#nullable enable
 
+using System;
+using MissileReflex.Src.Utils;
 using TMPro;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
+using WebGLInput = WebGLSupport.WebGLInput;
 
 namespace MissileReflex.Src.Lobby.MenuContents
 {
@@ -18,5 +22,33 @@ namespace MissileReflex.Src.Lobby.MenuContents
         [SerializeField] private Toggle toggleEnableWebGlInput;
         public Toggle ToggleEnableWebGlInput => toggleEnableWebGlInput;
 #nullable enable
+        private readonly Subject<string> _onSubmitInput = new();
+        public IObservable<string> OnSubmitInput => _onSubmitInput;
+        
+
+        [EventFunction]
+        private void Start()
+        {
+            inputField.onSubmit.AddListener((input) =>
+            {
+                _onSubmitInput.OnNext(input);
+            });
+            buttonPost.onClick.AddListener(() =>
+            {
+                _onSubmitInput.OnNext(inputField.text);
+            });
+            
+            toggleEnableWebGlInput.onValueChanged.AddListener(isOn =>
+            {
+                inputField.GetComponent<WebGLInput>().enabled = isOn;
+            });
+            toggleEnableWebGlInput.isOn = false;
+        }
+
+        public void CleanInputContent()
+        {
+            inputField.text = "";
+            inputField.ActivateInputField();
+        }
     }
 }

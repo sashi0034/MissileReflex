@@ -112,9 +112,26 @@ namespace MissileReflex.Src.Utils
 
         public static void CallDelayedAfterFrame(Action action)
         {
-            DOVirtual.DelayedCall(0, () => action());
+            RunUniTask(async () =>
+            {
+                await UniTask.Delay(0);
+                action();
+            });
         }
-        
+        public static void CallDelayedAfterFrame(Func<UniTask> action)
+        {
+            RunUniTask(async () =>
+            {
+                await UniTask.Delay(0);
+                action();
+            });
+        }
+
+        public static void RunUniTask(Func<UniTask> action)
+        {
+            action().Forget();
+        }
+
         public static async UniTask ExecutePerFrame(int numFrame, Action action)
         {
             for (int i = 0; i < numFrame; ++i)
@@ -149,7 +166,7 @@ namespace MissileReflex.Src.Utils
             };
         }
         
-        public static Color ColourRgb(int r, int g, int b)
+        public static Color ColourRgb256(int r, int g, int b)
         {
             return new Color((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f);
         }
@@ -159,7 +176,12 @@ namespace MissileReflex.Src.Utils
             int r = (hexRgb >> 16) & 0xff;
             int g = (hexRgb >> 8) & 0xff;
             int b = hexRgb & 0xff;
-            return ColourRgb(r, g, b);
+            return ColourRgb256(r, g, b);
+        }
+        
+        public static Color ColourHex(string hexCode)
+        {
+            return ColourHex(Convert.ToInt32(hexCode.Replace("#", ""), 16));
         }
         
         public static void DeactivateGameObjects(params MonoBehaviour[] objects)

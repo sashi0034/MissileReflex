@@ -93,6 +93,10 @@ namespace MissileReflex.Src.Lobby
                 $"プレイヤー [{sharedState.Runner.LocalPlayer.PlayerId}]"
                 ));
             HudUtil.AnimBigZeroToOne(labelMatchingParticipant.transform).Forget();
+            
+            lobbyHud.SectionMultiChatRef.RpcallPostInfoMessage(sharedState.Runner.ActivePlayers.Count() == 1
+                ? $"{gameRoot.SaveData.PlayerName} がルームを作成しました"
+                : $"{gameRoot.SaveData.PlayerName} がルームに参加しました");
 
             // 人が集まるまで待機
             await processAfterConnectSucceeded(runner, sharedState);

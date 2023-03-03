@@ -11,6 +11,7 @@ using MissileReflex.Src.Storage;
 using MissileReflex.Src.Utils;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -86,6 +87,17 @@ namespace MissileReflex.Src
             Debug.Assert(temp != null);
             if (temp == null) return;
             saveData = temp;
+            
+            Debug.Log("succeeded read save data");
         }
+
+        public void WriteSaveData()
+        {
+            string jsonData = JsonUtility.ToJson(saveData);
+            ES3.Save(ConstParam.SaveDataMainKey, jsonData);
+            
+            Logger.Print("write save data:\n" + jsonData);
+        }
+        
     }
 }
