@@ -92,6 +92,7 @@ namespace MissileReflex.Src.Lobby.MenuContents
 
             inputPlayerName.text = newNameCorrected;
             gameRoot.SaveData.SetPlayerName(newNameCorrected);
+            if (lobbyHud.SharedState != null) lobbyHud.SharedState.NotifyPlayerInfoFromSaveData(gameRoot.SaveData);
             gameRoot.WriteSaveData();
             
             lobbyHud.SectionMultiChatRef.PostInfoMessageAuto(

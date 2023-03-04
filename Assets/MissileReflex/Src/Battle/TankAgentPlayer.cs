@@ -36,8 +36,22 @@ namespace MissileReflex.Src.Battle
             updateInputShoot(input);
 
             // カメラ位置調整
-            if (Object.HasInputAuthority && _selfTank.IsAlive()) 
-                mainCamera.transform.localPosition = _selfTank.transform.position.FixY(mainCamera.transform.localPosition.y);
+            if (Object.HasInputAuthority && _selfTank.IsAlive()) controlCameraPos(input);
+        }
+
+        private void controlCameraPos(PlayerInputData _)
+        {
+            var cameraTransform = mainCamera.transform;
+            var cameraPos = cameraTransform.localPosition;
+
+            const float lerpScale = 20f;
+
+            var targetPos = _selfTank.transform.position.FixY(cameraPos.y);
+
+            cameraTransform.localPosition = Vector3.Lerp(
+                cameraPos,
+                targetPos,
+                Time.deltaTime * lerpScale);
         }
 
         private void updateInputMove(PlayerInputData input)

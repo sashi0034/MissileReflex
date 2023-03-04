@@ -86,7 +86,7 @@ namespace MissileReflex.Src.Params
         {
             return
 #if !DEBUG
-                releaseValue;
+                release;
 #else
                 debug.Equals(invalid) ? release : debug;
 #endif

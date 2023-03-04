@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Fusion;
 using MissileReflex.Src.Connection;
 using MissileReflex.Src.Params;
+using MissileReflex.Src.Storage;
 using UnityEngine;
 
 namespace MissileReflex.Src.Lobby
@@ -67,9 +68,11 @@ namespace MissileReflex.Src.Lobby
             _matchingRemainingCount--;
         }
 
-        public void NotifyPlayerInfo(PlayerGeneralInfo info)
+        public void NotifyPlayerInfoFromSaveData(SaveData saveData)
         {
-            rpcallNotifyPlayerInfo(Runner.LocalPlayer, info);
+            rpcallNotifyPlayerInfo(
+                Runner.LocalPlayer, 
+                new PlayerGeneralInfo(saveData.PlayerRating, saveData.PlayerName));
         }
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         private void rpcallNotifyPlayerInfo(PlayerRef player, PlayerGeneralInfo info)

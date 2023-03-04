@@ -60,6 +60,7 @@ namespace MissileReflex.Src.Lobby
                 message, 
                 labelMatchingParticipant);
             
+            sharedState.NotifyPlayerInfoFromSaveData(gameRoot.SaveData);
             processAfterConnectSucceeded(runner, sharedState).RunTaskHandlingError(handleMatchingError);
         }
 
@@ -118,10 +119,7 @@ namespace MissileReflex.Src.Lobby
 
             // 共有状態オブジェクトがスポーンされるのを同期
             var sharedState = await syncSpawnLobbySharedState();
-            sharedState.NotifyPlayerInfo(new PlayerGeneralInfo(
-                gameRoot.SaveData.PlayerRating,
-                gameRoot.SaveData.PlayerName
-            ));
+            sharedState.NotifyPlayerInfoFromSaveData(gameRoot.SaveData);
             return (runner, sharedState);
         }
 
