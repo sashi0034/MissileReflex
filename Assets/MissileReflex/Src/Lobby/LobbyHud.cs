@@ -46,6 +46,10 @@ namespace MissileReflex.Src.Lobby
 
         public void Init()
         {
+            if (_sharedState != null) _sharedState.Runner.Shutdown();
+            
+            panelStartMatching.Init();
+                
             sectionMenuContents.Init();
             panelSelectMenu.Init();
         }

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Fusion;
 using MissileReflex.Src.Connection;
 using MissileReflex.Src.Params;
@@ -42,8 +43,8 @@ namespace MissileReflex.Src.Lobby
         private static GameRoot gameRoot => GameRoot.Instance;
         private static LobbyHud lobbyHud => gameRoot.LobbyHud;
 
-        [Networked]
-        private NetworkDictionary<PlayerRef, LobbyPlayerStatus> playerStatus { get; } =
+        [Networked, Capacity(ConstParam.MaxTankAgent)]
+        private NetworkDictionary<PlayerRef, LobbyPlayerStatus> _playerStatus { get; } =
             MakeInitializer(new Dictionary<PlayerRef, LobbyPlayerStatus>());
 
         [Networked] private int _matchingRemainingCount { get; set; } = Int32.MaxValue;
@@ -61,6 +62,13 @@ namespace MissileReflex.Src.Lobby
         public void Init()
         {
             CleanRestart();
+        }
+        
+        // memo: StateAuthorityを持ってるプレイヤーが切断したとき、自動で別のプレイヤーに権限が移譲する
+
+        public void RemovePlayer(PlayerRef player)
+        {
+            _playerStatus.Remove(player);
         }
 
         public void DecRemainingCount()
@@ -119,7 +127,7 @@ namespace MissileReflex.Src.Lobby
 
         public LobbyPlayerStatus GetPlayerStatus(PlayerRef player)
         {
-            if (playerStatus.TryGet(player, out var status)) return status;
+            if (_playerStatus.TryGet(player, out var status)) return status;
             Debug.Assert(false);
             return new LobbyPlayerStatus();
         }
@@ -128,12 +136,12 @@ namespace MissileReflex.Src.Lobby
         {
             Debug.Assert(nullablePlayer != null);
             var player = nullablePlayer ?? PlayerRef.None;
-            playerStatus.Set(player, modifier(getPlayerStatusOrDefault(player)));
+            _playerStatus.Set(player, modifier(getPlayerStatusOrDefault(player)));
         }
 
         private LobbyPlayerStatus getPlayerStatusOrDefault(PlayerRef player)
         {
-            return playerStatus.ContainsKey(player) ? playerStatus[player] : new LobbyPlayerStatus();
+            return _playerStatus.ContainsKey(player) ? _playerStatus[player] : new LobbyPlayerStatus();
         }
 
         [Rpc(RpcSources.All, RpcTargets.All)]

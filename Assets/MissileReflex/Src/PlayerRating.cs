@@ -44,6 +44,12 @@ namespace MissileReflex.Src
             Debug.Assert(playerResult.TeamOrder is > 0 and <= ConstParam.NumTankTeam);
             const float halfOrder = (1f + ConstParam.NumTankTeam) / 2;
             float teamRatingDelta = (halfOrder - playerResult.TeamOrder) * ConstParam.RatingDeltaCriterion;
+            // 全然倒してなかったらポイントあげない
+            float actualTeamRatingDelta = teamRatingDelta < 0
+                ? teamRatingDelta
+                : playerResult.SelfScore > 1
+                    ? teamRatingDelta
+                    : 0;
             
             float amplifier = playerResult.FinishedStatus switch
             {
@@ -55,7 +61,7 @@ namespace MissileReflex.Src
 
             float attenuationOffline = playerResult.IsOnlineBattle ? 1f : 0.2f; 
             
-            int ratingDelta = (int)(teamRatingDelta + playerResult.SelfScore);
+            int ratingDelta = (int)(actualTeamRatingDelta + playerResult.SelfScore);
             
             return (int)(ratingDelta * amplifier * attenuationOffline);
         }

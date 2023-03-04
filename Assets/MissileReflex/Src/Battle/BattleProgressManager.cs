@@ -134,20 +134,24 @@ namespace MissileReflex.Src.Battle
             Debug.Assert(runner != null);
             if (runner == null) throw new NetworkObjectMissingException();
 
-            // ホストで共有状態オブジェクトの作成     
-            if (runner.IsServer) runner.Spawn(battleSharedStatePrefab);
+            while (true)
+            {
+                // 疑似ホストで共有状態オブジェクトの作成
+                if (gameRoot.Network.IsLocalPlayerPseudoHost()) runner.Spawn(battleSharedStatePrefab);
+                // 共有状態オブジェクトがスポーンされるのを同期
+                if (_battleSharedState != null) break;
+                await UniTask.DelayFrame(1);
+            }
+
+            // ホストでタンク召喚
+            if (gameRoot.Network.IsLocalPlayerPseudoHost()) summonTanks(runner);
+
             updateHudTeamInfo();
-                        
-            // 共有状態オブジェクトがスポーンされるのを同期
-            await UniTask.WaitUntil(() => _battleSharedState != null);
-            
+
             // スタートの表示
             battleRoot.Hud.PerformLabelBattleStart().Forget();
             SeManager.Instance.PlaySe(SeManager.Instance.SeBattleStart);
             
-            // ホストでタンク召喚
-            if (runner.IsServer) summonTanks(runner);
-
             runner.ProvideInput = true;
 
             var state = _battleSharedState;
@@ -185,6 +189,7 @@ namespace MissileReflex.Src.Battle
             var players = runner.ActivePlayers.ToList();
             players.ShuffleList();
             // players.Sort((a, b) => a.PlayerId - b.PlayerId);
+            
             foreach (var player in players)
             {
                 var playerInfo = gameRoot.LobbyHud.SharedState != null 
@@ -192,7 +197,6 @@ namespace MissileReflex.Src.Battle
                     : new PlayerGeneralInfo(); 
                 
                 battleRoot.TankManager.SpawnPlayer(runner, player, battleRoot.TankManager.GetNextSpawnInfo(playerInfo));
-
             }
             // AI召喚
             int numAi = ConstParam.MaxTankAgent - players.Count;

@@ -15,6 +15,9 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private BattleRoot battleRoot;
         
         [SerializeField] private NetworkPrefabRef[] missilePrefab;
+        
+        [SerializeField] private ParticleSystem missileExplosion;
+        public ParticleSystem MissileExplosion => missileExplosion;
 
         private readonly List<Missile> _missileList = new List<Missile>();
         private IntervalProcess _intervalProcess = new();
@@ -37,8 +40,14 @@ namespace MissileReflex.Src.Battle
 
         public void ShootMissile(MissileInitArg arg, NetworkRunner runner)
         {
-            var team = arg.Attacker.Team;
-            var attackerPlayer = arg.Attacker.OwnerNetworkPlayer;
+            var attacker = arg.Attacker;
+            var attackerPlayer = attacker.OwnerNetworkPlayer;
+            
+            // ミサイルは自分自身が発射するように
+            if (attacker.OwnerNetworkPlayer != PlayerRef.None && attacker.IsOwnerLocalPlayer() == false) return;
+
+            var team = attacker.Team;
+
             runner.Spawn(
                 missilePrefab[team.TeamId], arg.Attacker.transform.position, Quaternion.identity, attackerPlayer,
                 onBeforeSpawned: (_, obj) =>

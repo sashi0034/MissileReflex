@@ -43,8 +43,6 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private GameObject view;
         [SerializeField] private int lifeTimeReflectedCount = 3;
 
-        [SerializeField] private ParticleSystem missileExplosion;
-
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip seReflected;
 
@@ -52,8 +50,8 @@ namespace MissileReflex.Src.Battle
         private MissilePhysic _physic;
 #nullable enable
         
-        private BattleRoot BattleRoot => BattleRoot.Instance;
-        public MissileManager Manager => BattleRoot.MissileManager;
+        private static BattleRoot battleRoot => BattleRoot.Instance;
+        private static MissileManager manager => battleRoot.MissileManager;
 
         private bool _hasDespawned = false;
         public bool HasDespawned => _hasDespawned;
@@ -75,8 +73,7 @@ namespace MissileReflex.Src.Battle
         public Vector3 Pos => transform.position;
 
         private static readonly Vector3 invalidEffectExplosionPos = Vector3.positiveInfinity;
-        [Networked] private Vector3 _requestedEffectExplosionPos { get; set; } = invalidEffectExplosionPos;
-
+        
         public void Awake()
         {
             _physic = new MissilePhysic(this);
@@ -88,17 +85,13 @@ namespace MissileReflex.Src.Battle
             
             _viewInitialRotation = view.transform.localRotation.eulerAngles;
 
-            transform.parent = Manager.transform;
+            transform.parent = manager.transform;
             transform.position = _ownerFighter.transform.position.FixY(ConstParam.Instance.MissileOffsetY);
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
             _hasDespawned = true;
-            
-            // 爆発エフェクトを出す
-            if (_requestedEffectExplosionPos != invalidEffectExplosionPos)
-                birthEffectExplosion(_requestedEffectExplosionPos);
         }
 
         public void Init(MissileInitArg arg)
@@ -144,7 +137,7 @@ namespace MissileReflex.Src.Battle
 
         public void RequestEffectExplosion(Vector3 pos)
         {
-            _requestedEffectExplosionPos = pos;
+            rpcallBirthEffectExplosion(Runner, pos);
         }
 
         private bool isReflectedUpTo()
@@ -157,11 +150,12 @@ namespace MissileReflex.Src.Battle
             _reflectedCount++;
         }
         
-        private void birthEffectExplosion(Vector3 pos, RpcInfo info = default)
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        private static void rpcallBirthEffectExplosion(NetworkRunner _, Vector3 pos)
         {
-            var effect = Instantiate(missileExplosion, Manager.transform);
+            var effect = Instantiate(manager.MissileExplosion, manager.transform);
             effect.transform.position = pos;
-            Util.DelayDestroyEffect(effect, BattleRoot.CancelBattle).Forget();
+            Util.DelayDestroyEffect(effect, battleRoot.CancelBattle).Forget();
             var explosionAudio = effect.GetComponent<AudioSource>();
             Debug.Assert(explosionAudio != null);
             if (explosionAudio == null) return;

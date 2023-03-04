@@ -34,6 +34,11 @@ namespace MissileReflex.Src.Lobby
         public IObservable<LobbySharedState?> OnMatchingFinished => _onMatchingFinished;
         
 
+        
+        public void Init()
+        {
+            CleanRestart();
+        }
         public void CleanRestart()
         {
             Util.ActivateAndResetScale(button);
@@ -90,7 +95,7 @@ namespace MissileReflex.Src.Lobby
             message.text = "サーバーに接続しています...";
             
             // 接続開始
-            var (runner, sharedState) = await startConnectNetwork(GameMode.AutoHostOrClient);
+            var (runner, sharedState) = await startConnectNetwork(GameMode.Shared);
             HudUtil.AnimBigZeroToOne(labelMatchingParticipant.transform).Forget();
             
             lobbyHud.SectionMultiChatRef.PostInfoMessageAuto(sharedState.Runner.ActivePlayers.Count() == 1
@@ -114,11 +119,9 @@ namespace MissileReflex.Src.Lobby
             await lobbyHud.GameRoot.Network.StartMatching(gameMode);
 
             if (tryGetNetworkRunner(out var runner) == false || runner == null) throw new NetworkObjectMissingException();
-
-            runner.Spawn(lobbySharedStatePrefab, onBeforeSpawned: (_, obj) => { obj.GetComponent<LobbySharedState>().Init(); });
-
+            
             // 共有状態オブジェクトがスポーンされるのを同期
-            var sharedState = await syncSpawnLobbySharedState();
+            var sharedState = await syncSpawnLobbySharedState(runner);
             sharedState.NotifyPlayerInfoFromSaveData(gameRoot.SaveData);
             return (runner, sharedState);
         }
@@ -162,9 +165,21 @@ namespace MissileReflex.Src.Lobby
             _onMatchingFinished.OnNext(sharedState);
         }
 
-        private async UniTask<LobbySharedState> syncSpawnLobbySharedState()
+        private async UniTask<LobbySharedState> syncSpawnLobbySharedState(NetworkRunner runner)
         {
-            await UniTask.WaitUntil(() => lobbyHud.SharedState != null);
+            while (true)
+            {
+                await UniTask.DelayFrame(1);
+                if (gameRoot.Network.IsLocalPlayerPseudoHost())
+                {
+                    runner.Spawn(
+                        lobbySharedStatePrefab,
+                        inputAuthority: runner.LocalPlayer,
+                        onBeforeSpawned: (_, obj) => { obj.GetComponent<LobbySharedState>().Init(); });
+                }
+                if (lobbyHud.SharedState != null) break;
+            }
+            
             return lobbyHud.SharedState!;
         }
 

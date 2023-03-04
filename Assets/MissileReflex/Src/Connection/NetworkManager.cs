@@ -32,6 +32,7 @@ namespace MissileReflex.Src.Connection
         private NetworkLifetimeObject? _lifetimeObject;
         public NetworkRunner? Runner => _lifetimeObject != null ? _lifetimeObject.NetworkRunner : null;
 
+        public PlayerRef PseudoHostRef => _lifetimeObject != null ? _lifetimeObject.PseudoHost : PlayerRef.None;
 
         public void ModifyRunner(Action<NetworkRunner> modifier)
         {
@@ -41,6 +42,12 @@ namespace MissileReflex.Src.Connection
                 return;
             }
             modifier(Runner);
+        }
+
+        public bool IsLocalPlayerPseudoHost()
+        {
+            return _lifetimeObject != null && 
+                   PseudoHostRef == _lifetimeObject.NetworkRunner.LocalPlayer;
         }
         
         public async UniTask DebugStartBattleNetwork(GameMode mode)
@@ -77,6 +84,21 @@ namespace MissileReflex.Src.Connection
                 gameRoot.FrontHud.PopupMessageBelt.PerformPopupCautionOnShutdown(reason);
                 gameRoot.LobbyHud.SectionMultiChatRef.PostInfoMessageLocal("ホストがルームを解散しました");
                 battleRoot.Progress.FinalizeResult();
+            });
+
+            lifetimeObject.OnEndPlayerLeft.Subscribe(player =>
+            {
+                string playerName = gameRoot.LobbyHud.SharedState != null
+                    ? gameRoot.LobbyHud.SharedState.GetPlayerStatus(player).Info.Name
+                    : "?";
+                if (gameRoot.LobbyHud.SharedState != null) gameRoot.LobbyHud.SharedState.RemovePlayer(player);
+                
+                if (gameRoot.SaveData.IsEnteredBattle == false) return;
+                if (gameRoot.LobbyHud.SharedState == null) return;
+                
+                // バトル中でプレイヤーが抜けたなら警告を出す
+                gameRoot.FrontHud.PopupMessageBelt.PerformPopupCautionOnPlayerLeft(
+                    playerName);
             });
         }
 

@@ -76,25 +76,38 @@ namespace MissileReflex.Src
 
         public void ReadSaveData()
         {
-            string jsonData = ES3.Load<string>(ConstParam.SaveDataMainKey, defaultValue: "");
-            if (jsonData.IsNullOrWhitespace()) return;
+            try
+            {
+                string jsonData = ES3.Load<string>(ConstParam.SaveDataMainKey, defaultValue: "");
+                if (jsonData.IsNullOrWhitespace()) return;
             
-            Debug.Log("read save data:\n" + jsonData);
+                Debug.Log("read save data:\n" + jsonData);
 
-            var temp = JsonUtility.FromJson<SaveData>(jsonData);
-            Debug.Assert(temp != null);
-            if (temp == null) return;
-            saveData = temp;
+                var temp = JsonUtility.FromJson<SaveData>(jsonData);
+                Debug.Assert(temp != null);
+                if (temp == null) return;
+                saveData = temp;
             
-            Debug.Log("succeeded read save data");
+                Debug.Log("succeeded read save data");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+            }
         }
 
         public void WriteSaveData()
         {
-            string jsonData = JsonUtility.ToJson(saveData);
-            ES3.Save(ConstParam.SaveDataMainKey, jsonData);
-            
-            Logger.Print("write save data:\n" + jsonData);
+            try
+            {
+                string jsonData = JsonUtility.ToJson(saveData);
+                ES3.Save(ConstParam.SaveDataMainKey, jsonData);
+                Debug.Log("write save data:\n" + jsonData);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+            }
         }
         
     }

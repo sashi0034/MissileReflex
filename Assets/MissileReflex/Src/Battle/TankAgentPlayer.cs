@@ -29,6 +29,12 @@ namespace MissileReflex.Src.Battle
 
         public override void FixedUpdateNetwork()
         {
+            if (_selfTank.IsOwnerLocalPlayer() && Object.StateAuthority != Runner.LocalPlayer)
+            {
+                // プレイヤー自身のオブジェクトはStateAuthorityを要求する
+                Object.RequestStateAuthority();
+            }
+            
             GetInput(out PlayerInputData input);
             
             updateInputMove(input);

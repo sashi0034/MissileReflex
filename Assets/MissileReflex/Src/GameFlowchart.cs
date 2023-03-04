@@ -1,10 +1,12 @@
 ﻿#nullable enable
 
 using System;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using MissileReflex.Src.Battle;
 using MissileReflex.Src.Lobby;
 using MissileReflex.Src.Params;
+using MissileReflex.Src.Storage;
 using MissileReflex.Src.Utils;
 using Sirenix.OdinInspector;
 using UniRx;
@@ -76,6 +78,8 @@ namespace MissileReflex.Src
                 catch (Exception e)
                 {
                     UniTaskUtil.LogTaskHandlingError(e);
+                    init();
+                    gameRoot.FrontHud.PopupMessageBelt.PerformPopupCautionFromException(e);
                 }
             }
         }
@@ -107,9 +111,10 @@ namespace MissileReflex.Src
 
             if (sharedState != null) sharedState.NotifyLocalLoadedArena();
             gameRoot.BattleRoot.Init();
-
+            
             // プレイヤー全員がシーンロードを終わるまで待機
-            await UniTask.WaitUntil(() => sharedState == null || sharedState.IsAllPlayersLoadedArena());
+            await waitForAllPlayersLoadedArena(sharedState, gameRoot.SaveData);
+            
             if (sharedState != null) sharedState.NotifyEnteredBattle();
             
             gameRoot.SaveData.SetEnteredBattle(true);
@@ -139,6 +144,33 @@ namespace MissileReflex.Src
 
             // 部屋をまた開ける
             gameRoot.Network.ModifyRunner(runner => runner.SessionInfo.IsOpen = true);
+        }
+
+        private static async UniTask waitForAllPlayersLoadedArena(LobbySharedState? sharedState, SaveData saveData)
+        {
+            float failureCheckingTime = 0;
+            
+            while (true)
+            {
+                if (sharedState == null ||
+                    // プレイヤー全員がシーンロードを終わるまで待機
+                    sharedState.IsAllPlayersLoadedArena() ||
+                    // まれにぎりぎりで参戦すると同期がずれるので一応これでもOK
+                    sharedState.HasEnteredBattle) break;
+                
+                // ぎりぎり参戦とかだとたまに同期がおかしいので一応確認しておく
+                if ((failureCheckingTime += Time.deltaTime) >= 1f)
+                {
+                    failureCheckingTime = 0;
+                    if (sharedState.GetPlayerStatus(sharedState.Runner.LocalPlayer).HasLoadedArena == false)
+                    {
+                        sharedState.NotifyPlayerInfoFromSaveData(saveData);
+                        sharedState.NotifyLocalLoadedArena();
+                    }
+                }
+
+                await UniTask.DelayFrame(1);
+            }
         }
 
         private void updatePlayerRatingFromResult(BattleLocalPlayerResult? playerResult)

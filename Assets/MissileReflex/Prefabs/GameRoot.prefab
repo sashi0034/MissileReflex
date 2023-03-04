@@ -2984,6 +2984,8 @@ MonoBehaviour:
   - RawGuidValue: 0c7d00b83fe5072439c892ecbcb566b6
   - RawGuidValue: cb9b70e7a25ecdc4b91604abdbaeeac6
   - RawGuidValue: b5f687bcebae4c547ab8c1bb6a3ec873
+  missileExplosion: {fileID: 8194992990867289333, guid: 0b85710846d7ad24e876b4748d5727f6,
+    type: 3}
 --- !u!1 &3573201640852897261
 GameObject:
   m_ObjectHideFlags: 0

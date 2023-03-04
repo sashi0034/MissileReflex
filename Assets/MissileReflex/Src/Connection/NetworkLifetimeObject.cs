@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Fusion;
 using Fusion.Sockets;
 using MissileReflex.Src.Battle;
@@ -24,6 +25,9 @@ namespace MissileReflex.Src.Connection
         private Subject<Unit> _onEndSceneLoadDone = new Subject<Unit>();
         public Subject<Unit> OnEndSceneLoadDone => _onEndSceneLoadDone;
 
+        private Subject<PlayerRef> _onEndPlayerLeft = new Subject<PlayerRef>();
+        public IObservable<PlayerRef> OnEndPlayerLeft => _onEndPlayerLeft;
+
         private Subject<ShutdownReason> _onEndShutdown = new();
         public IObservable<ShutdownReason> OnEndShutdown => _onEndShutdown;
         
@@ -42,15 +46,13 @@ namespace MissileReflex.Src.Connection
         
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
-            if (runner.IsServer)
-                Debug.Log("host; player joined: " + player.PlayerId);
-            else
-                Debug.Log("client; player joined: " + player.PlayerId);
+            Debug.Log("player joined: " + player.PlayerId);
         }
 
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
         {
             Debug.Log("player left: " + player.PlayerId);
+            _onEndPlayerLeft.OnNext(player);
         }
 
         public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)

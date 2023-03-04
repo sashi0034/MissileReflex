@@ -109,10 +109,11 @@ namespace MissileReflex.Src.Battle
 
         public void SpawnPlayer(NetworkRunner runner, PlayerRef player, TankSpawnInfo spawnInfo)
         {
-            runner.Spawn(playerPrefab, spawnInfo.InitialPos, Quaternion.identity, player, onBeforeSpawned: (networkRunner, obj) =>
+            var networkObj = runner.Spawn(playerPrefab, spawnInfo.InitialPos, Quaternion.identity, player, onBeforeSpawned: (networkRunner, obj) =>
             {
                 obj.GetComponent<TankAgentPlayer>().Init(spawnInfo, player);
             });
+            networkObj.RequestStateAuthority();
         }
         
         public void SpawnAi(NetworkRunner runner, TankSpawnInfo spawnInfo)

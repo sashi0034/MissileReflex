@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Fusion;
@@ -11,13 +12,7 @@ using UnityEngine;
 
 namespace MissileReflex.Src.Front
 {
-    public enum EPopupMessageBeltKind
-    {
-        Unexpected,
-        ConnectionFailed,
-        HostDisconnected
-    }
-
+    
     
     public class PopupMessageBelt : MonoBehaviour
     {
@@ -29,39 +24,47 @@ namespace MissileReflex.Src.Front
         
         public void PerformPopupCautionFromException(Exception e)
         {
-            if (_taskPerform.Status == UniTaskStatus.Pending) return;
-            _taskPerform = performPopupCautionInternal(EPopupMessageBeltKind.Unexpected);
+            pushPerformPopupCaution("予期せぬエラーが発生しました");
         }
         public void PerformPopupCautionOnShutdown(ShutdownReason kind)
         {
-            if (_taskPerform.Status == UniTaskStatus.Pending) return;
-            _taskPerform = kind switch
+            switch (kind)
             {
-                ShutdownReason.DisconnectedByPluginLogic  => performPopupCautionInternal(EPopupMessageBeltKind.HostDisconnected),
-                ShutdownReason.Ok => UniTask.CompletedTask,
-                _ => performPopupCautionInternal(EPopupMessageBeltKind.ConnectionFailed),
-            };
+            case ShutdownReason.DisconnectedByPluginLogic:
+                pushPerformPopupCaution("ホストが通信を切断しました");
+                break;
+            case ShutdownReason.Ok:
+                pushPerformPopupCaution("通信接続に失敗しました");
+                break;
+            }
+        }
+        public void PerformPopupCautionOnPlayerLeft(string playerName)
+        {
+            pushPerformPopupCaution($"{playerName} が通信を切断しました");
+        }
+
+        private void pushPerformPopupCaution(string messageText)
+        {
+            Util.RunUniTask(async () =>
+            {
+                await UniTask.WaitUntil(() => _taskPerform.Status != UniTaskStatus.Pending);
+                _taskPerform = performPopupCautionInternal(messageText);
+            });
         }
         
-        private async UniTask performPopupCautionInternal(EPopupMessageBeltKind kind)
+        private async UniTask performPopupCautionInternal(string messageText)
         {
             SeManager.Instance.PlaySe(SeManager.Instance.SeSectionFront);
 
             Util.ActivateGameObjects(this);
-            
-            message.text = kind switch
-            {
-                EPopupMessageBeltKind.Unexpected => "予期せぬエラーが発生しました",
-                EPopupMessageBeltKind.ConnectionFailed => "通信接続に失敗しました",
-                EPopupMessageBeltKind.HostDisconnected => "ホストが通信を切断しました",
-                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
-            };
+
+            message.text = messageText;
             transform.localScale = new Vector3(0, 1, 1);
             await transform.DOScaleX(1f, 0.5f).SetEase(Ease.OutBack);
             await UniTask.Delay(3f.ToIntMilli());
             await transform.DOScaleX(0f, 0.5f).SetEase(Ease.InBack);
             
-            Util.DestroyComponent(this);
+            Util.DeactivateGameObjects(this);
         }
 
 
