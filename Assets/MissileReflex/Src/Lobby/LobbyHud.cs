@@ -59,6 +59,7 @@ namespace MissileReflex.Src.Lobby
             if (_sharedState != null) _sharedState.CleanRestart();
             
             panelStartMatching.CleanRestart();
+            panelSelectMenu.CleanRestart();
             sectionMenuContents.CleanRestart();
         }
     }

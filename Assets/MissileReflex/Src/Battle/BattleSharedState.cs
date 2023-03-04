@@ -17,21 +17,22 @@ namespace MissileReflex.Src.Battle
         bool IsLocalPlayer,
         TankScore Score,
         PlayerRating PlayerRating);
-    
+
     public record BattleTeamScore(
         int TeamId,
         int Score,
-        int Order)
+        int Order /* 1-index */)
     {
         public BattleTeamScore AddScore(int score)
         {
             return this with { Score = Score + score };
         }
+
         public BattleTeamScore SetOrder(int order)
         {
             return this with { Order = order };
         }
-    };
+    }
 
     public class BattleSharedState : NetworkBehaviour
     {

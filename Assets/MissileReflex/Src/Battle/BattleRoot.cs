@@ -92,6 +92,7 @@ namespace MissileReflex.Src.Battle
         {
             missileManager.ClearBattle();
             tankManager.ClearBattle();
+            battleProgressManager.ClearBattle();
         }
     }
 }

@@ -2,6 +2,7 @@
 
 using System;
 using Cysharp.Threading.Tasks;
+using MissileReflex.Src.Lobby.MenuContents;
 using MissileReflex.Src.Utils;
 using UnityEngine;
 
@@ -20,12 +21,20 @@ namespace MissileReflex.Src.Lobby
 
         public void Init()
         {
+            Debug.Assert(
+                getSectionOf(initialSelectedMenu).TryGetComponent<SectionPlayerInfo>(out _), 
+                $"entry point must be {nameof(SectionPlayerInfo)}");
+            
             _currSelectedMenu = initialSelectedMenu;
             Util.CallDelayedAfterFrame(() =>
             {
                 _currSelectedMenu.EnableSelect();
                 Util.ActivateGameObjects(getSectionOf(_currSelectedMenu));
             });
+        }
+        public void CleanRestart()
+        {
+            ChangeSelectedMenu(initialSelectedMenu);
         }
 
         public void ChangeSelectedMenu(ButtonMenuCommon newSelectedMenu)

@@ -165,7 +165,12 @@ namespace MissileReflex.Src.Utils
                 _ => order + "th"
             };
         }
-        
+
+        public static string StringifySignedNumber(int number)
+        {
+            return number < 0 ? number.ToString() : "+" + number;
+        }
+
         public static Color ColourRgb256(int r, int g, int b)
         {
             return new Color((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f);

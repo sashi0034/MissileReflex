@@ -2,8 +2,11 @@
 
 using System;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using MissileReflex.Src.Params;
 using MissileReflex.Src.Storage;
 using MissileReflex.Src.Utils;
+using Sirenix.OdinInspector;
 using Sirenix.Utilities;
 using TMPro;
 using UnityEngine;
@@ -26,8 +29,9 @@ namespace MissileReflex.Src.Lobby.MenuContents
         public TextMeshProUGUI TextRatingDelta => textRatingDelta;
         
 #nullable enable
-        private int ratingDeltaByLastBattle = 0;
-        public int RatingDeltaByLastBattle => ratingDeltaByLastBattle;
+        private const int invalidRatingDelta = Int32.MinValue;
+        private int _ratingDeltaByLastBattle = invalidRatingDelta;
+        public int RatingDeltaByLastBattle => _ratingDeltaByLastBattle;
 
         [EventFunction]
         private void Start()
@@ -37,7 +41,7 @@ namespace MissileReflex.Src.Lobby.MenuContents
 
         public void SetRatingDeltaByLastBattle(int delta)
         {
-            ratingDeltaByLastBattle = delta;
+            _ratingDeltaByLastBattle = delta;
         }
 
         public void CleanRestart()
@@ -45,10 +49,28 @@ namespace MissileReflex.Src.Lobby.MenuContents
             inputPlayerName.text = gameRoot.SaveData.PlayerName;
             textPlayerRating.text = gameRoot.SaveData.PlayerRating.ToString(); 
             
-            bool isShowRatingDelta = ratingDeltaByLastBattle != 0;
-            textRatingDelta.gameObject.SetActive(isShowRatingDelta);
-            if (isShowRatingDelta) performRatingDelta().RunTaskHandlingError();
+            checkPerformRatingDelta();
         }
+
+        private void checkPerformRatingDelta()
+        {
+            bool isShowRatingDelta = _ratingDeltaByLastBattle != invalidRatingDelta;
+            textRatingDelta.gameObject.SetActive(isShowRatingDelta);
+            
+            if (!isShowRatingDelta) return;
+            performRatingDelta(gameRoot.SaveData.PlayerRating, _ratingDeltaByLastBattle).RunTaskHandlingError();
+            _ratingDeltaByLastBattle = invalidRatingDelta;
+        }
+
+#if UNITY_EDITOR
+        [Button]
+        public void TestPerformRatingDelta(int ratingDelta)
+        {
+            _ratingDeltaByLastBattle = ratingDelta;
+            checkPerformRatingDelta();
+        }
+#endif
+
 
         private void onSubmitPlayerName(string newName)
         {
@@ -74,9 +96,37 @@ namespace MissileReflex.Src.Lobby.MenuContents
                 $"{oldName} が名前を {newNameCorrected} に変更しました");
         }
 
-        private async UniTask performRatingDelta()
+        private async UniTask performRatingDelta(PlayerRating actualRating, int ratingDelta)
         {
-            // TODO
+            textPlayerRating.text = (actualRating.Value - ratingDelta).ToString();
+            textRatingDelta.text = Util.StringifySignedNumber(ratingDelta);
+            textRatingDelta.color = ratingDelta == 0
+                ? Util.ColourHex(ConstParam.ColorCodeGamingGreen)
+                : ratingDelta < 0
+                    ? Util.ColourHex(ConstParam.ColorBluePale)
+                    : Util.ColourHex(ConstParam.ColorOrange);
+
+            Util.ActivateAndResetScale(textRatingDelta);
+
+            await UniTask.Delay(0.5f.ToIntMilli());
+            await textPlayerRating.transform.DOScale(1.1f, 0.5f).SetEase(Ease.InBack);
+
+            // 変化量をカウントダウン 
+            int changingRatingDelta = ratingDelta;
+            await DOTween.To(
+                () => changingRatingDelta,
+                value =>
+                {
+                    changingRatingDelta = value;
+                    textPlayerRating.text = (actualRating.Value - changingRatingDelta).ToString();
+                    textRatingDelta.text = Util.StringifySignedNumber(value);
+                },
+                0,
+                1.5f).SetEase(Ease.OutSine);
+            await textPlayerRating.transform.DOScale(1.0f, 0.5f).SetEase(Ease.InOutBack,10);
+            await UniTask.Delay(0.5f.ToIntMilli());
+            await HudUtil.AnimSmallOneToZero(textRatingDelta.transform);
+
         }
     }
 }

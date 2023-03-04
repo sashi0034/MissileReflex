@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MissileReflex.Src
 {
-    public class SeManager : MonoBehaviour
+    public partial class SeManager : MonoBehaviour
     {
 #nullable disable
         private static SeManager _instance;

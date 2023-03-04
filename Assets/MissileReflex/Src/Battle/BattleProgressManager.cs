@@ -16,9 +16,22 @@ using UnityEngine;
 
 namespace MissileReflex.Src.Battle
 {
+    public enum EBattleFinishedStatus
+    {
+        ErroredAtEarly,
+        ErroredAtLastSpurt,
+        Completed,
+    }
+    
     public record BattleFinalResult(
         BattleTankScore[] TankScores,
-        BattleTeamScore[] TeamScores);
+        BattleTeamScore[] TeamScores,
+        EBattleFinishedStatus FinishedStatus);
+
+    public record BattleLocalPlayerResult(
+        int TeamOrder,
+        int SelfScore,
+        EBattleFinishedStatus FinishedStatus);
     
     public class BattleProgressManager : MonoBehaviour
     {
@@ -30,12 +43,19 @@ namespace MissileReflex.Src.Battle
         private BattleSharedState? _battleSharedState;
         public BattleSharedState? SharedState => _battleSharedState;
         private BattleFinalResult? _result;
-        private readonly Subject<Unit> _onBattleCompleted = new();
-        public IObservable<Unit> OnBattleCompleted => _onBattleCompleted;
+        private readonly Subject<BattleLocalPlayerResult?> _onBattleCompleted = new();
+        public IObservable<BattleLocalPlayerResult?> OnBattleCompleted => _onBattleCompleted;
         
 
         public void Init()
         {
+            _result = null;
+        }
+
+        public void ClearBattle()
+        {
+            if (_battleSharedState != null) 
+                _battleSharedState.Runner.Despawn(_battleSharedState.GetComponent<NetworkObject>());
             _result = null;
         }
         
@@ -80,7 +100,29 @@ namespace MissileReflex.Src.Battle
             
             Debug.Log("finish battle flowchart");
             
-            _onBattleCompleted.OnNext(Unit.Default);
+            _onBattleCompleted.OnNext(getLocalPlayerResult());
+        }
+
+        private BattleLocalPlayerResult? getLocalPlayerResult()
+        {
+            if (_result == null) return null;
+            
+            int playerTeamId = -1;
+            int playerScore = 0;
+            foreach (var score in _result.TankScores)
+            {
+                if (score.IsLocalPlayer == false) continue;
+                playerTeamId = score.Team.TeamId;
+                playerScore = score.Score.Score;
+                break;
+            }
+
+            if (playerTeamId == -1) return null;
+            var team = _result.TeamScores.FirstOrDefault(team => team.TeamId == playerTeamId);
+            if (team == null) return null;
+            int teamOrder = team.Order;
+
+            return new BattleLocalPlayerResult(teamOrder, playerScore, _result.FinishedStatus);
         }
 
         private async UniTask startBattleInternal()
@@ -206,7 +248,17 @@ namespace MissileReflex.Src.Battle
 
             var teamScores = calcTeamScoreList();
 
-            _result = new BattleFinalResult(tankScores.ToArray(), teamScores);
+            int remainingTime = _battleSharedState == null ? Int32.MaxValue : _battleSharedState.RemainingTime;
+            var finishedState = remainingTime <= 1
+                ? EBattleFinishedStatus.Completed
+                : remainingTime <= ConstParam.Instance.BattleTimeLastSpurt
+                    ? EBattleFinishedStatus.ErroredAtLastSpurt
+                    : EBattleFinishedStatus.ErroredAtEarly;
+
+            _result = new BattleFinalResult(
+                tankScores.ToArray(), 
+                teamScores,
+                finishedState);
         }
 
         private BattleTeamScore[] calcTeamScoreList()

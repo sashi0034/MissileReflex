@@ -8,6 +8,7 @@ using MissileReflex.Src.Utils;
 using Sirenix.Utilities;
 using TMPro;
 using UniRx;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -60,6 +61,9 @@ namespace MissileReflex.Src.Lobby.MenuContents
         [EventFunction]
         private void OnEnable()
         {
+#if UNITY_EDITOR
+            if (EditorApplication.isPlaying == false) return;
+#endif
             // 非表示から表示させるとたまにレイアウトが崩れるので再構築
             rebuildScrollView();
         }
@@ -68,6 +72,9 @@ namespace MissileReflex.Src.Lobby.MenuContents
         {
             Util.CallDelayedAfterFrame(async () =>
             {
+                // シーン移動して新しいほうがすぐ破棄される場合があるので
+                if (gameObject == null) return;
+                
                 LayoutRebuilder.MarkLayoutForRebuild(scrollContent.GetComponent<RectTransform>());
                 await UniTask.DelayFrame(0);
                 // スクロール位置更新

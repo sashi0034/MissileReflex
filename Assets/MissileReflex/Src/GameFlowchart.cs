@@ -2,9 +2,11 @@
 
 using System;
 using Cysharp.Threading.Tasks;
+using MissileReflex.Src.Battle;
 using MissileReflex.Src.Lobby;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
+using Sirenix.OdinInspector;
 using UniRx;
 using UnityEngine;
 
@@ -61,6 +63,9 @@ namespace MissileReflex.Src
             await UniTask.DelayFrame(1);
             gameRoot.ResetSaveData();
             gameRoot.ReadSaveData();
+            correctSaveDataAfterRead();
+            
+            gameRoot.LobbyHud.CleanRestart();
 
             while (true)
             {
@@ -75,10 +80,20 @@ namespace MissileReflex.Src
             }
         }
 
+        private void correctSaveDataAfterRead()
+        {
+            if (gameRoot.SaveData.IsEnteredBattle == false) return;
+
+            // 前回ゲームを切っていたら最下位として減点する
+            updatePlayerRatingFromResult(new BattleLocalPlayerResult(
+                ConstParam.NumTankTeam,
+                0,
+                EBattleFinishedStatus.Completed));
+            gameRoot.SaveData.SetEnteredBattle(false);
+        }
+
         private async UniTask flowGame()
         {
-            gameRoot.LobbyHud.CleanRestart();
-            
             // マッチング終了まで待機
             var sharedState = await gameRoot.LobbyHud.PanelStartMatching.OnMatchingFinished.Take(1);
             
@@ -89,11 +104,15 @@ namespace MissileReflex.Src
             const int arenaIndex = 1;
             await gameRoot.LoadScene(ConstParam.GetLiteralArena(arenaIndex));
 
-            // プレイヤー全員がシーンロードを終わるまで待機
             if (sharedState != null) sharedState.NotifyLocalLoadedArena();
             gameRoot.BattleRoot.Init();
+
+            // プレイヤー全員がシーンロードを終わるまで待機
             await UniTask.WaitUntil(() => sharedState == null || sharedState.IsAllPlayersLoadedArena());
             if (sharedState != null) sharedState.NotifyEnteredBattle();
+            
+            gameRoot.SaveData.SetEnteredBattle(true);
+            gameRoot.WriteSaveData();
 
             HudUtil.AnimSmallOneToZero(gameRoot.LobbyHud.transform).Forget();
             
@@ -101,19 +120,54 @@ namespace MissileReflex.Src
             gameRoot.BattleRoot.Progress.FlowBattle();
 
             // 終了まで待つ
-            await gameRoot.BattleRoot.Progress.OnBattleCompleted.Take(1);
-
-            // ロビーを表示
-            await HudUtil.AnimBigZeroToOne(gameRoot.LobbyHud.transform);
+            var playerResult = await gameRoot.BattleRoot.Progress.OnBattleCompleted.Take(1);
             
+            // 結果を保存
+            updatePlayerRatingFromResult(playerResult);
+            gameRoot.SaveData.SetEnteredBattle(false);
+            gameRoot.WriteSaveData();
+
             // バトルの後片付け
             gameRoot.BattleRoot.ClearBattle();
             
             await gameRoot.LoadScene(ConstParam.LiteralMainScene);
-            
+
+            // ロビーを表示
+            gameRoot.LobbyHud.CleanRestart();
+            await HudUtil.AnimBigZeroToOne(gameRoot.LobbyHud.transform);
+
             // 部屋をまた開ける
             gameRoot.Network.ModifyRunner(runner => runner.SessionInfo.IsOpen = true);
         }
+
+        private void updatePlayerRatingFromResult(BattleLocalPlayerResult? playerResult)
+        {
+            if (playerResult == null) return;
+
+            var newRating = gameRoot.SaveData.PlayerRating.CalcNewRating(playerResult, out int ratingDelta);
+            
+            gameRoot.SaveData.SetPlayerRating(newRating);
+            gameRoot.LobbyHud.SectionMenuContents.SectionPlayerInfo.SetRatingDeltaByLastBattle(ratingDelta);
+        }
+
+#if UNITY_EDITOR
+        [Button]
+        public void TestCalcNewRating(
+            int currRating,
+            int teamOrder, 
+            int selfScore, 
+            EBattleFinishedStatus finishedStatus)
+        {
+            var newRating =
+                new PlayerRating(currRating).CalcNewRating(new BattleLocalPlayerResult(
+                    teamOrder, 
+                    selfScore, 
+                    finishedStatus), 
+                    out int ratingDelta);
+            Debug.Log($"{currRating} -> {newRating} (delta: {ratingDelta})");
+        }
+#endif
+
         
         
     }

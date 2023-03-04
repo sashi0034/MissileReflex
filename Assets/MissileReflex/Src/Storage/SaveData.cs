@@ -12,8 +12,7 @@ namespace MissileReflex.Src.Storage
         [SerializeField] private PlayerRating playerRating = new(ConstParam.DefaultPlayerRating);
         public PlayerRating PlayerRating => playerRating;
 
-        private static readonly string defaultPlayerName = $"Player_{Guid.NewGuid().ToString()[..4]}"; 
-        [SerializeField] private string playerName = defaultPlayerName;
+        [SerializeField] private string playerName = getDefaultPlayerName();
         public string PlayerName => playerName;
         
         // 通信切断処理に実装
@@ -21,6 +20,11 @@ namespace MissileReflex.Src.Storage
         public bool IsEnteredBattle => isEnteredBattle;
 
 
+        private static string getDefaultPlayerName()
+        {
+            return $"Player_{Guid.NewGuid().ToString()[..4]}";
+        }
+        
         public void SetPlayerRating(PlayerRating rating)
         {
             playerRating = rating;
@@ -29,6 +33,11 @@ namespace MissileReflex.Src.Storage
         public void SetPlayerName(string name)
         {
             playerName = name;
+        }
+
+        public void SetEnteredBattle(bool flag)
+        {
+            isEnteredBattle = flag;
         }
     }
 }

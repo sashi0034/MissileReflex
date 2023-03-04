@@ -72,6 +72,7 @@ namespace MissileReflex.Src.Params
 
         public const string ColorCodeGamingGreen = "#76b900";
         public const string ColorOrange = "#F86718";
+        public const string ColorBluePale = "#0576B9";
 
         private static int overwriteIfDebug(int release, int debug)
         {
