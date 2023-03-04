@@ -122,6 +122,8 @@ namespace MissileReflex.Src.Lobby.MenuContents
 
         private LabelPostedContent appendNewPostedContent()
         {
+            if (gameObject.activeSelf) SeManager.Instance.PlaySe(SeManager.Instance.SeChatPost);
+
             _numPosted++;
             
             var newContent = Instantiate(labelPostedContentPrefab, scrollContent.transform);

@@ -159,6 +159,7 @@ namespace MissileReflex.Src.Lobby
                 await UniTask.Delay(1000);
             }
 
+            SeManager.Instance.PlaySe(SeManager.Instance.SeMatchingEnd);
             message.text = $"ゲームの準備をしています";
             _onMatchingFinished.OnNext(sharedState);
         }

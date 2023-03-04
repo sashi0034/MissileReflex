@@ -41,6 +41,9 @@ namespace MissileReflex.Src.Lobby
         {
             if (_currSelectedMenu == newSelectedMenu) return;
             
+            if (gameObject.activeSelf)
+                SeManager.Instance.PlaySe(SeManager.Instance.SeSectionSwitch);
+            
             var (beforeSection, afterSection) = 
                 (getSectionOf(_currSelectedMenu), getSectionOf(newSelectedMenu));
 

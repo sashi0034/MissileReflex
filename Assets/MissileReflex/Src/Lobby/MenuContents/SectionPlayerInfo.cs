@@ -80,6 +80,8 @@ namespace MissileReflex.Src.Lobby.MenuContents
                 inputPlayerName.text = gameRoot.SaveData.PlayerName;
                 return;
             }
+            
+            SeManager.Instance.PlaySe(SeManager.Instance.SeSectionTap);
 
             const int maxPlayerNameLength = 16;
             var newNameCorrected = newName[..Math.Min(newName.Length, maxPlayerNameLength)]
@@ -111,6 +113,8 @@ namespace MissileReflex.Src.Lobby.MenuContents
             await UniTask.Delay(0.5f.ToIntMilli());
             await textPlayerRating.transform.DOScale(1.1f, 0.5f).SetEase(Ease.InBack);
 
+            SeManager.Instance.PlaySe(SeManager.Instance.SeRatingChange);
+            
             // 変化量をカウントダウン 
             int changingRatingDelta = ratingDelta;
             await DOTween.To(

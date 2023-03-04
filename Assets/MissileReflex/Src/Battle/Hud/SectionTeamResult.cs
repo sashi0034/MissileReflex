@@ -42,11 +42,14 @@ namespace MissileReflex.Src.Battle.Hud
             await HudUtil.AnimBigZeroToOne(transform);
             
             // 順番にチームリザルト表示していく
-            for (int i = labelTeamResultInfos.Length - 1; i >= 0; --i)
+            for (int order = labelTeamResultInfos.Length - 1; order >= 0; --order)
             {
-                var info = labelTeamResultInfos[i];
+                var info = labelTeamResultInfos[order];
+
+                int index = labelTeamResultInfos.Length - order;
+                await UniTask.Delay(index * 0.3f.ToIntMilli());
                 
-                await UniTask.Delay((labelTeamResultInfos.Length - i) * 0.3f.ToIntMilli());
+                SeManager.Instance.PlaySePitch(SeManager.Instance.SeResultShow, 0.8f + 0.2f * index);
                 
                 const float animDuration = 0.5f;
                 HudUtil.AnimBigZeroToOne(info.transform, animDuration).Forget();
@@ -56,6 +59,8 @@ namespace MissileReflex.Src.Battle.Hud
                 });
             }
 
+            SeManager.Instance.PlaySe(SeManager.Instance.SeResultClap);
+            
             // 1位のチームだけアニメーション
             var anim = DOTween.Sequence()
                 .Append(labelTeamResultInfos[0].transform.DOScale(1.1f, 0.5f).SetEase(Ease.OutBack))

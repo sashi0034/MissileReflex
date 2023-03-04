@@ -222,6 +222,8 @@ namespace MissileReflex.Src.Battle
 
             getSpawnSymbol().AnimRespawn(cancel).Forget();
             
+            if (IsOwnerLocalPlayer()) SeManager.Instance.PlaySe(SeManager.Instance.SePlayerRespawn);
+            
             // TODO: オーブ系のエフェクトで無敵を表現?
             await DOTween.Sequence(selfView)
                 .Append(selfView.transform.DOScale(1.0f, 0.1f).SetEase(Ease.OutBack))

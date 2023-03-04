@@ -29,6 +29,9 @@ namespace MissileReflex.Src.Battle.Hud
         public void OnPushButton()
         {
             if (_animConfirm.Status == UniTaskStatus.Pending) return;
+            
+            SeManager.Instance.PlaySe(SeManager.Instance.SeSectionConfirm);
+            
             _animConfirm = HudUtil.AnimSmallOneToZero(transform);
             _onConfirmed.OnNext(Unit.Default);
         }

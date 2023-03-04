@@ -45,6 +45,8 @@ namespace MissileReflex.Src.Front
         
         private async UniTask performPopupCautionInternal(EPopupMessageBeltKind kind)
         {
+            SeManager.Instance.PlaySe(SeManager.Instance.SeSectionFront);
+
             Util.ActivateGameObjects(this);
             
             message.text = kind switch

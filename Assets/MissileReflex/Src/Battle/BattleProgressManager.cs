@@ -143,6 +143,7 @@ namespace MissileReflex.Src.Battle
             
             // スタートの表示
             battleRoot.Hud.PerformLabelBattleStart().Forget();
+            SeManager.Instance.PlaySe(SeManager.Instance.SeBattleStart);
             
             // ホストでタンク召喚
             if (runner.IsServer) summonTanks(runner);
@@ -154,6 +155,7 @@ namespace MissileReflex.Src.Battle
 
             // 制限時間が0になったら試合終了
             await decRemainingTimeUntilZero(state);
+            SeManager.Instance.PlaySe(SeManager.Instance.SeBattleFinish);
             
             FinalizeResult();
             runner.ProvideInput = false;
@@ -224,6 +226,10 @@ namespace MissileReflex.Src.Battle
             // 同士討ちは減点
             int deltaScore = killed.Team.IsSame(attacker.Team) ? -1 : 1;
             attacker.EarnedScore.IncScore(deltaScore);
+
+            // プレイヤーが得点したときは音鳴らす
+            if (deltaScore > 0 && attacker.IsOwnerLocalPlayer()) 
+                SeManager.Instance.PlaySe(SeManager.Instance.SePlayerScored);
 
             // HUD更新
             battleRoot.Hud.LabelScoreAdditionOnKillManager.BirthLabel(new LabelScoreAdditionOnKillArg(

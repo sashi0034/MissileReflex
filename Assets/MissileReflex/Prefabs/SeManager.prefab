@@ -47,6 +47,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioSource: {fileID: 8456676367353812075}
   seMatchingStart: {fileID: 8300000, guid: b5ab44a66b36c2d449d1941de2a9a351, type: 3}
+  seMatchingEnd: {fileID: 8300000, guid: 650bcf026c443054da8ae8d1b17386fb, type: 3}
+  seBattleStart: {fileID: 8300000, guid: 1dfe2bd59243a6f46b9dd5acd9ddc697, type: 3}
+  seBattleFinish: {fileID: 8300000, guid: f3eeae1bf5bdee84c9b30b1b8bc24f99, type: 3}
+  sePlayerScored: {fileID: 8300000, guid: 1c172acb3d95d2247807ca9e70b38215, type: 3}
+  sePlayerRespawn: {fileID: 8300000, guid: 075f52285c13b1f45b39accc3f52ef8e, type: 3}
+  seSectionSwitch: {fileID: 8300000, guid: 5b1362fda5e8f504d80d8f9b56e04e83, type: 3}
+  seSectionTap: {fileID: 8300000, guid: c54d07883a4044344850432f487255ba, type: 3}
+  seSectionConfirm: {fileID: 8300000, guid: e3029dbdc1225c94eb985217803a62a6, type: 3}
+  seSectionFront: {fileID: 8300000, guid: 7d7778de00279fa40822dde48d23ab89, type: 3}
+  seResultClap: {fileID: 8300000, guid: 0de5c0c7820b4a74d8d23b5a959c5642, type: 3}
+  seResultShow: {fileID: 8300000, guid: 043ead94af820874a8ccab4c3c8c7dcf, type: 3}
+  seChatPost: {fileID: 8300000, guid: 1800aa77a8b400d438e7451a6474e2ce, type: 3}
+  seRatingChange: {fileID: 8300000, guid: 47e6dadc4909e0b4a9a0305a7bf15c55, type: 3}
 --- !u!82 &8456676367353812075
 AudioSource:
   m_ObjectHideFlags: 0
