@@ -52,10 +52,12 @@ namespace MissileReflex.Src
                 EBattleFinishedStatus.Completed => 1f,
                 _ => throw new ArgumentOutOfRangeException()
             };
+
+            float attenuationOffline = playerResult.IsOnlineBattle ? 1f : 0.2f; 
             
             int ratingDelta = (int)(teamRatingDelta + playerResult.SelfScore);
             
-            return (int)(ratingDelta * amplifier);
+            return (int)(ratingDelta * amplifier * attenuationOffline);
         }
     }
 }

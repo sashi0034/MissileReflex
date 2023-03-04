@@ -48,6 +48,13 @@ namespace MissileReflex.Src.Lobby
 
         private void ResumeSameRoom(NetworkRunner runner, LobbySharedState sharedState)
         {
+            // オフラインモードなら終了
+            if (runner.GameMode == GameMode.Single)
+            {
+                runner.Shutdown();
+                return;
+            }
+            
             Util.DeactivateGameObjects(button);
             Util.ActivateAndResetScale(
                 message, 
@@ -69,35 +76,20 @@ namespace MissileReflex.Src.Lobby
             HudUtil.AnimBigZeroToOne(button.transform).Forget();
         }
 
+        public bool CanPushButton()
+        {
+            return button.interactable && button.gameObject.activeSelf;
+        }
+
         private async UniTask onPushButtonInternal()
         {
-            button.interactable = false;
+            await disablePushButton();
 
-            SeManager.Instance.PlaySe(SeManager.Instance.SeMatchingStart);
-            await HudUtil.AnimSmallOneToZero(button.transform);
-            button.interactable = true;
-            
             HudUtil.AnimBigZeroToOne(message.transform).Forget();
             message.text = "サーバーに接続しています...";
             
             // 接続開始
-            if (lobbyHud.SharedState != null) throw new NetworkObjectAlreadyExistException();
-            await lobbyHud.GameRoot.Network.StartMatching(GameMode.AutoHostOrClient);
-
-            if (tryGetNetworkRunner(out var runner) == false || runner == null) throw new NetworkObjectMissingException();
-
-            runner.Spawn(lobbySharedStatePrefab, onBeforeSpawned: (_, obj) =>
-            {
-                obj.GetComponent<LobbySharedState>().Init();
-            });
-            
-            // 共有状態オブジェクトがスポーンされるのを同期
-            var sharedState = await syncSpawnLobbySharedState();
-            sharedState.NotifyPlayerInfo(new PlayerGeneralInfo(
-                // TODO: ちゃんとしたパラメータにする
-                new PlayerRating(1000), 
-                $"プレイヤー [{sharedState.Runner.LocalPlayer.PlayerId}]"
-                ));
+            var (runner, sharedState) = await startConnectNetwork(GameMode.AutoHostOrClient);
             HudUtil.AnimBigZeroToOne(labelMatchingParticipant.transform).Forget();
             
             lobbyHud.SectionMultiChatRef.PostInfoMessageAuto(sharedState.Runner.ActivePlayers.Count() == 1
@@ -106,6 +98,40 @@ namespace MissileReflex.Src.Lobby
 
             // 人が集まるまで待機
             await processAfterConnectSucceeded(runner, sharedState);
+        }
+
+        public async UniTask StartOfflineBattle()
+        {
+            await disablePushButton();
+            var (_, sharedState) = await startConnectNetwork(GameMode.Single);
+            _onMatchingFinished.OnNext(sharedState);
+        }
+
+        private async UniTask<(NetworkRunner, LobbySharedState)> startConnectNetwork(GameMode gameMode)
+        {
+            if (lobbyHud.SharedState != null) throw new NetworkObjectAlreadyExistException();
+            await lobbyHud.GameRoot.Network.StartMatching(gameMode);
+
+            if (tryGetNetworkRunner(out var runner) == false || runner == null) throw new NetworkObjectMissingException();
+
+            runner.Spawn(lobbySharedStatePrefab, onBeforeSpawned: (_, obj) => { obj.GetComponent<LobbySharedState>().Init(); });
+
+            // 共有状態オブジェクトがスポーンされるのを同期
+            var sharedState = await syncSpawnLobbySharedState();
+            sharedState.NotifyPlayerInfo(new PlayerGeneralInfo(
+                gameRoot.SaveData.PlayerRating,
+                gameRoot.SaveData.PlayerName
+            ));
+            return (runner, sharedState);
+        }
+
+        private async UniTask disablePushButton()
+        {
+            button.interactable = false;
+
+            SeManager.Instance.PlaySe(SeManager.Instance.SeMatchingStart);
+            await HudUtil.AnimSmallOneToZero(button.transform);
+            button.interactable = true;
         }
 
         private async UniTask processAfterConnectSucceeded(NetworkRunner runner, LobbySharedState sharedState)

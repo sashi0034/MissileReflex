@@ -35,8 +35,11 @@ namespace MissileReflex.Src.Connection
 
         public void ModifyRunner(Action<NetworkRunner> modifier)
         {
-            Debug.Assert(Runner != null);
-            if (Runner == null) return;
+            if (Runner == null)
+            {
+                Debug.LogWarning("Runner is null");
+                return;
+            }
             modifier(Runner);
         }
         
@@ -68,6 +71,9 @@ namespace MissileReflex.Src.Connection
             lifetimeObject.OnEndShutdown.Subscribe(reason =>
             {
                 // この時点では各NetworkObjectsは生きているはず
+                Debug.Log("shutdown: " + reason);
+                if (Runner != null && Runner.GameMode == GameMode.Single) return; 
+                
                 gameRoot.FrontHud.PopupMessageBelt.PerformPopupCautionOnShutdown(reason);
                 gameRoot.LobbyHud.SectionMultiChatRef.PostInfoMessageLocal("ホストがルームを解散しました");
                 battleRoot.Progress.FinalizeResult();

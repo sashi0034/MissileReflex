@@ -88,7 +88,8 @@ namespace MissileReflex.Src
             updatePlayerRatingFromResult(new BattleLocalPlayerResult(
                 ConstParam.NumTankTeam,
                 0,
-                EBattleFinishedStatus.Completed));
+                EBattleFinishedStatus.Completed,
+                true));
             gameRoot.SaveData.SetEnteredBattle(false);
         }
 
@@ -162,7 +163,8 @@ namespace MissileReflex.Src
                 new PlayerRating(currRating).CalcNewRating(new BattleLocalPlayerResult(
                     teamOrder, 
                     selfScore, 
-                    finishedStatus), 
+                    finishedStatus,
+                    true), 
                     out int ratingDelta);
             Debug.Log($"{currRating} -> {newRating} (delta: {ratingDelta})");
         }

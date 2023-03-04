@@ -26,12 +26,14 @@ namespace MissileReflex.Src.Battle
     public record BattleFinalResult(
         BattleTankScore[] TankScores,
         BattleTeamScore[] TeamScores,
-        EBattleFinishedStatus FinishedStatus);
+        EBattleFinishedStatus FinishedStatus,
+        bool IsOnlineBattle);
 
     public record BattleLocalPlayerResult(
         int TeamOrder,
         int SelfScore,
-        EBattleFinishedStatus FinishedStatus);
+        EBattleFinishedStatus FinishedStatus,
+        bool IsOnlineBattle);
     
     public class BattleProgressManager : MonoBehaviour
     {
@@ -122,7 +124,8 @@ namespace MissileReflex.Src.Battle
             if (team == null) return null;
             int teamOrder = team.Order;
 
-            return new BattleLocalPlayerResult(teamOrder, playerScore, _result.FinishedStatus);
+            return new BattleLocalPlayerResult(
+                teamOrder, playerScore, _result.FinishedStatus, _result.IsOnlineBattle);
         }
 
         private async UniTask startBattleInternal()
@@ -179,7 +182,7 @@ namespace MissileReflex.Src.Battle
             // プレイヤー召喚
             var players = runner.ActivePlayers.ToList();
             players.ShuffleList();
-            players.Sort((a, b) => a.PlayerId - b.PlayerId);
+            // players.Sort((a, b) => a.PlayerId - b.PlayerId);
             foreach (var player in players)
             {
                 var playerInfo = gameRoot.LobbyHud.SharedState != null 
@@ -258,7 +261,8 @@ namespace MissileReflex.Src.Battle
             _result = new BattleFinalResult(
                 tankScores.ToArray(), 
                 teamScores,
-                finishedState);
+                finishedState,
+                _battleSharedState != null && _battleSharedState.Runner.GameMode != GameMode.Single);
         }
 
         private BattleTeamScore[] calcTeamScoreList()

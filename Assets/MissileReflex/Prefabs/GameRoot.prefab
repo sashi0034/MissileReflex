@@ -443,6 +443,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84b088d40e694c838785f8ba4884810d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lobbyHud: {fileID: 8842213316950949460}
   textNotAvailable: {fileID: 8454776847242843531}
   buttonStartOfflineBattle: {fileID: 6006643555186133047}
 --- !u!1 &353386070186173656
