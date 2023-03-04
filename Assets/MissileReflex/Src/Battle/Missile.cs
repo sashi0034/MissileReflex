@@ -84,7 +84,7 @@ namespace MissileReflex.Src.Battle
 
         public override void Spawned()
         {
-            _selfNetwork = GetComponent<NetworkObject>();
+            _selfNetwork = Object;
             
             _viewInitialRotation = view.transform.localRotation.eulerAngles;
 

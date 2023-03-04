@@ -57,7 +57,7 @@ namespace MissileReflex.Src.Battle
         public void ClearBattle()
         {
             if (_battleSharedState != null) 
-                _battleSharedState.Runner.Despawn(_battleSharedState.GetComponent<NetworkObject>());
+                _battleSharedState.Runner.Despawn(_battleSharedState.Object);
             _result = null;
         }
         

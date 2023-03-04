@@ -30,7 +30,7 @@ namespace MissileReflex.Src.Battle
             foreach (var missile in _missileList)
             {
                 if (missile == null) continue;
-                missile.Runner.Despawn(missile.GetComponent<NetworkObject>());
+                missile.Runner.Despawn(missile.Object);
             }
             _missileList.Clear();
         }

@@ -31,6 +31,10 @@ namespace MissileReflex.Src.Connection
         private readonly BoolFlag _pushedMouseRight = new();
         private readonly BoolFlag _pushedMouseLeft = new();
 
+        // 共有モードで疑似ホストを決定しておく
+        private PlayerRef _pseudoHost = PlayerRef.None;
+        public PlayerRef PseudoHost => _pseudoHost;
+
         public void Init(BattleRoot root)
         {
             battleRoot = root;
@@ -97,11 +101,33 @@ namespace MissileReflex.Src.Connection
         [EventFunction]
         private void Update()
         {
+            // 一応念のため疑似ホストを更新しておく
+            _pseudoHost = findPseudoHost(networkRunner);
+            
+            checkPlayerInput();
+        }
+
+        private void checkPlayerInput()
+        {
             if (networkRunner.ProvideInput == false) return;
             if (Input.GetMouseButtonDown(0)) _pushedMouseLeft.UpFlag();
             if (Input.GetMouseButtonDown(1)) _pushedMouseRight.UpFlag();
         }
         
+        private static PlayerRef findPseudoHost(NetworkRunner runner)
+        {
+            var pseudoHost = PlayerRef.None;
+            foreach (var player in runner.ActivePlayers)
+            {
+                if (pseudoHost == PlayerRef.None ||
+                    pseudoHost.PlayerId > player.PlayerId)
+                {
+                    pseudoHost = player;
+                }
+            }
+            return pseudoHost;
+        }
+
         public void OnInput(NetworkRunner _, NetworkInput input)
         {
             var direction = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));

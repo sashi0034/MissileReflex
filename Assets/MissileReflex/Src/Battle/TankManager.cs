@@ -58,7 +58,7 @@ namespace MissileReflex.Src.Battle
         {
             foreach (var tank in _tankFighterList)
             {
-                if (tank != null) tank.Runner.Despawn(tank.GetComponent<NetworkObject>());
+                if (tank != null) tank.Runner.Despawn(tank.Object);
             }
             _tankFighterList.Clear();
         }

@@ -12,14 +12,6 @@ namespace MissileReflex.Src.Params
         [FoldoutGroup(tagBuildIn)][SerializeField] private bool isClearDebug = false;
         public bool IsClearDebug => isClearDebug;
 
-#if DEBUG
-        [SerializeField] private bool isForceOfflineBattle;
-        public bool IsForceOfflineBattle => isForceOfflineBattle;
-
-        [SerializeField] private bool isGuiDebugStartBattle = false;
-        public bool IsGuiDebugStartBattle => isGuiDebugStartBattle;
-        
-
         [SerializeField] private int owBattleTimeLimit = -1;
         public int OwBattleTimeLimit => owBattleTimeLimit;
 
@@ -28,9 +20,12 @@ namespace MissileReflex.Src.Params
 
         [SerializeField] private int owMatchingTimeLimit = -1;
         public int OwMatchingTimeLimit => owMatchingTimeLimit;
-        
-                
-        
+#if DEBUG
+        [SerializeField] private bool isForceOfflineBattle;
+        public bool IsForceOfflineBattle => isForceOfflineBattle;
+
+        [SerializeField] private bool isGuiDebugStartBattle = false;
+        public bool IsGuiDebugStartBattle => isGuiDebugStartBattle;
 #endif
     }
 }
