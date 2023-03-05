@@ -20,7 +20,8 @@ namespace MissileReflex.Src.Battle.Hud
         public IReadOnlyList<Vector3> PanelLocalPosList => panelLocalPosList;
         private bool _isLastSpurt = false;
 
-        public void Start()
+        [EventFunction]
+        private void Awake()
         {
             Debug.Assert(panelLocalPosList.Length == panelCurrTeamInfoList.Length);
             for (int i = 0; i < panelCurrTeamInfoList.Length; ++i)
