@@ -1,6 +1,7 @@
 /*
 !.gitignore
 !/MissileReflex
+/MissileReflex/Src/Params/ConstParam_Secret.cs
 !/Resources
 !/UIOutline
 

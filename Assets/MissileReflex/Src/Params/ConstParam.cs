@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 namespace MissileReflex.Src.Params
 {
     [CreateAssetMenu(fileName = nameof(ConstParam), menuName = "ScriptableObjects/Create" + nameof(ConstParam))]
-    public class ConstParam : SingletonScriptableObject<ConstParam>
+    public partial class ConstParam : SingletonScriptableObject<ConstParam>
     {
         [SerializeField] private float missilePredictInterval = 0.1f;
         public float MissilePredictInterval => missilePredictInterval;
