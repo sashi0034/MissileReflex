@@ -77,7 +77,7 @@ namespace MissileReflex.Src.Params
         public const string ColorOrange = "#F86718";
         public const string ColorBluePale = "#0576B9";
 
-        public static readonly RangeF MatchingSpeedRange = new RangeF(1, 5);
+        public static readonly RangeF MatchingSpeedRange = new RangeF(0.5f, 5);
         public const float MatchingSpeedDefault = 2f;
 
         public static readonly RangeInt BattleTimeLimitRange = new RangeInt(45, 300);

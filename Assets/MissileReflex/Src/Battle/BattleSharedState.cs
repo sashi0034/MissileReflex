@@ -57,7 +57,9 @@ namespace MissileReflex.Src.Battle
             transform.parent = battleRoot.Progress.transform;
 
             _remainingTime = gameRoot.LobbyHud.SharedState != null
-                ? gameRoot.LobbyHud.SharedState.RoomSetting.BattleTimeLimit
+                ? ConstParam.OverwriteIfDebug(
+                    gameRoot.LobbyHud.SharedState.RoomSetting.BattleTimeLimit,
+                    DebugParam.Instance.OwBattleTimeLimit)
                 : ConstParam.BattleTimeLimitDefault;
         }
     }
