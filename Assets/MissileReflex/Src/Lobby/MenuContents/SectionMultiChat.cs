@@ -70,10 +70,11 @@ namespace MissileReflex.Src.Lobby.MenuContents
 
         private void rebuildScrollView()
         {
+            var selfObj = gameObject;
             Util.CallDelayedAfterFrame(async () =>
             {
                 // シーン移動して新しいほうがすぐ破棄される場合があるので
-                if (gameObject == null) return;
+                if (selfObj == null) return;
                 
                 LayoutRebuilder.MarkLayoutForRebuild(scrollContent.GetComponent<RectTransform>());
                 await UniTask.DelayFrame(0);

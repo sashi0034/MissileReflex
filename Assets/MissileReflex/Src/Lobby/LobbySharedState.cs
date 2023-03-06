@@ -132,9 +132,9 @@ namespace MissileReflex.Src.Lobby
             _hasEnteredBattle = false;
             _matchingRemainingCount = ConstParam.Instance.MatchingTimeLimit;
             
-            foreach (var player in Runner.ActivePlayers)
+            foreach (var keyValuePair in _playerStatus)
             {
-                modifyPlayerStatus(player, status => status.CleanParams());
+                modifyPlayerStatus(keyValuePair.Key, status => status.CleanParams());
             }
         }
 

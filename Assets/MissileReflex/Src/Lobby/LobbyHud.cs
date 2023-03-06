@@ -41,6 +41,17 @@ namespace MissileReflex.Src.Lobby
 
         public void RegisterSharedState(LobbySharedState state)
         {
+            Debug.Assert(_sharedState == null);
+            if (_sharedState != null)
+            {
+                // 万一重複してしまったら、PlayerIdの小さい方を採用
+                if (_sharedState.Object.StateAuthority.PlayerId < state.Object.StateAuthority.PlayerId)
+                {
+                    state.Runner.Despawn(state.Object);
+                    return;
+                }
+                _sharedState.Runner.Despawn(_sharedState.Object);
+            }
             _sharedState = state;
         }
 

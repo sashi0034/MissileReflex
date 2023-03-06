@@ -82,8 +82,9 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
-            _cancelBattle = new CancellationTokenSource();
             gameObject.SetActive(true);
+            _cancelBattle.Cancel();
+            _cancelBattle = new CancellationTokenSource();
             missileManager.Init();
             tankManager.Init();
             battleProgressManager.Init();

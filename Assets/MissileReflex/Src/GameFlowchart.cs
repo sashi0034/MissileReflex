@@ -110,9 +110,9 @@ namespace MissileReflex.Src
             // TODO: 新規ステージ
             const int arenaIndex = 1;
             await gameRoot.LoadScene(ConstParam.GetLiteralArena(arenaIndex));
+            gameRoot.BattleRoot.Init();
 
             if (sharedState != null) sharedState.NotifyLocalLoadedArena();
-            gameRoot.BattleRoot.Init();
             
             // プレイヤー全員がシーンロードを終わるまで待機
             await waitForAllPlayersLoadedArena(sharedState, gameRoot.SaveData);

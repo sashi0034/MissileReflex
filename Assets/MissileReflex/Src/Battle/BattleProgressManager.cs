@@ -51,18 +51,19 @@ namespace MissileReflex.Src.Battle
 
         public void Init()
         {
-            _result = null;
+            ClearBattle();
         }
 
         public void ClearBattle()
         {
-            if (_battleSharedState != null) 
-                _battleSharedState.Runner.Despawn(_battleSharedState.Object);
+            if (_battleSharedState != null)
+                Util.DespawnNetworkObjectSurely(_battleSharedState).RunTaskHandlingError();
             _result = null;
         }
         
         public void RegisterSharedState(BattleSharedState state)
         {
+            Debug.Assert(state == null);
             _battleSharedState = state;
         }
 
@@ -82,6 +83,7 @@ namespace MissileReflex.Src.Battle
 
         private void showUiHandlingError(Exception e)
         {
+            UniTaskUtil.LogTaskHandlingError(e);
             // エラーが起こった時にポップアップ表示
             gameRoot.FrontHud.PopupMessageBelt.PerformPopupCautionFromException(e);
         }
@@ -94,7 +96,6 @@ namespace MissileReflex.Src.Battle
             }
             catch (Exception e)
             {
-                UniTaskUtil.LogTaskHandlingError(e);
                 showUiHandlingError(e);
             }
 

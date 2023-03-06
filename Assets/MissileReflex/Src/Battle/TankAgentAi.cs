@@ -60,10 +60,12 @@ namespace MissileReflex.Src.Battle
 
         private async UniTask processAiRoutine(CancellationToken cancel)
         {
-            while (gameObject != null)
+            while (true)
             {
+                var selfObj = gameObject;
                 await UniTask.Delay(aiUpdateInterval, cancellationToken: cancel);
 
+                if (selfObj == null) break;
                 await processAiRoutineFrame(cancel);
             }
         }

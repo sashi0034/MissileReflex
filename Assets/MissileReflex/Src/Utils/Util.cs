@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Fusion;
 using MissileReflex.Src.Params;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -266,6 +267,18 @@ namespace MissileReflex.Src.Utils
                 return e;
             }
             return null;
+        }
+        
+        public static async UniTask DespawnNetworkObjectSurely(NetworkBehaviour obj)
+        {
+            while (true)
+            {
+                obj.Object.RequestStateAuthority();
+                obj.Runner.Despawn(obj.Object);
+                if (obj.gameObject == null) break;
+                await UniTask.Delay(obj.Runner.DeltaTime.ToIntMilli());
+                Debug.Log($"{obj} still alive");
+            }
         }
     }
     
