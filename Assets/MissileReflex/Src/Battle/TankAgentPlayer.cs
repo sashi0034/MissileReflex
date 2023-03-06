@@ -46,6 +46,26 @@ namespace MissileReflex.Src.Battle
             if (Object.HasInputAuthority && _selfTank.IsAlive()) controlCameraPos(input);
         }
 
+#if UNITY_EDITOR
+        [Button]
+        public void TestShowAuthority()
+        {
+            Debug.Log($"owner: {_selfTank.OwnerNetworkPlayer}\nstate auth: {Object.StateAuthority}");
+        }
+
+        [Button]
+        public void TestRequestAuthority()
+        {
+            Util.RunUniTask(async () =>
+            {
+                Debug.Log($"state auth before: {Object.StateAuthority}");
+                Object.RequestStateAuthority();
+                Debug.Log($"state auth after 0s: {Object.StateAuthority}");
+                await UniTask.Delay(1000);
+                Debug.Log($"state auth after 1s: {Object.StateAuthority}");
+            });
+        }
+#endif
         private void controlCameraPos(PlayerInputData _)
         {
             var cameraTransform = mainCamera.transform;

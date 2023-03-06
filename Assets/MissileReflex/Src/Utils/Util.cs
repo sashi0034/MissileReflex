@@ -27,7 +27,7 @@ namespace MissileReflex.Src.Utils
         }
 
 
-        public static bool EnsureSingleton<T>(T awakened, ref T instanceRef) where T : MonoBehaviour
+        public static bool EnsureSingleton<T>(T awakened, ref T? instanceRef) where T : MonoBehaviour
         {
             if (instanceRef != null & instanceRef != awakened)
             {

@@ -22,13 +22,13 @@ namespace MissileReflex.Src.Connection
         public NetworkSceneManagerBase SceneManager => sceneManager;
         private BattleRoot battleRoot;
 #nullable enable
-        private Subject<Unit> _onEndSceneLoadDone = new Subject<Unit>();
+        private readonly Subject<Unit> _onEndSceneLoadDone = new Subject<Unit>();
         public Subject<Unit> OnEndSceneLoadDone => _onEndSceneLoadDone;
 
-        private Subject<PlayerRef> _onEndPlayerLeft = new Subject<PlayerRef>();
+        private readonly Subject<PlayerRef> _onEndPlayerLeft = new Subject<PlayerRef>();
         public IObservable<PlayerRef> OnEndPlayerLeft => _onEndPlayerLeft;
 
-        private Subject<ShutdownReason> _onEndShutdown = new();
+        private readonly Subject<ShutdownReason> _onEndShutdown = new();
         public IObservable<ShutdownReason> OnEndShutdown => _onEndShutdown;
         
 

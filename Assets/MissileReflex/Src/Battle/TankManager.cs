@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Fusion;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
@@ -45,12 +46,11 @@ namespace MissileReflex.Src.Battle
         public void Init()
         {
             ClearBattle();
-            _tankSqrMagAdjMat = new float[,]{};
+
             _processCalcTankSqrMagAdjMat =
                 new IntervalProcess(calcTankSqrMagAdjMat, ConstParam.Instance.TankAdjMatUpdateInterval);
-            _localPlayerTank = null;
 
-            tankSpawnSymbolGroup = FindObjectOfType<TankSpawnSymbolGroup>();
+            tankSpawnSymbolGroup = TankSpawnSymbolGroup.Instance;
             Debug.Assert(tankSpawnSymbolGroup != null);
         }
 
@@ -58,9 +58,12 @@ namespace MissileReflex.Src.Battle
         {
             foreach (var tank in _tankFighterList)
             {
-                if (tank != null) tank.Runner.Despawn(tank.Object);
+                if (tank == null) return;
+                Util.DespawnNetworkObjectSurely(tank).RunTaskHandlingError();
             }
             _tankFighterList.Clear();
+            _tankSqrMagAdjMat = new float[,]{};
+            _localPlayerTank = null;
         }
 
         [EventFunction]
@@ -99,6 +102,11 @@ namespace MissileReflex.Src.Battle
                     
                     var tank1 = _tankFighterList[row];
                     var tank2 = _tankFighterList[column];
+                    
+                    Debug.Assert(tank1 != null, $"tank: {row} is null");
+                    Debug.Assert(tank2 != null, $"tank: {column} is null");
+                    if (tank1 == null || tank2 == null) continue;
+                    
                     var sqrMag = (tank1.transform.position - tank2.transform.position).sqrMagnitude;
 
                     _tankSqrMagAdjMat[row, column] = sqrMag;
