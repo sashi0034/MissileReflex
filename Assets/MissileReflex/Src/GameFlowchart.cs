@@ -3,6 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using Fusion;
 using MissileReflex.Src.Battle;
 using MissileReflex.Src.Lobby;
 using MissileReflex.Src.Params;
@@ -103,7 +104,8 @@ namespace MissileReflex.Src
             var sharedState = await gameRoot.LobbyHud.PanelStartMatching.OnMatchingFinished.Take(1);
             
             // 部屋を閉じる
-            gameRoot.Network.ModifyRunner(runner => runner.SessionInfo.IsOpen = false);
+            if (sharedState != null) sharedState.CloseJoinBattle();
+            // gameRoot.Network.ModifyRunner(runner => runner.SessionInfo.IsOpen = false);
 
             // TODO: 新規ステージ
             const int arenaIndex = 1;
@@ -143,7 +145,7 @@ namespace MissileReflex.Src
             await HudUtil.AnimBigZeroToOne(gameRoot.LobbyHud.transform);
 
             // 部屋をまた開ける
-            gameRoot.Network.ModifyRunner(runner => runner.SessionInfo.IsOpen = true);
+            // gameRoot.Network.ModifyRunner(runner => runner.SessionInfo.IsOpen = true);
         }
 
         private static async UniTask waitForAllPlayersLoadedArena(LobbySharedState? sharedState, SaveData saveData)

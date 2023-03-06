@@ -14,6 +14,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4004285516994594272, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
         type: 3}
+      propertyPath: NetworkedBehaviours.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4004285516994594272, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
+      propertyPath: NetworkedBehaviours.Array.data[2]
+      value: 
+      objectReference: {fileID: 2099327544}
+    - target: {fileID: 4004285516994594272, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
+        type: 3}
       propertyPath: NetworkGuid.RawGuidValue.Array.data[0]
       value: -3111076085716389936
       objectReference: {fileID: 0}
@@ -25,7 +35,7 @@ PrefabInstance:
     - target: {fileID: 4777918284038277780, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
         type: 3}
       propertyPath: m_Name
-      value: TankAgentAi Variant
+      value: TankAgentAi
       objectReference: {fileID: 0}
     - target: {fileID: 4900318780997718825, guid: 4dc58aeabe3b8374b85f3a03a7b48bd5,
         type: 3}
@@ -164,5 +174,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b58f487cc255434aa1f3f56c0b5ae1d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _interpolationDataSource: 0
   selfTank: {fileID: 7372698774502346694}
-  selfTeam: 1

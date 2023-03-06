@@ -82,7 +82,7 @@ namespace MissileReflex.Src.Battle.Hud
         {
             var cancelWait = new CancellationTokenSource();
             var taskConfirm = buttonConfirm.OnConfirmed.Take(1).ToUniTask(cancellationToken: cancelWait.Token);
-            var taskTimeOut = UniTask.Delay((ConstParam.Instance.MatchingTimeLimit / 2) * 1000,
+            var taskTimeOut = UniTask.Delay(ConstParam.Instance.BattleResultSessionTimeLimit * 1000,
                 cancellationToken: cancelWait.Token);
             await UniTask.WhenAny(taskConfirm, taskTimeOut);
             cancelWait.Cancel();

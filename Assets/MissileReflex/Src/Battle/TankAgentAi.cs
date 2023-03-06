@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Fusion;
 using MissileReflex.Src.Params;
 using MissileReflex.Src.Utils;
 using Sirenix.OdinInspector;
@@ -29,7 +30,7 @@ namespace MissileReflex.Src.Battle
     }
     
     
-    public class TankAgentAi : MonoBehaviour, ITankAgent
+    public class TankAgentAi : NetworkBehaviour, ITankAgent
     {
 #nullable disable
         [SerializeField] private TankFighter selfTank;
@@ -43,14 +44,18 @@ namespace MissileReflex.Src.Battle
 
         private static TankAiAgentParam param => ConstParam.Instance.TankAiAgentParam;
         
-        private int _foolishnessLevel = 2;
-        private int aiUpdateInterval => param.UpdateInterval.ToIntMilli() * _foolishnessLevel;
-        
+        private float _foolishnessLevel = 2.5f;
+        private int aiUpdateInterval => (param.UpdateInterval * _foolishnessLevel).ToIntMilli();
+
+
+        public override void Spawned()
+        {
+            processAiRoutine(battleRoot.CancelBattle).RunTaskHandlingError();
+        }
 
         public void Init(TankSpawnInfo spawnInfo)
         {
             selfTank.Init(spawnInfo, null);
-            processAiRoutine(battleRoot.CancelBattle).RunTaskHandlingError();
         }
 
         private async UniTask processAiRoutine(CancellationToken cancel)

@@ -48,14 +48,17 @@ namespace MissileReflex.Src.Battle
             if (_remainingTime < 0) _remainingTime = 0;
         }
 
-        private static BattleRoot battleRoot => BattleRoot.Instance; 
+        private static GameRoot gameRoot => GameRoot.Instance;
+        private static BattleRoot battleRoot => gameRoot.BattleRoot;
 
         public override void Spawned()
         {
             battleRoot.Progress.RegisterSharedState(this);
             transform.parent = battleRoot.Progress.transform;
 
-            _remainingTime = ConstParam.Instance.BattleTimeLimit;
+            _remainingTime = gameRoot.LobbyHud.SharedState != null
+                ? gameRoot.LobbyHud.SharedState.RoomSetting.BattleTimeLimit
+                : ConstParam.BattleTimeLimitDefault;
         }
     }
 }

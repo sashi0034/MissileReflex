@@ -11,7 +11,7 @@ namespace MissileReflex.Src.Battle.Hud
 
         public void Init()
         {
-            text.text = ConstParam.Instance.BattleTimeLimit.ToString();
+            text.text = "?";
         }
 
         public void UpdateText(int seconds)

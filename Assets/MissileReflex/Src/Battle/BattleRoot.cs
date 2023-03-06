@@ -33,6 +33,8 @@ namespace MissileReflex.Src.Battle
         public BattleProgressManager Progress => battleProgressManager;
 
 #nullable enable
+
+        public bool IsSleeping => gameObject.activeSelf == false; 
         
         
 

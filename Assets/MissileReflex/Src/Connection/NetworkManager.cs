@@ -23,6 +23,9 @@ namespace MissileReflex.Src.Connection
     public class NetworkObjectAlreadyExistException : Exception
     { }
     
+    public class NetworkBattleUnfinishedException : Exception
+    { }
+    
     public class NetworkManager : MonoBehaviour
     {
 #nullable disable
@@ -104,6 +107,7 @@ namespace MissileReflex.Src.Connection
                 string playerName = gameRoot.LobbyHud.SharedState != null
                     ? gameRoot.LobbyHud.SharedState.GetPlayerStatus(player).Info.Name
                     : "?";
+                gameRoot.LobbyHud.SectionMultiChatRef.PostInfoMessageLocal($"{playerName}がルームを抜けました");
                 if (gameRoot.LobbyHud.SharedState != null) gameRoot.LobbyHud.SharedState.RemovePlayer(player);
                 
                 if (gameRoot.SaveData.IsEnteredBattle == false) return;

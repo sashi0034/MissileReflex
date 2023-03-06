@@ -21,6 +21,10 @@ namespace MissileReflex.Src.Lobby
         
         [SerializeField] private SectionHelp sectionHelp;
         public SectionHelp SectionHelp => sectionHelp;
+
+        [SerializeField] private SectionRoomSetting sectionRoomSetting;
+        public SectionRoomSetting SectionRoomSetting => sectionRoomSetting;
+        
 #nullable enable
         
         public MonoBehaviour[] ListSections()
@@ -29,6 +33,7 @@ namespace MissileReflex.Src.Lobby
             {
                 sectionPlayerInfo,
                 sectionMultiChat,
+                sectionRoomSetting,
                 sectionOfflineBattle,
                 sectionHelp,
             };
@@ -41,6 +46,7 @@ namespace MissileReflex.Src.Lobby
                 Util.DeactivateGameObjects(section);
             }
             sectionMultiChat.Init();
+            sectionRoomSetting.Init();
         }
 
         public void CleanRestart()

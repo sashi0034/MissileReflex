@@ -53,10 +53,13 @@ namespace MissileReflex.Src.Battle
                 onBeforeSpawned: (_, obj) =>
             {
                 var missile = obj.GetComponent<Missile>();
-                _missileList.Add(missile);
-
                 missile.Init(arg);
             });
+        }
+
+        public void RegisterMissile(Missile missile)
+        {
+            _missileList.Add(missile);
         }
 
         [EventFunction]

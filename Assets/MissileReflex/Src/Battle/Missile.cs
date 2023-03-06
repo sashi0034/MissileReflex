@@ -81,6 +81,9 @@ namespace MissileReflex.Src.Battle
 
         public override void Spawned()
         {
+            manager.RegisterMissile(this);
+            if (battleRoot.IsSleeping) return;
+            
             _selfNetwork = Object;
             
             _viewInitialRotation = view.transform.localRotation.eulerAngles;
@@ -104,6 +107,8 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         public override void FixedUpdateNetwork()
         {
+            if (battleRoot.IsSleeping) return;
+
             // 衝突した
             if (missileDamage.HitTankCount > 0 || missileDamage.HitMissileCount > 0)
             {
@@ -153,6 +158,8 @@ namespace MissileReflex.Src.Battle
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         private static void rpcallBirthEffectExplosion(NetworkRunner _, Vector3 pos)
         {
+            if (battleRoot.IsSleeping) return;
+            
             var effect = Instantiate(manager.MissileExplosion, manager.transform);
             effect.transform.position = pos;
             Util.DelayDestroyEffect(effect, battleRoot.CancelBattle).Forget();

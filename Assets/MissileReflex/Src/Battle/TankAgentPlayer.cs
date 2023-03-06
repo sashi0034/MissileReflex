@@ -12,7 +12,7 @@ namespace MissileReflex.Src.Battle
     [DisallowMultipleComponent]
     public class TankAgentPlayer : NetworkBehaviour, ITankAgent
     {
-        private BattleRoot BattleRoot => BattleRoot.Instance;
+        private BattleRoot battleRoot => BattleRoot.Instance;
 
 #nullable disable
         [SerializeField] private TankFighter _selfTank;
@@ -29,6 +29,7 @@ namespace MissileReflex.Src.Battle
 
         public override void FixedUpdateNetwork()
         {
+            if (battleRoot.IsSleeping) return;
             if (_selfTank.IsOwnerLocalPlayer() && Object.StateAuthority != Runner.LocalPlayer)
             {
                 // プレイヤー自身のオブジェクトはStateAuthorityを要求する

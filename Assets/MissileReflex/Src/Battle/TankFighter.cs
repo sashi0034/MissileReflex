@@ -90,9 +90,12 @@ namespace MissileReflex.Src.Battle
 
         public override void Spawned()
         {
+            _localId = battleRoot.TankManager.RegisterTank(this);
+
+            if (battleRoot.IsSleeping) return;
+            
             transform.parent = battleRoot.TankManager.transform;
             ChangeMaterial(battleRoot.TankManager.GetTankMatOf(_team));
-            _localId = battleRoot.TankManager.RegisterTank(this);
             _prediction.Init();
             battleRoot.Hud.LabelTankNameManager.BirthWith(this);
             getSpawnSymbol().Init(this);
@@ -165,6 +168,7 @@ namespace MissileReflex.Src.Battle
         [EventFunction]
         public override void FixedUpdateNetwork()
         {
+            if (battleRoot.IsSleeping) return;
             if (battleRoot.CancelBattle.IsCancellationRequested) return;
             if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return;
             
@@ -191,6 +195,8 @@ namespace MissileReflex.Src.Battle
         [Rpc]
         private void rpcallStartDie()
         {
+            if (battleRoot.IsSleeping) return;
+            
             if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return;
             _taskDeadAndRespawn = performDeadAndRespawn(battleRoot.CancelBattle)
                 // 例外が起きた時も一応リスポーンするように

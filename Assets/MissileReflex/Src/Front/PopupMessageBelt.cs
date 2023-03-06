@@ -24,7 +24,15 @@ namespace MissileReflex.Src.Front
         
         public void PerformPopupCautionFromException(Exception e)
         {
-            pushPerformPopupCaution("予期せぬエラーが発生しました");
+            switch (e)
+            {
+            case NetworkBattleUnfinishedException:
+                pushPerformPopupCaution("バトルのルームが解散しました");
+                break;
+            default:
+                pushPerformPopupCaution("予期せぬエラーが発生しました");
+                break;
+            }
         }
         public void PerformPopupCautionOnShutdown(ShutdownReason kind)
         {

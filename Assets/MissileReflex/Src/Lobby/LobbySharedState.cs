@@ -38,6 +38,23 @@ namespace MissileReflex.Src.Lobby
         }
     }
 
+    public struct LobbyRoomSetting : INetworkStruct
+    {
+        public float MatchingSpeed { get; set; } 
+        public int BattleTimeLimit { get; set; }
+
+        public LobbyRoomSetting(float matchingSpeed, int battleTimeLimit)
+        {
+            MatchingSpeed = matchingSpeed;
+            BattleTimeLimit = battleTimeLimit;
+        }
+        public LobbyRoomSetting(LobbyRoomSetting setting)
+        {
+            MatchingSpeed = setting.MatchingSpeed;
+            BattleTimeLimit = setting.BattleTimeLimit;
+        }
+    }
+
     public class LobbySharedState : NetworkBehaviour
     {
         private static GameRoot gameRoot => GameRoot.Instance;
@@ -50,9 +67,18 @@ namespace MissileReflex.Src.Lobby
         [Networked] private int _matchingRemainingCount { get; set; } = Int32.MaxValue;
         public int MatchingRemainingCount => _matchingRemainingCount;
 
+        // バトルに参加できるか!HasEnteredBattleで判定してもよさそうだけど、一応念のためCanJoinBattleというフラグで判定しておく
+        [Networked] private NetworkBool _canJoinBattle { get; set; } = true;
+        public bool CanJoinBattle => _canJoinBattle;
+        
         [Networked] private NetworkBool _hasEnteredBattle { get; set; } = false;
         public bool HasEnteredBattle => _hasEnteredBattle;
-
+        
+        [Networked] private LobbyRoomSetting _lobbyRoomSetting { get; set; } = new LobbyRoomSetting(
+            ConstParam.MatchingSpeedDefault,
+            ConstParam.BattleTimeLimitDefault);
+        public LobbyRoomSetting RoomSetting => _lobbyRoomSetting;
+        
         public override void Spawned()
         {
             transform.parent = lobbyHud.transform;
@@ -102,6 +128,7 @@ namespace MissileReflex.Src.Lobby
         // バトルが終わった後に、同じ部屋で対戦できるように
         public void CleanRestart()
         {
+            _canJoinBattle = true;
             _hasEnteredBattle = false;
             _matchingRemainingCount = ConstParam.Instance.MatchingTimeLimit;
             
@@ -120,9 +147,18 @@ namespace MissileReflex.Src.Lobby
             return true;
         }
 
+        public void CloseJoinBattle()
+        {
+            _canJoinBattle = false;
+        }
         public void NotifyEnteredBattle()
         {
             _hasEnteredBattle = true;
+        }
+
+        public void ModifyRoomSetting(Func<LobbyRoomSetting, LobbyRoomSetting> func)
+        {
+            _lobbyRoomSetting = func(_lobbyRoomSetting);
         }
 
         public LobbyPlayerStatus GetPlayerStatus(PlayerRef player)

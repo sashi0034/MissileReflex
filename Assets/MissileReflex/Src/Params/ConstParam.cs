@@ -1,9 +1,11 @@
 ﻿using System;
 using MissileReflex.Src.Battle;
+using MissileReflex.Src.Utils;
 using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
+using RangeInt = MissileReflex.Src.Utils.RangeInt;
 
 namespace MissileReflex.Src.Params
 {
@@ -40,15 +42,16 @@ namespace MissileReflex.Src.Params
 
         [SerializeField] private Material[] matTeamColorMetal;
         public Material[] MatTeamColorMetal => matTeamColorMetal;
-
-        [SerializeField] private int battleTimeLimit = 180;
-        public int BattleTimeLimit => overwriteIfDebug(battleTimeLimit, DebugParam.Instance.OwBattleTimeLimit);
-
+        
         [SerializeField] private int battleTimeLastSpurt = 30;
-        public int BattleTimeLastSpurt => overwriteIfDebug(battleTimeLastSpurt, DebugParam.Instance.OwBattleTimeLastSpurt);
+        public int BattleTimeLastSpurt => OverwriteIfDebug(battleTimeLastSpurt, DebugParam.Instance.OwBattleTimeLastSpurt);
 
         [SerializeField] private int matchingTimeLimit = 60;
-        public int MatchingTimeLimit => overwriteIfDebug(matchingTimeLimit, DebugParam.Instance.OwMatchingTimeLimit);
+        public int MatchingTimeLimit => OverwriteIfDebug(matchingTimeLimit, DebugParam.Instance.OwMatchingTimeLimit);
+
+        [SerializeField] private int battleResultSessionTimeLimit = 10;
+        public int BattleResultSessionTimeLimit => battleResultSessionTimeLimit;
+        
         
 
         public const string LiteralMainScene = "MainScene";
@@ -74,11 +77,17 @@ namespace MissileReflex.Src.Params
         public const string ColorOrange = "#F86718";
         public const string ColorBluePale = "#0576B9";
 
-        private static int overwriteIfDebug(int release, int debug)
+        public static readonly RangeF MatchingSpeedRange = new RangeF(1, 5);
+        public const float MatchingSpeedDefault = 1f;
+
+        public static readonly RangeInt BattleTimeLimitRange = new RangeInt(45, 300);
+        public const int BattleTimeLimitDefault = 90;
+
+        public static int OverwriteIfDebug(int release, int debug)
         {
             return overwriteIfDebugInternal(release, debug, -1);
         }
-        private static float overwriteIfDebug(float release, float debug)
+        public static float OverwriteIfDebug(float release, float debug)
         {
             return overwriteIfDebugInternal(release, debug, -1);
         }

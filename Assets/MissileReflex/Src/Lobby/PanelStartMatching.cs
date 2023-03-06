@@ -14,6 +14,7 @@ using MissileReflex.Src.Utils;
 using TMPro;
 using UniRx;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
 
@@ -141,28 +142,58 @@ namespace MissileReflex.Src.Lobby
             {
                 if (runner == null) throw new NetworkObjectMissingException();
 
-                sharedState.DecRemainingCount();
-                int numParticipants = runner.ActivePlayers.Count();
-                bool isGathered = sharedState.MatchingRemainingCount <= 0 || numParticipants == ConstParam.MaxTankAgent;
-
-                message.text = isGathered
-                    ? "ホストを待っています"
-                    : $"対戦相手を探しています...\n{sharedState.MatchingRemainingCount}";
-                labelMatchingParticipant.SetText(numParticipants);
-
-                // ホストがバトルからロビーに戻って来てなかったらダメ
-                // そろってたら始める
-                if (sharedState.HasEnteredBattle == false && isGathered) break;
-                
-                DOTween.Sequence()
-                    .Append(message.transform.DOScale(1.05f, 0.5f).SetEase(Ease.OutBack))
-                    .Append(message.transform.DOScale(1.0f, 0.5f).SetEase(Ease.InSine));
-                await UniTask.Delay(1000);
+                float perWaiting = 1f / sharedState.RoomSetting.MatchingSpeed;
+                if (updateCheckOtherPlayersJoin(runner, sharedState, perWaiting)) break;
+                await UniTask.Delay(perWaiting.ToIntMilli());
             }
 
             SeManager.Instance.PlaySe(SeManager.Instance.SeMatchingEnd);
             message.text = $"ゲームの準備をしています";
             _onMatchingFinished.OnNext(sharedState);
+        }
+
+        private bool updateCheckOtherPlayersJoin(NetworkRunner runner, LobbySharedState sharedState, float perWaiting)
+        {
+            sharedState.DecRemainingCount();
+            int numParticipants = runner.ActivePlayers.Count();
+            bool isGathered = sharedState.MatchingRemainingCount <= 0 || numParticipants == ConstParam.MaxTankAgent;
+            var battleSharedState = gameRoot.BattleRoot.Progress.SharedState;
+            bool isBattleStartedAlready = sharedState.CanJoinBattle == false;
+
+            if (isBattleStartedAlready && 
+                battleSharedState!= null && battleSharedState.HasStateAuthority)
+            {
+                // バトルをしてる人が切断したならとりあえずエラーにしておく
+                runner.Shutdown();
+                throw new NetworkBattleUnfinishedException();
+            }
+            
+            // クリーン前にAuthorityの人が切断するとたまにリセットされないまま進んでしまうので一応ここでリセット
+            if (sharedState.HasStateAuthority && sharedState.HasEnteredBattle) 
+                sharedState.CleanRestart();
+            
+            message.text = isGathered
+                ? isBattleStartedAlready && battleSharedState != null
+                    ? $"対戦中... 終了まで\n{battleSharedState.RemainingTime}"
+                    : "ホストを待っています"
+                // 通常待機
+                : $"対戦相手を探しています...\n{sharedState.MatchingRemainingCount}";
+            labelMatchingParticipant.SetText(numParticipants);
+
+            if (
+                // 既にバトル始まってるならダメ
+                isBattleStartedAlready == false &&
+                // バトル後ホストがバトルからロビーに戻って来てなかったらダメ
+                sharedState.HasEnteredBattle == false &&
+                // そろってたら始める
+                isGathered
+            )
+                return true;
+
+            DOTween.Sequence()
+                .Append(message.transform.DOScale(1.05f, perWaiting / 2).SetEase(Ease.OutBack))
+                .Append(message.transform.DOScale(1.0f, perWaiting / 2).SetEase(Ease.InSine));
+            return false;
         }
 
         private async UniTask<LobbySharedState> syncSpawnLobbySharedState(NetworkRunner runner)
