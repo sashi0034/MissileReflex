@@ -271,13 +271,15 @@ namespace MissileReflex.Src.Utils
         
         public static async UniTask DespawnNetworkObjectSurely(NetworkBehaviour obj)
         {
+            var selfObj = obj.gameObject;
+            var runner = obj.Runner;
             while (true)
             {
+                if (selfObj == null) break;
                 obj.Object.RequestStateAuthority();
                 obj.Runner.Despawn(obj.Object);
-                if (obj.gameObject == null) break;
-                await UniTask.Delay(obj.Runner.DeltaTime.ToIntMilli());
-                Debug.Log($"{obj} still alive");
+                if (selfObj == null) break;
+                await UniTask.Delay(runner.DeltaTime.ToIntMilli());
             }
         }
     }

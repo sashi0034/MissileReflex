@@ -13,6 +13,7 @@ namespace MissileReflex.Src.Battle
         [SerializeField] private sbyte damageAmount = 1;
 #nullable enable
         private GameRoot gameRoot => GameRoot.Instance;
+        private BattleRoot battleRoot => gameRoot.BattleRoot;
         
         private int _hitTankCount = 0;
         public int HitTankCount => _hitTankCount;
@@ -47,7 +48,7 @@ namespace MissileReflex.Src.Battle
         {
             return
                 // AIはホストでダメージ判定
-                (tank.OwnerNetworkPlayer == PlayerRef.None && gameRoot.Network.IsLocalPlayerPseudoHost()) ||
+                (tank.OwnerNetworkPlayer == PlayerRef.None && battleRoot.Progress.IsLocalPlayerMaster(Runner)) ||
                 // プレイヤーは自分の捜査対象のみ判定
                 tank.IsOwnerLocalPlayer();
         }

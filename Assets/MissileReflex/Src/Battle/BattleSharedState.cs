@@ -55,7 +55,10 @@ namespace MissileReflex.Src.Battle
         {
             battleRoot.Progress.RegisterSharedState(this);
             transform.parent = battleRoot.Progress.transform;
+        }
 
+        public void ResetRemainingTime()
+        {
             _remainingTime = gameRoot.LobbyHud.SharedState != null
                 ? ConstParam.OverwriteIfDebug(
                     gameRoot.LobbyHud.SharedState.RoomSetting.BattleTimeLimit,

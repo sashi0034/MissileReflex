@@ -38,6 +38,7 @@ namespace MissileReflex.Src.Lobby
         
         public void Init()
         {
+            if (lobbyHud.SharedState != null) lobbyHud.SharedState.Runner.Shutdown();
             CleanRestart();
         }
         public void CleanRestart()
@@ -163,18 +164,18 @@ namespace MissileReflex.Src.Lobby
             if (isBattleStartedAlready && 
                 battleSharedState!= null && battleSharedState.HasStateAuthority)
             {
-                // バトルをしてる人が切断したならとりあえずエラーにしておく
+                // バトルをしてる人たちが切断したならとりあえずエラーにしておく
                 runner.Shutdown();
                 throw new NetworkBattleUnfinishedException();
             }
             
-            // クリーン前にAuthorityの人が切断するとたまにリセットされないまま進んでしまうので一応ここでリセット
+            // クリーン前にAuthorityの人が切断するとたまにリセットされないまま進んでしまうかもしれないので一応ここでリセット
             if (sharedState.HasStateAuthority && sharedState.HasEnteredBattle) 
                 sharedState.CleanRestart();
             
             message.text = isGathered
                 ? isBattleStartedAlready && battleSharedState != null
-                    ? $"対戦中... 終了まで\n{battleSharedState.RemainingTime}"
+                    ? $"進行中のゲームがあります... 終了まで\n{battleSharedState.RemainingTime}"
                     : "ホストを待っています"
                 // 通常待機
                 : $"対戦相手を探しています...\n{sharedState.MatchingRemainingCount}";
@@ -201,7 +202,7 @@ namespace MissileReflex.Src.Lobby
             while (true)
             {
                 await UniTask.DelayFrame(1);
-                if (gameRoot.Network.IsLocalPlayerPseudoHost())
+                if (lobbyHud.SharedState == null && gameRoot.Network.IsLocalPlayerPseudoHost())
                 {
                     runner.Spawn(
                         lobbySharedStatePrefab,

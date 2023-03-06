@@ -47,6 +47,7 @@ namespace MissileReflex.Src.Battle
         private BattleFinalResult? _result;
         private readonly Subject<BattleLocalPlayerResult?> _onBattleCompleted = new();
         public IObservable<BattleLocalPlayerResult?> OnBattleCompleted => _onBattleCompleted;
+        private PlayerRef[] _battlePlayers = new PlayerRef[]{};
         
 
         public void Init()
@@ -59,11 +60,12 @@ namespace MissileReflex.Src.Battle
             if (_battleSharedState != null)
                 Util.DespawnNetworkObjectSurely(_battleSharedState).RunTaskHandlingError();
             _result = null;
+            _battlePlayers = new PlayerRef[] { };
         }
         
         public void RegisterSharedState(BattleSharedState state)
         {
-            Debug.Assert(state == null);
+            Debug.Assert(_battleSharedState == null);
             _battleSharedState = state;
         }
 
@@ -132,20 +134,28 @@ namespace MissileReflex.Src.Battle
         private async UniTask startBattleInternal()
         {
             var runner = gameRoot.Network.Runner;
-            Debug.Assert(runner != null);
-            if (runner == null) throw new NetworkObjectMissingException();
+            var lobbySharedState = gameRoot.LobbyHud.SharedState;
+            Debug.Assert(runner != null && lobbySharedState != null);
+            if (runner == null || lobbySharedState == null) throw new NetworkObjectMissingException();
+
+            // バトルに参加したプレイヤーを記憶
+            _battlePlayers =
+                runner.ActivePlayers.Where(player => lobbySharedState.GetPlayerStatus(player).HasLoadedArena).ToArray();
 
             while (true)
             {
                 // 疑似ホストで共有状態オブジェクトの作成
-                if (gameRoot.Network.IsLocalPlayerPseudoHost()) runner.Spawn(battleSharedStatePrefab);
+                if (isLocalPlayerMaster(runner, _battlePlayers) && _battleSharedState == null) 
+                    runner.Spawn(battleSharedStatePrefab);
                 // 共有状態オブジェクトがスポーンされるのを同期
                 if (_battleSharedState != null) break;
                 await UniTask.DelayFrame(1);
             }
+            
+            _battleSharedState.ResetRemainingTime();
 
             // ホストでタンク召喚
-            if (gameRoot.Network.IsLocalPlayerPseudoHost()) summonTanks(runner);
+            if (isLocalPlayerMaster(runner, _battlePlayers)) summonTanks(runner);
 
             updateHudTeamInfo();
 
@@ -167,6 +177,16 @@ namespace MissileReflex.Src.Battle
             
             // キャンセルトークン発行
             battleRoot.TerminateCancelBattle();
+        }
+
+        public bool IsLocalPlayerMaster(NetworkRunner runner)
+        {
+            return isLocalPlayerMaster(runner, _battlePlayers);
+        }
+
+        private static bool isLocalPlayerMaster(NetworkRunner runner, IEnumerable<PlayerRef>? playerList)
+        {
+            return NetworkLifetimeObject.FindPseudoHost(playerList) == runner.LocalPlayer;
         }
 
         private async UniTask performFinishBattle()

@@ -25,6 +25,9 @@ namespace MissileReflex.Src.Connection
         private readonly Subject<Unit> _onEndSceneLoadDone = new Subject<Unit>();
         public Subject<Unit> OnEndSceneLoadDone => _onEndSceneLoadDone;
 
+        private readonly Subject<PlayerRef> _onEndPlayerJoin = new Subject<PlayerRef>();
+        public IObservable<PlayerRef> OnEndPlayerJoin => _onEndPlayerJoin;
+
         private readonly Subject<PlayerRef> _onEndPlayerLeft = new Subject<PlayerRef>();
         public IObservable<PlayerRef> OnEndPlayerLeft => _onEndPlayerLeft;
 
@@ -47,6 +50,7 @@ namespace MissileReflex.Src.Connection
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
             Debug.Log("player joined: " + player.PlayerId);
+            _onEndPlayerJoin.OnNext(player);
         }
 
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
@@ -104,7 +108,7 @@ namespace MissileReflex.Src.Connection
         private void Update()
         {
             // 一応念のため疑似ホストを更新しておく
-            _pseudoHost = findPseudoHost(networkRunner);
+            _pseudoHost = FindPseudoHost(networkRunner.ActivePlayers);
             
             checkPlayerInput();
         }
@@ -116,10 +120,11 @@ namespace MissileReflex.Src.Connection
             if (Input.GetMouseButtonDown(1)) _pushedMouseRight.UpFlag();
         }
         
-        private static PlayerRef findPseudoHost(NetworkRunner runner)
+        public static PlayerRef FindPseudoHost(IEnumerable<PlayerRef>? playerRefs)
         {
+            if (playerRefs == null) return PlayerRef.None;
             var pseudoHost = PlayerRef.None;
-            foreach (var player in runner.ActivePlayers)
+            foreach (var player in playerRefs)
             {
                 if (pseudoHost == PlayerRef.None ||
                     pseudoHost.PlayerId > player.PlayerId)

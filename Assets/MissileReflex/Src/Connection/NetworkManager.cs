@@ -102,6 +102,11 @@ namespace MissileReflex.Src.Connection
                 battleRoot.Progress.FinalizeResult();
             });
 
+            lifetimeObject.OnEndPlayerJoin.Subscribe(player =>
+            {
+                if (gameRoot.LobbyHud.SharedState != null) gameRoot.LobbyHud.SharedState.CleanPlayer(player);
+            });
+
             lifetimeObject.OnEndPlayerLeft.Subscribe(player =>
             {
                 string playerName = gameRoot.LobbyHud.SharedState != null

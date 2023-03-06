@@ -88,6 +88,9 @@ namespace MissileReflex.Src.Battle
 
         private AudioListener? _audioListener;
 
+        private CancellationToken _cancelBattle;
+        public CancellationToken CancelBattle => _cancelBattle;
+
         public override void Spawned()
         {
             _localId = battleRoot.TankManager.RegisterTank(this);
@@ -95,6 +98,7 @@ namespace MissileReflex.Src.Battle
             if (battleRoot.IsSleeping) return;
             
             transform.parent = battleRoot.TankManager.transform;
+            _cancelBattle = battleRoot.CancelBattle;
             ChangeMaterial(battleRoot.TankManager.GetTankMatOf(_team));
             _prediction.Init();
             battleRoot.Hud.LabelTankNameManager.BirthWith(this);
@@ -169,7 +173,7 @@ namespace MissileReflex.Src.Battle
         public override void FixedUpdateNetwork()
         {
             if (battleRoot.IsSleeping) return;
-            if (battleRoot.CancelBattle.IsCancellationRequested) return;
+            if (_cancelBattle.IsCancellationRequested) return;
             if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return;
             
             if (_state == ETankFighterState.Dead) return;
@@ -196,11 +200,12 @@ namespace MissileReflex.Src.Battle
         private void rpcallStartDie()
         {
             if (battleRoot.IsSleeping) return;
+            if (_cancelBattle.IsCancellationRequested) return;
             
             if (_taskDeadAndRespawn.Status == UniTaskStatus.Pending) return;
-            _taskDeadAndRespawn = performDeadAndRespawn(battleRoot.CancelBattle)
+            _taskDeadAndRespawn = performDeadAndRespawn(_cancelBattle)
                 // 例外が起きた時も一応リスポーンするように
-                .RunTaskHandlingErrorAsync(_ => invokeRespawnAfterDead(battleRoot.CancelBattle));
+                .RunTaskHandlingErrorAsync(_ => invokeRespawnAfterDead(_cancelBattle));
         }
 
         private async UniTask performDeadAndRespawn(CancellationToken cancel)

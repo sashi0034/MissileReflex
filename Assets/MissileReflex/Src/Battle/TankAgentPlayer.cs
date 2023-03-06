@@ -1,10 +1,13 @@
 ﻿#nullable enable
 
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Fusion;
 using MissileReflex.Src.Battle;
 using MissileReflex.Src.Connection;
 using MissileReflex.Src.Utils;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace MissileReflex.Src.Battle
@@ -30,6 +33,7 @@ namespace MissileReflex.Src.Battle
         public override void FixedUpdateNetwork()
         {
             if (battleRoot.IsSleeping) return;
+            if (_selfTank.CancelBattle.IsCancellationRequested) return;
             if (_selfTank.IsOwnerLocalPlayer() && Object.StateAuthority != Runner.LocalPlayer)
             {
                 // プレイヤー自身のオブジェクトはStateAuthorityを要求する

@@ -134,8 +134,13 @@ namespace MissileReflex.Src.Lobby
             
             foreach (var keyValuePair in _playerStatus)
             {
-                modifyPlayerStatus(keyValuePair.Key, status => status.CleanParams());
+                CleanPlayer(keyValuePair.Key);
             }
+        }
+
+        public void CleanPlayer(PlayerRef player)
+        {
+            modifyPlayerStatus(player, status => status.CleanParams());
         }
 
         public bool IsAllPlayersLoadedArena()
